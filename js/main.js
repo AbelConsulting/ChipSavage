@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -45,8 +45,8 @@ class GameApp {
         this._loadingTipIndex = 0;
         this._loadingTips = [
             'Chain combos within 2 seconds for up to 10\u00d7 score!',
-            'Shadow Strike grants invincibility frames \u2014 dash through attacks!',
-            'Skunk Shot disrupts Kamikaze fuses \u2014 force early detonation!',
+            'Kick grants invincibility frames \u2014 dash through attacks!',
+            'Golf Shot disrupts Kamikaze fuses \u2014 force early detonation!',
             'Collect all 3 Golden Idols per stage for +30% damage \u0026 +25% speed!',
             'Double-jump to platform over the Jumper enemy\u2019s arc.',
             'Watch boss wind-up animations before committing to attacks.',
@@ -280,7 +280,7 @@ class GameApp {
                     const axisX = (gp.axes && gp.axes.length > 2) ? gp.axes[2] : (gp.axes ? gp.axes[0] : 0);
                     this._setKeyState('ArrowLeft', axisX < -0.25);
                     this._setKeyState('ArrowRight', axisX > 0.25);
-                    // Trigger = skunk shot
+                    // Trigger = Golf Shot
                     const trigger = this._getButtonPressed(gp, 0);
                     this._setKeyState('c', trigger);
                 }
@@ -778,7 +778,7 @@ class GameApp {
         this._setKeyState('ArrowLeft',  leftDown  || dpadLeft);
         this._setKeyState('ArrowRight', rightDown || dpadRight);
 
-        // Left trigger: skunk shot (KeyC)
+        // Left trigger: Golf Shot (KeyC)
         const leftTrigger = leftIsXr
             ? (this._getButtonPressed(leftPad, 0) || this._getButtonPressed(leftPad, 1))
             : (this._getButtonPressed(leftPad, 6) || this._getButtonPressed(leftPad, 4));
@@ -807,7 +807,7 @@ class GameApp {
         const xPressed = isStandard ? this._getButtonPressed(actionPad, 2) : false;
         const yPressed = isStandard ? this._getButtonPressed(actionPad, 3) : false;
         
-        // Right grip/shoulder button: skunk shot (KeyC)
+        // Right grip/shoulder button: Golf Shot (KeyC)
         // For VR: grip button (button 1 on right controller)
         // For Xbox: right bumper (button 5)
         const rightGrip = rightIsXr
@@ -818,7 +818,7 @@ class GameApp {
         this._setKeyState(' ', aPressed);
         // Right trigger + X button: regular attack (KeyX)
         this._setKeyState('x', rightTrigger || xPressed);
-        // Left trigger + right bumper: skunk shot (KeyC)
+        // Left trigger + right bumper: Golf Shot (KeyC)
         this._setKeyState('c', leftTrigger || rightGrip);
         // B button + Y: special attack (KeyZ)
         const specialPressed = bPressed || (isStandard && yPressed);
@@ -960,12 +960,12 @@ class GameApp {
         // the JS side. Since the banner is going to appear anyway, do the
         // proper thing: complete the sign-in flow, capture the player
         // identity, and sync achievements so the banner is meaningful
-        // rather than cosmetic. Set localStorage 'skunkfu.pgsAutoSignIn'
+        // rather than cosmetic. Set localStorage 'chipsavage.pgsAutoSignIn'
         // to '0' to skip the sign-in handshake (the OS banner may still
         // appear from the SDK's own silent auth).
         try {
             const skipAutoSignIn = (() => {
-                try { return localStorage.getItem('skunkfu.pgsAutoSignIn') === '0'; }
+                try { return localStorage.getItem('chipsavage.pgsAutoSignIn') === '0'; }
                 catch (_) { return false; }
             })();
             if (!skipAutoSignIn && window.PlayGamesServices && PlayGamesServices.isAvailable()) {
@@ -1536,8 +1536,8 @@ class GameApp {
             ['attack1', 'assets/audio/sfx/attack1.wav'],
             ['attack2', 'assets/audio/sfx/attack2.wav'],
             ['attack3', 'assets/audio/sfx/attack3.wav'],
-            ['shadow_strike', 'assets/audio/sfx/shadow_strike.wav'],
-            ['shadow_strike_hit', 'assets/audio/sfx/shadow_strike_hit.wav'],
+            ['kick', 'assets/audio/sfx/shadow_strike.wav'],
+            ['kick_hit', 'assets/audio/sfx/shadow_strike_hit.wav'],
             ['player_hit', 'assets/audio/sfx/player_hit.wav'],
             ['player_death', 'assets/audio/sfx/player_death.wav'],
             ['land', 'assets/audio/sfx/land.wav'],
@@ -1577,7 +1577,7 @@ class GameApp {
             ['kamikaze_explosion', 'assets/audio/sfx/kamikaze_explosion.wav'],
             ['kamikaze_fuse', 'assets/audio/sfx/kamikaze_fuse.wav'],
             // New gameplay sound effects
-            ['skunk_spray', 'assets/audio/sfx/skunk_spray.wav'],
+            ['golf_shot', 'assets/audio/sfx/skunk_spray.wav'],
             ['dash', 'assets/audio/sfx/dash.wav'],
             ['double_jump', 'assets/audio/sfx/double_jump.wav'],
             ['shield_block', 'assets/audio/sfx/shield_block.wav'],

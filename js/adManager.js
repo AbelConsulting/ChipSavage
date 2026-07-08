@@ -4,7 +4,7 @@
  * Provides Rewarded Video ("Watch Ad to Revive") and Interstitial ads
  * for the Android build. Gracefully no-ops on web / when plugin is absent.
  *
- * AdMob app (Google Play — com.skunksquad.skunkfu):
+ * AdMob app (Google Play — com.mephitideus.chipsavage):
  *   App ID:        ca-app-pub-8519140628365141~5979271944
  *
  * Ad units under that app:
@@ -20,7 +20,7 @@ const AdManager = (() => {
     'use strict';
 
     // ── Configuration ──────────────────────────────────────────────
-    // Defaults; runtime overrides come from localStorage `skunkfu_adConfig`
+    // Defaults; runtime overrides come from localStorage `chipsavage_adConfig`
     // (a JSON object). This lets us tune cadence remotely (e.g. via a Cloud
     // Function-served config) without redeploying. Only the listed keys can
     // be overridden — ad unit IDs and rewarded format are intentionally
@@ -62,7 +62,7 @@ const AdManager = (() => {
         interstitialMinIntervalSec: 90,
         // First-install grace: how many interstitials to skip on a brand-new
         // install. Helps D1 retention by not showing an ad mid-tutorial. The
-        // counter persists in localStorage as `skunkfu_iapInterSkipped`.
+        // counter persists in localStorage as `chipsavage_iapInterSkipped`.
         interstitialFirstInstallSkipCount: 1,
 
         // Max rewarded revives per session (prevent abuse)
@@ -71,7 +71,7 @@ const AdManager = (() => {
     const CONFIG = Object.assign({}, DEFAULT_CONFIG);
     function _applyStoredOverrides() {
         try {
-            const raw = localStorage.getItem('skunkfu_adConfig');
+            const raw = localStorage.getItem('chipsavage_adConfig');
             if (!raw) return;
             const overrides = JSON.parse(raw);
             if (!overrides || typeof overrides !== 'object') return;
@@ -476,9 +476,9 @@ const AdManager = (() => {
         const skipTarget = CONFIG.interstitialFirstInstallSkipCount | 0;
         if (skipTarget > 0) {
             let skipped = 0;
-            try { skipped = parseInt(localStorage.getItem('skunkfu_iapInterSkipped') || '0', 10) || 0; } catch (e) {}
+            try { skipped = parseInt(localStorage.getItem('chipsavage_iapInterSkipped') || '0', 10) || 0; } catch (e) {}
             if (skipped < skipTarget) {
-                try { localStorage.setItem('skunkfu_iapInterSkipped', String(skipped + 1)); } catch (e) {}
+                try { localStorage.setItem('chipsavage_iapInterSkipped', String(skipped + 1)); } catch (e) {}
                 _stagesSinceAd = 0; // reset counter so the next one comes in N stages
                 _log('Interstitial skipped (first-install grace ' + (skipped + 1) + '/' + skipTarget + ').');
                 return;
@@ -597,7 +597,7 @@ const AdManager = (() => {
      */
     function setConfig(overrides) {
         if (overrides === null) {
-            try { localStorage.removeItem('skunkfu_adConfig'); } catch (e) {}
+            try { localStorage.removeItem('chipsavage_adConfig'); } catch (e) {}
             for (const k of TUNABLE_KEYS) CONFIG[k] = DEFAULT_CONFIG[k];
             _log('Cleared config overrides; reverted to defaults.');
             return Object.assign({}, CONFIG);
@@ -605,7 +605,7 @@ const AdManager = (() => {
         if (!overrides || typeof overrides !== 'object') return Object.assign({}, CONFIG);
         let changed = false;
         let stored = {};
-        try { stored = JSON.parse(localStorage.getItem('skunkfu_adConfig') || '{}') || {}; } catch (e) {}
+        try { stored = JSON.parse(localStorage.getItem('chipsavage_adConfig') || '{}') || {}; } catch (e) {}
         for (const k of TUNABLE_KEYS) {
             if (Object.prototype.hasOwnProperty.call(overrides, k)) {
                 CONFIG[k] = overrides[k];
@@ -614,7 +614,7 @@ const AdManager = (() => {
             }
         }
         if (changed) {
-            try { localStorage.setItem('skunkfu_adConfig', JSON.stringify(stored)); } catch (e) {}
+            try { localStorage.setItem('chipsavage_adConfig', JSON.stringify(stored)); } catch (e) {}
             _log('Applied runtime config overrides:', overrides);
         }
         return Object.assign({}, CONFIG);

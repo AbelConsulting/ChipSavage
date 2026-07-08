@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -23,7 +23,7 @@ class LevelEditor {
         this.exportBtn = document.getElementById('editor-export-btn');
         this.importBtn = document.getElementById('editor-import-btn');
 
-        this.storageKey = 'skunkfu_level_tiles_v1';
+        this.storageKey = 'chipsavage_level_tiles_v1';
 
         this.availableTiles = ['ground_tile', 'platform_tile', 'wall_tile'];
 

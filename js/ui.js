@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -1387,7 +1387,7 @@ class UI {
             
             // Skunk ammo counter (below buff indicators)
             try {
-                if (player && player.skunkAmmo > 0) {
+                if (player && player.golfAmmo > 0) {
                     const ammoY = idolY + idolSize + (player.idolBonuses && (player.idolBonuses.speed > 0 || player.idolBonuses.damage > 0) ? 30 : 6);
                     const ammoIconSize = 18;
                     const ammoGap = 4;
@@ -1396,7 +1396,7 @@ class UI {
                     ctx.save();
                     
                     // Draw background pill
-                    const ammoPillW = Math.min(player.skunkAmmo, 9) * (ammoIconSize + ammoGap) + 8;
+                    const ammoPillW = Math.min(player.golfAmmo, 9) * (ammoIconSize + ammoGap) + 8;
                     const ammoPillH = ammoIconSize + 6;
                     
                     ctx.fillStyle = 'rgba(40, 200, 40, 0.25)';
@@ -1420,7 +1420,7 @@ class UI {
                     
                     // Draw ammo icons
                     const maxDisplay = 9;
-                    const displayCount = Math.min(player.skunkAmmo, maxDisplay);
+                    const displayCount = Math.min(player.golfAmmo, maxDisplay);
                     
                     for (let i = 0; i < displayCount; i++) {
                         const ix = ammoX + 4 + i * (ammoIconSize + ammoGap);
@@ -1435,11 +1435,11 @@ class UI {
                     }
                     
                     // If more than 9, show "+X" text
-                    if (player.skunkAmmo > maxDisplay) {
+                    if (player.golfAmmo > maxDisplay) {
                         ctx.font = 'bold 14px Arial';
                         ctx.fillStyle = '#40FF40';
                         ctx.textAlign = 'left';
-                        ctx.fillText(`+${player.skunkAmmo - maxDisplay}`, ammoX + ammoPillW + 6, ammoY + ammoPillH / 2 - 7);
+                        ctx.fillText(`+${player.golfAmmo - maxDisplay}`, ammoX + ammoPillW + 6, ammoY + ammoPillH / 2 - 7);
                     }
                     
                     ctx.restore();

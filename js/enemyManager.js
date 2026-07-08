@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -322,13 +322,13 @@ class EnemyManager {
                 // Check collision between attack hitbox and enemy
                 if (Utils.rectCollision(attackBox, enemy.getRect())) {
                     const knockbackDir = player.facingRight ? 1 : -1;
-                    const isShadow = !!player.isShadowStriking;
+                    const isShadow = !!player.isKicking;
                     // Use getCurrentDamage() to apply damage boost multiplier
                     const baseDamage = typeof player.getCurrentDamage === 'function' ? player.getCurrentDamage() : player.attackDamage;
                     const damage = isShadow ? Math.floor(baseDamage * 2) : baseDamage;
 
                     if (isShadow && this.audioManager && typeof this.audioManager.playSound === 'function' && enemiesHit === 0) {
-                        this.audioManager.playSound('shadow_strike_hit', { volume: 0.78, rate: 1.02 });
+                        this.audioManager.playSound('kick_hit', { volume: 0.78, rate: 1.02 });
                     }
                     
                     if (isShadow) {

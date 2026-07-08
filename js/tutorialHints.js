@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -16,9 +16,9 @@ try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('tutorialHi
 class TutorialHints {
     constructor(isMobile = false) {
         this.isMobile = isMobile;
-        this.STORAGE_KEY = 'skunkfu_tutorial_seen_v1';
-        this.DONE_KEY = 'skunkfu_tutorial_done';
-        this.RUNS_KEY = 'skunkfu_run_count';
+        this.STORAGE_KEY = 'chipsavage_tutorial_seen_v1';
+        this.DONE_KEY = 'chipsavage_tutorial_done';
+        this.RUNS_KEY = 'chipsavage_run_count';
 
         // Load seen hints from localStorage
         this._seen = {};
@@ -78,20 +78,20 @@ class TutorialHints {
                 touch: ['You can ATTACK enemies!',
                         'Tap 🗡 — they can\'t hurt you if they\'re down.']
             },
-            shadow_strike: {
-                id: 'shadow_strike',
+            kick: {
+                id: 'kick',
                 duration: 10,
-                kb:    ['Press Z for Shadow Strike!',
+                kb:    ['Press Z for Kick!',
                         'Dash through attacks — invincible!'],
-                touch: ['Tap 💥 for Shadow Strike!',
+                touch: ['Tap 💥 for Kick!',
                         'Dash through attacks — invincible!']
             },
-            skunk_shot: {
-                id: 'skunk_shot',
+            golf_shot: {
+                id: 'golf_shot',
                 duration: 10,
-                kb:    ['Press C to fire Skunk Shot!',
+                kb:    ['Press C to fire Golf Shot!',
                         'Ranged spray that stuns enemies.'],
-                touch: ['Tap 🦨 for Skunk Shot!',
+                touch: ['Tap 🦨 for Golf Shot!',
                         'Ranged spray that stuns enemies.']
             },
             golden_idol: {
@@ -241,7 +241,7 @@ class TutorialHints {
         if (this._glyphsActive) return;
         this._glyphsActive = true;
 
-        const KEY = 'skunkfu_glyphs_seen_v1';
+        const KEY = 'chipsavage_glyphs_seen_v1';
         let seen = {};
         try { seen = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { seen = {}; }
 
@@ -485,9 +485,9 @@ class TutorialHints {
                 return { label: 'COMBAT', accent: '#FF8F6B', accentSoft: 'rgba(255, 143, 107, 0.18)', accentGlow: 'rgba(255, 143, 107, 0.34)' };
             case 'attack_pity':
                 return { label: 'TIP', accent: '#FFB347', accentSoft: 'rgba(255, 179, 71, 0.20)', accentGlow: 'rgba(255, 179, 71, 0.40)' };
-            case 'shadow_strike':
+            case 'kick':
                 return { label: 'ABILITY', accent: '#B98BFF', accentSoft: 'rgba(185, 139, 255, 0.18)', accentGlow: 'rgba(185, 139, 255, 0.34)' };
-            case 'skunk_shot':
+            case 'golf_shot':
                 return { label: 'RANGED', accent: '#75F0A8', accentSoft: 'rgba(117, 240, 168, 0.18)', accentGlow: 'rgba(117, 240, 168, 0.34)' };
             case 'golden_idol':
                 return { label: 'LOOT', accent: '#FFD36A', accentSoft: 'rgba(255, 211, 106, 0.20)', accentGlow: 'rgba(255, 211, 106, 0.34)' };

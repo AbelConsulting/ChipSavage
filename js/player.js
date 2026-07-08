@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -17,7 +17,7 @@ class Player {
         this.width = 64;
         this.height = 64;
 
-        // Character stats (Ninja Skunk)
+        // Character stats (Chip Savage)
         this.name = Config.CHARACTER.name;
         this.maxHealth = Config.CHARACTER.health;
         this.health = this.maxHealth;
@@ -62,25 +62,25 @@ class Player {
         // Track previous-frame attack hitbox (used for swept collision checks)
         this._prevAttackHitbox = null;
 
-        // Shadow strike state
-        this.isShadowStriking = false;
+        // Kick state
+        this.isKicking = false;
         // Keep the move duration in sync with the animation timing.
-        // Shadow Strike should have enough active frames to feel consistent.
-        const shadowStrikeAnim = this.animations && this.animations.shadow_strike;
-        this.shadowStrikeDuration = shadowStrikeAnim ? (shadowStrikeAnim.frameCount * shadowStrikeAnim.frameDuration) : 0.4;
+        // Kick should have enough active frames to feel consistent.
+        const kickAnim = this.animations && this.animations.kick;
+        this.kickDuration = kickAnim ? (kickAnim.frameCount * kickAnim.frameDuration) : 0.4;
         // Tune dash distance (speed * duration). With 4 frames @ 0.08s => 0.32s total.
-        this.shadowStrikeSpeed = 380;
+        this.kickSpeed = 380;
 
-        // Skunk shot animation state (character-only, not projectile)
-        this.isSkunkShooting = false;
-        const skunkShotAnim = this.animations && this.animations.skunk_shot;
-        this.skunkShotDuration = skunkShotAnim ? (skunkShotAnim.frameCount * skunkShotAnim.frameDuration) : 0.32;
-        this.skunkShotTimer = 0;
+        // Golf Shot animation state (character-only, not projectile)
+        this.isGolfShooting = false;
+        const golfShotAnim = this.animations && this.animations.golf_shot;
+        this.golfShotDuration = golfShotAnim ? (golfShotAnim.frameCount * golfShotAnim.frameDuration) : 0.32;
+        this.golfShotTimer = 0;
 
-        // Shadow strike tuning: active damage window and hitbox size
+        // Kick tuning: active damage window and hitbox size
         // Default: active on all frames except the first/last (windup/recovery)
-        this.shadowStrikeHitboxWidth = 120;
-        this.shadowStrikeHitboxHeight = 70;
+        this.kickHitboxWidth = 120;
+        this.kickHitboxHeight = 70;
 
         // Combo system
         this.comboCount = 0;
@@ -114,11 +114,11 @@ class Player {
         this.damageBoost = null;
         
         // Skunk projectile system
-        this.skunkAmmo = 0; // Number of skunk shots available
-        this.skunkProjectiles = []; // Active skunk projectiles
-        this.skunkSprays = []; // Active spray clouds (AoE on impact)
-        this.skunkCooldown = 0.5; // Cooldown between skunk shots
-        this.skunkCooldownTimer = 0;
+        this.golfAmmo = 0; // Number of Golf Shots available
+        this.golfProjectiles = []; // Active skunk projectiles
+        this.golfSprays = []; // Active spray clouds (AoE on impact)
+        this.golfCooldown = 0.5; // Cooldown between Golf Shots
+        this.golfCooldownTimer = 0;
         
         // Idol collection bonuses (tiered, per-level)
         // { speed: 0.05, damage: 0.05, count: 1 } - tiers by collected count
@@ -146,8 +146,8 @@ class Player {
         const ninja_walk = spriteLoader.getSprite('ninja_walk');
         const ninja_jump = spriteLoader.getSprite('ninja_jump');
         const ninja_attack = spriteLoader.getSprite('ninja_attack');
-        const ninja_skunk_shot = spriteLoader.getSprite('ninja_skunk_shot');
-        const ninja_shadow_strike = spriteLoader.getSprite('ninja_shadow_strike');
+        const chip_golf_shot = spriteLoader.getSprite('chip_golf_shot');
+        const chip_kick = spriteLoader.getSprite('chip_kick');
         const ninja_hurt = spriteLoader.getSprite('ninja_hurt');
         const ninja_death = spriteLoader.getSprite('ninja_death');
 
@@ -161,11 +161,11 @@ class Player {
                 walk: spriteLoader.createAnimation('ninja_walk', 4, 0.1),
                 jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12),
                 attack: spriteLoader.createAnimation('ninja_attack', 4, 0.08),
-                skunk_shot: spriteLoader.createAnimation('ninja_skunk_shot', 4, 0.08),
-                // Shadow Strike: 4 frames, snappy timing.
+                golf_shot: spriteLoader.createAnimation('chip_golf_shot', 4, 0.08),
+                // Kick: 4 frames, snappy timing.
                 // Note: the current sheet is 256x64 (4x 64px frames) so we let
                 // SpriteLoader infer correct slicing.
-                shadow_strike: spriteLoader.createAnimation('ninja_shadow_strike', 4, 0.06),
+                kick: spriteLoader.createAnimation('chip_kick', 4, 0.06),
                 hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1),
                 death: spriteLoader.createAnimation('ninja_death', 4, 0.37)
             };
@@ -175,8 +175,8 @@ class Player {
                 walk: new Animation(ninja_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 jump: new Animation(ninja_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 attack: new Animation(ninja_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                skunk_shot: new Animation(ninja_skunk_shot, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
-                shadow_strike: new Animation(ninja_shadow_strike, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
+                golf_shot: new Animation(chip_golf_shot, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
+                kick: new Animation(chip_kick, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
                 hurt: new Animation(ninja_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 death: new Animation(ninja_death, 4, 0.37, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
             };
@@ -206,7 +206,7 @@ class Player {
             } else if (k === 'keyz' || k === 'z') {
                 this.specialAttack();
             } else if (k === 'keyc' || k === 'c') {
-                this.shootSkunkProjectile();
+                this.shootGolfProjectile();
             }
         }
     }
@@ -241,7 +241,7 @@ class Player {
     attack() {
         if (this.attackCooldownTimer <= 0 && this.hitStunTimer <= 0) {
             this.isAttacking = true;
-            this.isShadowStriking = false;
+            this.isKicking = false;
             this.attackTimer = this.attackDuration;
             this.attackCooldownTimer = this.attackCooldown;
             this.hitEnemies.clear();
@@ -272,17 +272,17 @@ class Player {
         }
     }
 
-    shootSkunkProjectile() {
+    shootGolfProjectile() {
         // Check if player has skunk ammo and cooldown is ready
-        if (this.skunkAmmo > 0 && this.skunkCooldownTimer <= 0 && this.hitStunTimer <= 0) {
-            this.skunkAmmo--;
-            this.skunkCooldownTimer = this.skunkCooldown;
-            this._skunkShotJustFired = true; // Flag for gameStats tracking
+        if (this.golfAmmo > 0 && this.golfCooldownTimer <= 0 && this.hitStunTimer <= 0) {
+            this.golfAmmo--;
+            this.golfCooldownTimer = this.golfCooldown;
+            this._golfShotJustFired = true; // Flag for gameStats tracking
 
-            this.isSkunkShooting = true;
-            this.skunkShotTimer = this.skunkShotDuration;
-            if (this.animations.skunk_shot) {
-                this.animations.skunk_shot.reset();
+            this.isGolfShooting = true;
+            this.golfShotTimer = this.golfShotDuration;
+            if (this.animations.golf_shot) {
+                this.animations.golf_shot.reset();
             }
             
             // Create projectile
@@ -298,11 +298,11 @@ class Player {
                 age: 0
             };
             
-            this.skunkProjectiles.push(projectile);
+            this.golfProjectiles.push(projectile);
             
-            // Play skunk shot sound
+            // Play Golf Shot sound
             if (this.audioManager) {
-                this.audioManager.playSound('skunk_spray', { volume: 0.7, rate: 1.1 });
+                this.audioManager.playSound('golf_shot', { volume: 0.7, rate: 1.1 });
             }
         }
     }
@@ -310,8 +310,8 @@ class Player {
     specialAttack() {
         if (this.attackCooldownTimer <= 0 && this.hitStunTimer <= 0) {
             this.isAttacking = true;
-            this.isShadowStriking = true;
-            this.attackTimer = this.shadowStrikeDuration;
+            this.isKicking = true;
+            this.attackTimer = this.kickDuration;
             this.attackCooldownTimer = this.attackCooldown * 1.5;
             this.hitEnemies.clear();
 
@@ -319,29 +319,29 @@ class Player {
             this._attackJustStarted = true;
             this._attackDidHit = false;
 
-            // Enhanced hitbox for shadow strike
-            this.attackHitbox.width = this.shadowStrikeHitboxWidth;
-            this.attackHitbox.height = this.shadowStrikeHitboxHeight;
+            // Enhanced hitbox for Kick
+            this.attackHitbox.width = this.kickHitboxWidth;
+            this.attackHitbox.height = this.kickHitboxHeight;
             this._updateAttackHitboxPosition();
 
             // Dash forward
-            this.velocityX = this.facingRight ? this.shadowStrikeSpeed : -this.shadowStrikeSpeed;
+            this.velocityX = this.facingRight ? this.kickSpeed : -this.kickSpeed;
 
             if (this.audioManager) {
-                this.audioManager.playSound('shadow_strike', 0.8);
+                this.audioManager.playSound('kick', 0.8);
                 this.audioManager.playSound('dash', { volume: 0.4, rate: 1.2 });
             }
 
-            // Reset shadow strike animation
-            if (this.animations.shadow_strike) {
-                this.animations.shadow_strike.reset();
+            // Reset Kick animation
+            if (this.animations.kick) {
+                this.animations.kick.reset();
             }
         }
     }
 
     updateProjectiles(dt, level) {
-        for (let i = this.skunkProjectiles.length - 1; i >= 0; i--) {
-            const proj = this.skunkProjectiles[i];
+        for (let i = this.golfProjectiles.length - 1; i >= 0; i--) {
+            const proj = this.golfProjectiles[i];
             
             // Update position
             proj.x += proj.velocityX * dt;
@@ -355,14 +355,14 @@ class Player {
             
             // Remove if lifetime expired
             if (proj.age >= proj.lifetime) {
-                this.skunkProjectiles.splice(i, 1);
+                this.golfProjectiles.splice(i, 1);
                 continue;
             }
             
             // Remove if out of bounds
             if (level) {
                 if (proj.x < -100 || proj.x > level.width + 100 || proj.y > level.height + 100) {
-                    this.skunkProjectiles.splice(i, 1);
+                    this.golfProjectiles.splice(i, 1);
                     continue;
                 }
             }
@@ -385,16 +385,16 @@ class Player {
                 
                 // If projectile hits a solid platform, create spray and remove projectile
                 if (collision && collision.platform && collision.platform.type === 'static') {
-                    this.createSprayCloud(proj.x, proj.y);
-                    this.skunkProjectiles.splice(i, 1);
+                    this.createGolfImpact(proj.x, proj.y);
+                    this.golfProjectiles.splice(i, 1);
                     continue;
                 }
             }
         }
         
         // Update spray clouds
-        for (let i = this.skunkSprays.length - 1; i >= 0; i--) {
-            const spray = this.skunkSprays[i];
+        for (let i = this.golfSprays.length - 1; i >= 0; i--) {
+            const spray = this.golfSprays[i];
             spray.age += dt;
             
             // Expand spray radius over time
@@ -415,12 +415,12 @@ class Player {
             
             // Remove spray cloud when expired
             if (spray.age >= spray.duration) {
-                this.skunkSprays.splice(i, 1);
+                this.golfSprays.splice(i, 1);
             }
         }
     }
     
-    createSprayCloud(x, y) {
+    createGolfImpact(x, y) {
         const spray = {
             x: x,
             y: y,
@@ -450,11 +450,11 @@ class Player {
             });
         }
         
-        this.skunkSprays.push(spray);
+        this.golfSprays.push(spray);
         
         // Play spray impact sound
         if (this.audioManager) {
-            this.audioManager.playSound('skunk_spray', { volume: 0.5, rate: 0.8 });
+            this.audioManager.playSound('golf_shot', { volume: 0.5, rate: 0.8 });
         }
     }
 
@@ -465,7 +465,7 @@ class Player {
                 damage, 
                 health: this.health, 
                 invulnerable: this.invulnerableTimer > 0,
-                isShadowStriking: this.isShadowStriking,
+                isKicking: this.isKicking,
                 source: source ? source.enemyType || 'unknown' : 'none'
             });
         }
@@ -476,8 +476,8 @@ class Player {
             return true;
         }
         
-        // Shadow Strike grants brief i-frames without the normal invuln flashing
-        if (this.isShadowStriking) {
+        // Kick grants brief i-frames without the normal invuln flashing
+        if (this.isKicking) {
             return false;
         }
         
@@ -560,18 +560,18 @@ class Player {
         // Reset attack state and clear any stuck input (e.g., missed keyup
         // during transitions) so the player doesn't auto-run on respawn.
         this.isAttacking = false;
-        this.isShadowStriking = false;
-        this.isSkunkShooting = false;
-        this.skunkShotTimer = 0;
+        this.isKicking = false;
+        this.isGolfShooting = false;
+        this.golfShotTimer = 0;
         this.attackTimer = 0;
         this.attackCooldownTimer = 0;
-        // Skunk Shot ammo: clear leftover ammo from the previous run and
+        // Golf Shot ammo: clear leftover ammo from the previous run and
         // grant one starting charge so every fresh game begins with one
-        // available Skunk Shot. (reset() is only called on new-game start,
+        // available Golf Shot. (reset() is only called on new-game start,
         // not on mid-run respawn, so collected ammo is not wiped between
         // life losses.)
-        this.skunkAmmo = 1;
-        this.skunkCooldownTimer = 0;
+        this.golfAmmo = 1;
+        this.golfCooldownTimer = 0;
         try { this.hitEnemies && this.hitEnemies.clear && this.hitEnemies.clear(); } catch (e) { __err('player', e); }
         this._prevAttackHitbox = null;
         this.jumpBufferTimer = 0;
@@ -733,7 +733,7 @@ class Player {
                 this.velocityX = this.targetVelocityX;
             }
         } else {
-            if (Math.abs(this.velocityX) > 0 && !this.isShadowStriking) {
+            if (Math.abs(this.velocityX) > 0 && !this.isKicking) {
                 const frictionAmount = this.friction * dt;
                 if (Math.abs(this.velocityX) <= frictionAmount) {
                     this.velocityX = 0;
@@ -798,7 +798,7 @@ class Player {
         }
 
         // Play footstep sounds when walking on ground
-        if (this.onGround && Math.abs(this.velocityX) > 50 && this.footstepTimer <= 0 && !this.isAttacking && !this.isShadowStriking) {
+        if (this.onGround && Math.abs(this.velocityX) > 50 && this.footstepTimer <= 0 && !this.isAttacking && !this.isKicking) {
             if (this.audioManager) {
                 // Subtle variation prevents “machine-gun” repetition.
                 const rate = 0.96 + Math.random() * 0.08; // 0.96..1.04
@@ -819,7 +819,7 @@ class Player {
             this.attackTimer -= dt;
             if (this.attackTimer <= 0) {
                 this.isAttacking = false;
-                this.isShadowStriking = false;
+                this.isKicking = false;
                 this._attackDidHit = false;
                 this.attackHitbox.width = this.defaultAttackWidth;
                 this.attackHitbox.height = this.defaultAttackHeight;
@@ -833,15 +833,15 @@ class Player {
             this.attackCooldownTimer -= dt;
         }
         
-        if (this.skunkCooldownTimer > 0) {
-            this.skunkCooldownTimer -= dt;
+        if (this.golfCooldownTimer > 0) {
+            this.golfCooldownTimer -= dt;
         }
 
-        if (this.skunkShotTimer > 0) {
-            this.skunkShotTimer -= dt;
-            if (this.skunkShotTimer <= 0) {
-                this.skunkShotTimer = 0;
-                this.isSkunkShooting = false;
+        if (this.golfShotTimer > 0) {
+            this.golfShotTimer -= dt;
+            if (this.golfShotTimer <= 0) {
+                this.golfShotTimer = 0;
+                this.isGolfShooting = false;
             }
         }
 
@@ -864,10 +864,10 @@ class Player {
             newState = "death";
         } else if (this.hitStunTimer > 0) {
             newState = "hurt";
-        } else if (this.isSkunkShooting && this.skunkShotTimer > 0) {
-            newState = "skunk_shot";
-        } else if (this.isShadowStriking) {
-            newState = "shadow_strike";
+        } else if (this.isGolfShooting && this.golfShotTimer > 0) {
+            newState = "golf_shot";
+        } else if (this.isKicking) {
+            newState = "kick";
         } else if (this.isAttacking) {
             newState = "attack";
         } else if (!this.onGround) {
@@ -896,7 +896,7 @@ class Player {
         this.velocityX = 0;
         this.velocityY = 0;
         this.isAttacking = false;
-        this.isShadowStriking = false;
+        this.isKicking = false;
         this.hitStunTimer = 0;
         this.invulnerableTimer = 0;
         const isFinal = !!(opts && opts.final);
@@ -1059,7 +1059,7 @@ class Player {
                 const fxW = hb.width;
                 const fxH = hb.height;
                 const grad = ctx.createLinearGradient(fxX, fxY, fxX + fxW, fxY + fxH);
-                if (this.isShadowStriking) {
+                if (this.isKicking) {
                     grad.addColorStop(0, 'rgba(255, 215, 0, 0.18)');
                     grad.addColorStop(1, 'rgba(255, 180, 60, 0.28)');
                 } else {
@@ -1096,16 +1096,16 @@ class Player {
 
             // Attack hitbox (only while attacking)
             if (this.isAttacking) {
-                ctx.strokeStyle = this.isShadowStriking
+                ctx.strokeStyle = this.isKicking
                     ? 'rgba(255, 215, 0, 0.7)'
                     : 'rgba(255, 0, 0, 0.55)';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(this.attackHitbox.x, this.attackHitbox.y, this.attackHitbox.width, this.attackHitbox.height);
 
-                // Shadow strike swept hitbox (helps visualize dash collisions)
+                // Kick swept hitbox (helps visualize dash collisions)
                 try {
                     const swept = (typeof this.getAttackHitboxForCollision === 'function') ? this.getAttackHitboxForCollision() : null;
-                    if (swept && this.isShadowStriking) {
+                    if (swept && this.isKicking) {
                         ctx.strokeStyle = 'rgba(255, 200, 80, 0.5)';
                         ctx.lineWidth = 2;
                         ctx.strokeRect(swept.x, swept.y, swept.width, swept.height);
@@ -1122,7 +1122,7 @@ class Player {
      */
     drawProjectiles(ctx, cameraX, cameraY) {
         // Draw spray clouds first (behind projectiles)
-        for (const spray of this.skunkSprays) {
+        for (const spray of this.golfSprays) {
             ctx.save();
             
             const screenX = spray.x - cameraX;
@@ -1163,7 +1163,7 @@ class Player {
         }
         
         // Draw projectiles
-        for (const proj of this.skunkProjectiles) {
+        for (const proj of this.golfProjectiles) {
             const screenX = proj.x - cameraX;
             const screenY = proj.y - cameraY;
             
@@ -1227,16 +1227,16 @@ class Player {
 
     isAttackDamageActive() {
         if (!this.isAttacking) return false;
-        if (!this.isShadowStriking) return true;
+        if (!this.isKicking) return true;
 
-        const anim = this.animations && this.animations.shadow_strike;
+        const anim = this.animations && this.animations.kick;
         if (anim && typeof anim.currentFrame === 'number' && typeof anim.frameCount === 'number') {
             // Active on all frames except first/last
             return anim.currentFrame > 0 && anim.currentFrame < (anim.frameCount - 1);
         }
 
         // Fallback: active for the middle 70% of the move
-        const dur = this.shadowStrikeDuration || 0.4;
+        const dur = this.kickDuration || 0.4;
         const elapsed = dur - (this.attackTimer || 0);
         const t = Utils.clamp(elapsed / dur, 0, 1);
         return t >= 0.15 && t <= 0.85;
@@ -1323,7 +1323,7 @@ class Player {
 
     getAttackHitboxForCollision() {
         if (!this.isAttacking) return null;
-        if (!this.isShadowStriking || !this._prevAttackHitbox) return this.attackHitbox;
+        if (!this.isKicking || !this._prevAttackHitbox) return this.attackHitbox;
 
         // Swept AABB: union of previous and current hitbox
         const x1 = Math.min(this._prevAttackHitbox.x, this.attackHitbox.x);

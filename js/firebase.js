@@ -1,16 +1,16 @@
 
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 // js/firebase.js
-// Global leaderboard integration via skunked.io REST API (Firebase Cloud Functions + Firestore).
+// Global leaderboard integration via chipsavage.io REST API (Firebase Cloud Functions + Firestore).
 // No external SDK required — pure fetch().
 
 // Direct Firebase Cloud Functions URL.
-// skunked.io is hosted on GitHub Pages so Firebase Hosting rewrites are
+// chipsavage.io is hosted on GitHub Pages so Firebase Hosting rewrites are
 // unavailable — we call the Cloud Functions directly from any host.
 const PROJECT_ID = 'studio-3829586481-2a2cf';
 const API_BASE = 'https://us-central1-' + PROJECT_ID + '.cloudfunctions.net';
@@ -76,7 +76,7 @@ export async function checkHealth() {
 }
 
 /**
- * Submits a score to the skunked.io leaderboard.
+ * Submits a score to the chipsavage.io leaderboard.
  * @param {string} name  The player name / gamer tag.
  * @param {number} score The score achieved.
  * @param {string[]} [achievements] Achievement names earned this run.

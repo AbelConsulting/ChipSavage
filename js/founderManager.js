@@ -24,11 +24,11 @@
  *   • If purchased before EARLY_ACCESS_END_ISO, also auto-grants Founder + Gold.
  *
  * Persistence:
- *   localStorage key  → skunkfu.founder        ('1' if granted, otherwise absent)
- *   localStorage key  → skunkfu.founderSince   (ISO date string, set on first grant)
+ *   localStorage key  → chipsavage.founder        ('1' if granted, otherwise absent)
+ *   localStorage key  → chipsavage.founderSince   (ISO date string, set on first grant)
  *
  * Auto-grant rule:
- *   If the player owns Remove Ads (skunkfu.adFree === '1') AND the current
+ *   If the player owns Remove Ads (chipsavage.adFree === '1') AND the current
  *   wall-clock date is before EARLY_ACCESS_END_ISO, founder status is granted
  *   automatically. After the cutoff, only manual grants (e.g. via promo code)
  *   add new founders — existing founders keep the flag forever.
@@ -55,28 +55,28 @@ const FounderManager = (() => {
     // Promo / press / community codes. Codes are case-insensitive and stripped
     // of whitespace before comparison. Each redemption is one-shot per device:
     // once a code has been used on this install it is recorded in
-    // `skunkfu.founderCodesUsed` (a JSON array) and cannot be re-used.
+    // `chipsavage.founderCodesUsed` (a JSON array) and cannot be re-used.
     //
     // NOTE: client-side codes are easy to share — keep this list short and
     // rotate values for paid campaigns. For high-value drops, gate redemption
     // through the Firebase function instead and call FounderManager.grant().
     const VALID_REDEEM_CODES = Object.freeze([
-        'SKUNKED-FOUNDER',
-        'DAY-ONE-SKUNK',
-        'WAY-OF-THE-SPRAY'
+        'CHIPSAVAGE-FOUNDER',
+        'DAY-ONE-CHIP',
+        'GOLF-BRAWLER'
     ]);
 
-    const STORAGE_KEY_FOUNDER       = 'skunkfu.founder';
-    const STORAGE_KEY_FOUNDER_SINCE = 'skunkfu.founderSince';
-    const STORAGE_KEY_AD_FREE       = 'skunkfu.adFree';
-    const STORAGE_KEY_FOUNDER_PASS  = 'skunkfu.founderPassOwned';
-    const STORAGE_KEY_CODES_USED    = 'skunkfu.founderCodesUsed';
+    const STORAGE_KEY_FOUNDER       = 'chipsavage.founder';
+    const STORAGE_KEY_FOUNDER_SINCE = 'chipsavage.founderSince';
+    const STORAGE_KEY_AD_FREE       = 'chipsavage.adFree';
+    const STORAGE_KEY_FOUNDER_PASS  = 'chipsavage.founderPassOwned';
+    const STORAGE_KEY_CODES_USED    = 'chipsavage.founderCodesUsed';
     // Cosmetic preference — Founders may opt out of the gold ninja skin and
     // play with the original look. Defaults to enabled (no entry == on).
-    const STORAGE_KEY_GOLD_SKIN     = 'skunkfu.useGoldSkin';
+    const STORAGE_KEY_GOLD_SKIN     = 'chipsavage.useGoldSkin';
     // Founder skin colour variant (gold | sapphire | amethyst | steel).
     // Default 'gold' if missing or unknown.
-    const STORAGE_KEY_SKIN_VARIANT  = 'skunkfu.skinVariant';
+    const STORAGE_KEY_SKIN_VARIANT  = 'chipsavage.skinVariant';
     const VALID_SKIN_VARIANTS = Object.freeze(['gold', 'sapphire', 'amethyst', 'steel']);
     const DEFAULT_SKIN_VARIANT = 'gold';
     // Skins that anyone with the Remove Ads purchase can use, regardless of

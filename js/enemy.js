@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -46,7 +46,7 @@ const BOSS_TYPE_INFO = Object.freeze(
 );
 
 if (typeof window !== 'undefined') {
-    window.SKUNKFU_BOSS_INFO = BOSS_TYPE_INFO;
+    window.chipsavage_BOSS_INFO = BOSS_TYPE_INFO;
 }
 
 class Enemy {
@@ -180,7 +180,7 @@ class Enemy {
         this.chainExplosionDepth = 0;   // How many chain explosions deep (for bonus scoring)
 
         // Skunk effect state
-        this.isSkunked = false;
+        this.isGolfHit = false;
         this.skunkTimer = 0;
         this.skunkDuration = 5.0; // 5 seconds of being disabled
         this.skunkParticles = [];
@@ -412,10 +412,10 @@ class Enemy {
         }
 
         // Update skunk effect
-        if (this.isSkunked) {
+        if (this.isGolfHit) {
             this.skunkTimer -= dt;
             if (this.skunkTimer <= 0) {
-                this.isSkunked = false;
+                this.isGolfHit = false;
                 this.skunkParticles = [];
             } else {
                 // Skunk spray disrupts kamikaze fuse/dash — forces early detonation
@@ -605,7 +605,7 @@ class Enemy {
         }
 
         // AI behavior (only if not stunned or skunked)
-        if (this.hitStunTimer <= 0 && !this.isSkunked) {
+        if (this.hitStunTimer <= 0 && !this.isGolfHit) {
             const playerRect = (player && typeof player.getRect === 'function')
                 ? player.getRect()
                 : { x: player.x, y: player.y, width: player.width || 0, height: player.height || 0 };
@@ -691,7 +691,7 @@ class Enemy {
             if (this.isBossType() && this.thrownProjectiles && this.thrownProjectiles.length > 0) {
                 this._updateThrownProjectiles(dt, level);
             }
-        } // end if (!hitStunTimer && !isSkunked)
+        } // end if (!hitStunTimer && !isGolfHit)
 
         // Apply gravity
         this._applyGravityAndCollision(dt, level);
@@ -1109,7 +1109,7 @@ class Enemy {
                 this.facingRight = dx > 0;
 
                 if (this.audioManager) {
-                    this.audioManager.playSound('skunk_spray', { volume: 0.55, rate: 0.85 });
+                    this.audioManager.playSound('golf_shot', { volume: 0.55, rate: 0.85 });
                 }
             }
             return;
@@ -1880,7 +1880,7 @@ class Enemy {
             }
         
         // Draw skunk effect if skunked
-        if (this.isSkunked) {
+        if (this.isGolfHit) {
             // Draw skunk particles (bubbles)
             if (this.skunkParticles && this.skunkParticles.length > 0) {
                 ctx.save();

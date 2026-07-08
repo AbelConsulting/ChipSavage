@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -32,8 +32,8 @@ class SpriteLoader {
             'ninja_walk': 4,
             'ninja_jump': 4,
             'ninja_attack': 4,
-            'ninja_skunk_shot': 4,
-            'ninja_shadow_strike': 4,
+            'chip_golf_shot': 4,
+            'chip_kick': 4,
             'ninja_hurt': 2,
             'ninja_death': 4,
             'basic_idle': 4,
@@ -280,8 +280,8 @@ class SpriteLoader {
             ['ninja_walk', 'assets/sprites/characters/ninja_walk.png'],
             ['ninja_jump', 'assets/sprites/characters/ninja_jump.png'],
             ['ninja_attack', 'assets/sprites/characters/ninja_attack.png'],
-            ['ninja_skunk_shot', 'assets/sprites/characters/ninja_skunk_shot.png'],
-            ['ninja_shadow_strike', 'assets/sprites/characters/ninja_shadow_strike.png'],
+            ['chip_golf_shot', 'assets/sprites/characters/chip_golf_shot.png'],
+            ['chip_kick', 'assets/sprites/characters/chip_kick.png'],
             ['ninja_hurt', 'assets/sprites/characters/ninja_hurt.png'],
             ['ninja_death', 'assets/sprites/characters/ninja_death.png'],
             

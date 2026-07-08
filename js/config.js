@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -35,7 +35,7 @@ const Config = {
     GRAVITY: 1500, // pixels per second squared
     MAX_FALL_SPEED: 800,
 
-    // Player settings (Ninja Skunk)
+    // Player settings (Chip Savage)
     PLAYER_SPEED: 400,
     PLAYER_JUMP_FORCE: 700,
     PLAYER_MAX_HEALTH: 100,
@@ -110,15 +110,15 @@ const Config = {
     GRAY: '#808080',
     DARK_GRAY: '#404040',
 
-    // Ninja Skunk Character
+    // Chip Savage Character
     CHARACTER: {
-        name: "Ninja Skunk",
+        name: "Chip Savage",
         health: 100,
         speed: 400,
         jump_force: 700,
         attack_damage: 15,
-        special_ability: "Shadow Strike",
-        color: 'rgb(64, 64, 64)' // Dark gray for ninja
+        special_ability: "Kick",
+        color: 'rgb(80, 60, 40)' // Brown for golfer
     }
     ,
     // Touch controls defaults

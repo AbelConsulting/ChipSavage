@@ -41,9 +41,9 @@ const PurchaseManager = (() => {
 
     const PRODUCT_ID_REMOVE_ADS    = 'remove_ads';
     const PRODUCT_ID_FOUNDER_PASS  = 'founder_pass';
-    const STORAGE_KEY_AD_FREE      = 'skunkfu.adFree';
-    const STORAGE_KEY_FOUNDER_PASS = 'skunkfu.founderPassOwned';
-    const STORAGE_KEY_PENDING_IAP  = 'skunkfu.pendingIapPurchases';
+    const STORAGE_KEY_AD_FREE      = 'chipsavage.adFree';
+    const STORAGE_KEY_FOUNDER_PASS = 'chipsavage.founderPassOwned';
+    const STORAGE_KEY_PENDING_IAP  = 'chipsavage.pendingIapPurchases';
 
     let _store         = null;     // CdvPurchase.store reference
     let _storePollDone = false;    // True after first poll attempt (avoids 8s re-poll on every click)
@@ -155,7 +155,7 @@ const PurchaseManager = (() => {
     //         fetch the server doc; if it shows ownership we don't have
     //         locally, mirror it down.
     function _getApi() {
-        try { return window.SkunkEntitlementsAPI || null; } catch (_) { return null; }
+        try { return window.ChipSavageEntitlementsAPI || null; } catch (_) { return null; }
     }
     function _getPlayerId() {
         try {
@@ -227,7 +227,7 @@ const PurchaseManager = (() => {
     // as the player ID is known. The listener runs at most once per session
     // because _pullEntitlementsRemote() is gated by _remotePullDone.
     try {
-        window.addEventListener('skunkfu-pgs-signed-in', () => {
+        window.addEventListener('chipsavage-pgs-signed-in', () => {
             _pullEntitlementsRemote(false);
         });
     } catch (_) {}
@@ -552,7 +552,7 @@ const PurchaseManager = (() => {
             // flag) and only if we don't already see the entitlement, so
             // returning users never get an extra Play Billing round-trip.
             try {
-                const RESTORED_KEY = 'skunkfu.iapAutoRestoreTriedAt';
+                const RESTORED_KEY = 'chipsavage.iapAutoRestoreTriedAt';
                 const alreadyTried = !!localStorage.getItem(RESTORED_KEY);
                 if (!_adFree && !alreadyTried && typeof store.restorePurchases === 'function') {
                     _log('First-launch auto-restore probe (no local entitlement).');

@@ -1,7 +1,7 @@
-﻿/*!
- * Skunked: Way of the Spray
+/*!
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
- * Proprietary and confidential â€” unauthorized copying, distribution, or use
+ * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 /**
@@ -11,7 +11,7 @@
 
 const LEVEL_CONFIGS = [
     // =========================================================
-    // STAGE 1-1: FOREST OUTSKIRTS â€” THE RUN
+    // STAGE 1-1: FOREST OUTSKIRTS — THE RUN
     // =========================================================
     {
         name: "Forest Outskirts",
@@ -142,7 +142,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 2-1: SKUNK CITY â€” THE RUN
+    // STAGE 2-1: SKUNK CITY — THE RUN
     // =========================================================
     {
         name: "Skunk City",
@@ -281,7 +281,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 3-1: MOUNTAIN DOJO â€” THE RUN
+    // STAGE 3-1: MOUNTAIN DOJO — THE RUN
     // =========================================================
     {
         name: "Mountain Dojo",
@@ -426,7 +426,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 4-1: CRYSTAL CAVERNS â€” THE RUN
+    // STAGE 4-1: CRYSTAL CAVERNS — THE RUN
     // =========================================================
     {
         name: "Crystal Caverns",
@@ -575,7 +575,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 5-1: CRYSTAL CAVERNS DEPTHS â€” THE RUN
+    // STAGE 5-1: CRYSTAL CAVERNS DEPTHS — THE RUN
     // =========================================================
     {
         name: "Crystal Caverns Depths",
@@ -728,7 +728,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 6-1: NEON CROSSROADS â€” THE RUN
+    // STAGE 6-1: NEON CROSSROADS — THE RUN
     // =========================================================
     {
         name: "Neon Crossroads",
@@ -870,7 +870,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 7-1: CRYSTAL RIDGE â€” THE RUN
+    // STAGE 7-1: CRYSTAL RIDGE — THE RUN
     // =========================================================
     {
         name: "Crystal Ridge",
@@ -1022,7 +1022,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 8-1: ABYSSAL CAVERNS â€” THE RUN
+    // STAGE 8-1: ABYSSAL CAVERNS — THE RUN
     // =========================================================
     {
         name: "Abyssal Caverns",
@@ -1177,7 +1177,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 9-1: NEON NEXUS â€” THE RUN
+    // STAGE 9-1: NEON NEXUS — THE RUN
     // =========================================================
     {
         name: "Neon Nexus",
@@ -1325,7 +1325,7 @@ const LEVEL_CONFIGS = [
     },
 
     // =========================================================
-    // STAGE 10-1: FINAL SHOWDOWN â€” THE RUN
+    // STAGE 10-1: FINAL SHOWDOWN — THE RUN
     // =========================================================
     {
         name: "Final Showdown",
@@ -1476,7 +1476,7 @@ const LEVEL_CONFIGS = [
 
 // --- SURVIVAL MODE ARENA ---
 // Compact fighting arena used exclusively for Survival Mode.
-// No boss, no exit â€” enemies come in escalating waves until the player falls.
+// No boss, no exit — enemies come in escalating waves until the player falls.
 const SURVIVAL_ARENA_CONFIG = {
     name: "Survival Arena",
     id: "survival_arena",

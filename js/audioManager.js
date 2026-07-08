@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -41,8 +41,8 @@ class AudioManager {
             enemy_attack: 2,
             jump: 2,
             land: 2,
-            shadow_strike: 1,
-            shadow_strike_hit: 1,
+            kick: 1,
+            kick_hit: 1,
             combo: 1,
             combo_level_up: 1,
             item_pickup: 2,
@@ -86,8 +86,8 @@ class AudioManager {
             enemy_attack: 180,
             jump: 120,
             land: 160,
-            shadow_strike: 200,
-            shadow_strike_hit: 140,
+            kick: 200,
+            kick_hit: 140,
             combo: 200,
             combo_level_up: 250,
             item_pickup: 120,

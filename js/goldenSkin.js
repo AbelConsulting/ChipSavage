@@ -1,5 +1,5 @@
 /*!
- * goldenSkin.js — Procedural Founder skins for the Ninja Skunk.
+ * goldenSkin.js — Procedural Founder skins for the Chip Savage.
  *
  * Generates tinted copies of the existing ninja sprite sheets at runtime by
  * mapping each pixel's luminance onto a colour-gradient palette. No new image

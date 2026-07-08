@@ -1,7 +1,7 @@
-﻿/*!
- * Skunked: Way of the Spray
+/*!
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
- * Proprietary and confidential — unauthorized copying, distribution, or use
+ * Proprietary and confidential � unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 /**
@@ -404,7 +404,7 @@ class Game {
                                 if (rewarded && this.state === 'GAME_OVER') {
                                     this.reviveFromAd();
                                 } else {
-                                    // Ad dismissed — restart normally
+                                    // Ad dismissed � restart normally
                                     this.audioManager.playSound && this.audioManager.playSound('ui_confirm');
                                     this.startGame(0, this.gameMode);
                                     this.dispatchGameStateChange();
@@ -759,11 +759,11 @@ class Game {
                 fastestCompletion: parseFloat(localStorage.getItem('fastestCompletion')) || Infinity,
                 // Combat tracking
                 bossesDefeated: 0,
-                shadowStrikesUsed: 0,
-                shadowStrikeKills: 0,
-                skunkShotsFired: 0,
-                skunkShotsHit: 0,
-                enemiesSkunked: 0,
+                kicksUsed: 0,
+                kickKills: 0,
+                golfShotsFired: 0,
+                golfShotsHit: 0,
+                enemiesHitByGolfShot: 0,
                 exploderChainKills: 0,
                 airKills: 0,
                 // Power-up tracking
@@ -776,13 +776,13 @@ class Game {
                 closeCalls: 0,
                 deathsThisRun: 0,
                 // Cross-run persistent stats
-                totalRuns: parseInt(localStorage.getItem('skunkfu_totalRuns') || '0') + 1,
-                totalEnemiesDefeated: parseInt(localStorage.getItem('skunkfu_totalEnemiesDefeated') || '0'),
-                totalBossesDefeated: parseInt(localStorage.getItem('skunkfu_totalBossesDefeated') || '0'),
-                totalPlayTime: parseFloat(localStorage.getItem('skunkfu_totalPlayTime') || '0')
+                totalRuns: parseInt(localStorage.getItem('chipsavage_totalRuns') || '0') + 1,
+                totalEnemiesDefeated: parseInt(localStorage.getItem('chipsavage_totalEnemiesDefeated') || '0'),
+                totalBossesDefeated: parseInt(localStorage.getItem('chipsavage_totalBossesDefeated') || '0'),
+                totalPlayTime: parseFloat(localStorage.getItem('chipsavage_totalPlayTime') || '0')
             };
             // Persist incremented run count
-            try { localStorage.setItem('skunkfu_totalRuns', String(this.gameStats.totalRuns)); } catch (e) { __err('game:totalRuns', e); }
+            try { localStorage.setItem('chipsavage_totalRuns', String(this.gameStats.totalRuns)); } catch (e) { __err('game:totalRuns', e); }
 
             // Reset idol tracking for a new run
             this.idolProgress = {};
@@ -900,7 +900,7 @@ class Game {
                     setTimeout(() => {
                         if (this.tutorialHints) this.tutorialHints.trigger('objective');
                     }, 10000);
-                    // Pulsing glyphs on touch buttons (mobile only) — teaches
+                    // Pulsing glyphs on touch buttons (mobile only) � teaches
                     // brand-new players which buttons matter without text.
                     try { this.tutorialHints.enableButtonGlyphs(); } catch (e) { __err('game', e); }
                 }
@@ -1019,7 +1019,7 @@ class Game {
                 // if the audio layer throws (Android WebView can leave AudioContext
                 // in a broken state after backgrounding). Previously a throw here
                 // would abort the function leaving the overlay stuck on screen
-                // while `this.state` was already 'PLAYING' — making subsequent
+                // while `this.state` was already 'PLAYING' � making subsequent
                 // Resume taps no-op due to the `state !== 'PAUSED'` guard.
                 const overlay = document.getElementById('pause-overlay');
                 if (overlay) {
@@ -1307,7 +1307,7 @@ class Game {
             } catch (e) { __err('game', e); }
         }
 
-        // ─── Survival Mode Methods ────────────────────────────────────────
+        // --- Survival Mode Methods ----------------------------------------
 
         /** Load the compact survival arena and kick off the first wave countdown. */
         _initSurvivalMode() {
@@ -1354,7 +1354,7 @@ class Game {
             try { this.gameStats.levelDamageTaken = 0; } catch (e) {}
 
             // Drop the player onto the arena center floor.
-            // Ground platform top is at y=660; player height = 64 → spawn just above it.
+            // Ground platform top is at y=660; player height = 64 ? spawn just above it.
             if (this.player) {
                 this.player.x = 1350;
                 this.player.y = 596; // 660 - 64 (player height)
@@ -1390,9 +1390,9 @@ class Game {
             const wave = this.survivalWave;
 
             // Difficulty scaling
-            const enemiesThisWave = Math.min(40, 4 + (wave - 1) * 3);        // 4, 7, 10 … capped at 40
-            const aggression      = Math.min(2.0, 1.0 + (wave - 1) * 0.15); // 1.0 → 2.0
-            const spawnInterval   = Math.max(0.8, 2.5 - (wave - 1) * 0.1);  // 2.5s → 0.8s
+            const enemiesThisWave = Math.min(40, 4 + (wave - 1) * 3);        // 4, 7, 10 � capped at 40
+            const aggression      = Math.min(2.0, 1.0 + (wave - 1) * 0.15); // 1.0 ? 2.0
+            const spawnInterval   = Math.max(0.8, 2.5 - (wave - 1) * 0.1);  // 2.5s ? 0.8s
             const maxSimultaneous = Math.min(12, 3 + Math.floor(wave * 1.2));
 
             // Unlock enemy types progressively
@@ -1419,14 +1419,14 @@ class Game {
 
             // Milestone banner text for landmark waves
             let bannerText = `WAVE ${wave}`;
-            if      (wave === 5)              bannerText = 'WAVE 5 — HALFWAY?!';
-            else if (wave === 10)             bannerText = 'WAVE 10 — STILL STANDING?!';
-            else if (wave === 15)             bannerText = 'WAVE 15 — UNSTOPPABLE!';
-            else if (wave >= 20 && wave % 5 === 0) bannerText = `WAVE ${wave} — LEGENDARY!`;
+            if      (wave === 5)              bannerText = 'WAVE 5 � HALFWAY?!';
+            else if (wave === 10)             bannerText = 'WAVE 10 � STILL STANDING?!';
+            else if (wave === 15)             bannerText = 'WAVE 15 � UNSTOPPABLE!';
+            else if (wave >= 20 && wave % 5 === 0) bannerText = `WAVE ${wave} � LEGENDARY!`;
             this._survivalWaveBannerText  = bannerText;
             this._survivalWaveBannerTimer = 2.5;
 
-            // Screen flash + shake — intensity scales with wave number
+            // Screen flash + shake � intensity scales with wave number
             try {
                 const flashAlpha = Math.min(0.5, 0.15 + wave * 0.025);
                 this.screenFlash = new ScreenFlash(`rgba(255, 80, 0, ${flashAlpha.toFixed(2)})`, 0.4);
@@ -1440,13 +1440,13 @@ class Game {
                 }
             } catch (e) { __err('game', e); }
 
-            // Grant 2 skunk shots at the start of every wave
+            // Grant 2 Golf Shots at the start of every wave
             if (this.player) {
                 // Brief invulnerability window so the player isn't immediately
                 // swarmed the moment a wave kicks off.
                 this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer, 1.5);
 
-                this.player.skunkAmmo = (this.player.skunkAmmo || 0) + 2;
+                this.player.golfAmmo = (this.player.golfAmmo || 0) + 2;
                 try {
                     this.damageNumbers.push(new FloatingText(
                         this.player.x + 32, this.player.y - 40,
@@ -1493,7 +1493,7 @@ class Game {
                 const allKilled  = defeatedThisWave >= this.survivalWaveKillTarget;
 
                 if (allKilled) {
-                    // Kill target reached — advance immediately. Clear remaining
+                    // Kill target reached � advance immediately. Clear remaining
                     // enemies so the player isn't juggling stragglers during the
                     // rest countdown.
                     if (this.enemyManager) {
@@ -1559,7 +1559,7 @@ class Game {
             this.dispatchGameStateChange();
             if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Level Complete!');
             // Is this the final campaign stage? If so, skip the per-stage
-            // jingle and the interstitial cue — both feel jarring right
+            // jingle and the interstitial cue � both feel jarring right
             // before the victory screen.
             const _isFinalStage = (typeof LEVEL_CONFIGS !== 'undefined')
                 && ((this.currentLevelIndex || 0) + 1) >= LEVEL_CONFIGS.length;
@@ -1576,8 +1576,8 @@ class Game {
             try {
                 if (typeof Analytics !== 'undefined') {
                     const lvlIdx = this.currentLevelIndex || 0;
-                    const sprayAcc = (this.gameStats.skunkShotsFired > 0)
-                        ? Math.round((this.gameStats.skunkShotsHit / this.gameStats.skunkShotsFired) * 100) : 0;
+                    const golfShotAcc = (this.gameStats.golfShotsFired > 0)
+                        ? Math.round((this.gameStats.golfShotsHit / this.gameStats.golfShotsFired) * 100) : 0;
                     Analytics.trackLevelComplete({
                         level: lvlIdx + 1,
                         levelName: (typeof LEVEL_CONFIGS !== 'undefined' && LEVEL_CONFIGS[lvlIdx]) ? LEVEL_CONFIGS[lvlIdx].name : '',
@@ -1586,14 +1586,14 @@ class Game {
                         enemiesDefeated: this.gameStats.enemiesDefeated || 0,
                         perfect: (this.gameStats.levelDamageTaken || 0) === 0,
                         maxCombo: this.gameStats.maxCombo || 0,
-                        sprayAccuracy: sprayAcc,
+                        golfShotAccuracy: golfShotAcc,
                         deathsThisLevel: this.gameStats.deathsThisRun || 0,
                         idolsCollected: this.gameStats.idolsCollected || 0
                     });
                 }
             } catch (e) { /* analytics must never break gameplay */ }
 
-            // Notify ad manager for interstitial pacing — but never on the
+            // Notify ad manager for interstitial pacing � but never on the
             // final stage; an interstitial sandwiched between the boss kill
             // and the victory screen is a guaranteed bad review.
             try {
@@ -1615,7 +1615,7 @@ class Game {
             // Wait then transition. Use a dt-driven timer (not setTimeout)
             // so the wait is paused while a full-screen ad is on screen.
             // Previously this used setTimeout(2000) which fired even when the
-            // WebView was backgrounded by an AdMob interstitial — by the time
+            // WebView was backgrounded by an AdMob interstitial � by the time
             // the ad closed the next level had already loaded behind it,
             // causing damage / game-overs the player couldn't see.
             // Final stage holds a touch longer so the "FINAL BOSS DOWN!"
@@ -1628,7 +1628,7 @@ class Game {
             this.dispatchGameStateChange();
             if (typeof Config !== 'undefined' && Config.DEBUG) console.log('GAME VICTORY!');
 
-            // Tutorial complete — suppress hints on future playthroughs
+            // Tutorial complete � suppress hints on future playthroughs
             if (this.tutorialHints) this.tutorialHints.markDone();
 
             // Mark completion for achievements
@@ -1668,8 +1668,8 @@ class Game {
             // Analytics: victory
             try {
                 if (typeof Analytics !== 'undefined') {
-                    const sprayAcc = (this.gameStats.skunkShotsFired > 0)
-                        ? Math.round((this.gameStats.skunkShotsHit / this.gameStats.skunkShotsFired) * 100) : 0;
+                    const golfShotAcc = (this.gameStats.golfShotsFired > 0)
+                        ? Math.round((this.gameStats.golfShotsHit / this.gameStats.golfShotsFired) * 100) : 0;
                     Analytics.trackVictory({
                         score: this.score,
                         completionTime: this.gameStats.completionTime,
@@ -1678,7 +1678,7 @@ class Game {
                         enemiesDefeated: this.gameStats.enemiesDefeated,
                         bossesDefeated: this.gameStats.bossesDefeated || 0,
                         maxCombo: this.gameStats.maxCombo,
-                        sprayAccuracy: sprayAcc,
+                        golfShotAccuracy: golfShotAcc,
                         deathsTotal: this.gameStats.deathsThisRun || 0,
                         totalRuns: this.gameStats.totalRuns || 0
                     });
@@ -1718,7 +1718,7 @@ class Game {
                     Promise.resolve(Highscores.isHighScore(this.score)).then((isHigh) => {
                         if (!isHigh) return;
                         // Delay the prompt so the victory screen lands
-                        // first — modal-on-celebration is jarring.
+                        // first � modal-on-celebration is jarring.
                         setTimeout(() => {
                             // Bail if the player already started the
                             // return-to-menu fade.
@@ -1739,7 +1739,7 @@ class Game {
                                         if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Highscores updated (victory)', updated);
                                     }
                                 } catch (e) { console.warn('Failed to render scoreboard (victory)', e); }
-                                // High-score flow done — gently return
+                                // High-score flow done � gently return
                                 // to the main menu via a full reload so
                                 // the next run starts on a clean slate.
                                 this._victoryPromptOpen = false;
@@ -1826,7 +1826,7 @@ class Game {
                     // Fade from transparent (0.0) to black (1.0)
                     this.transitionAlpha = progress;
                     if (progress >= 1.0) {
-                        // If we're fading out as part of the victory →
+                        // If we're fading out as part of the victory ?
                         // main-menu return, just hold on black; the
                         // location.reload() scheduled in
                         // _returnToMenuAfterVictory() will replace the page.
@@ -1882,7 +1882,7 @@ class Game {
                 dt *= 0.3; // Slow everything to 30% speed briefly
             }
 
-            // Boss Trigger Logic — skipped in survival mode (no boss in survival arena)
+            // Boss Trigger Logic � skipped in survival mode (no boss in survival arena)
             if (this.gameMode !== 'survival' && !this.bossEncountered && this.level.bossConfig && this.level.completionConfig) {
                 const triggerX = this.level.completionConfig.bossTriggerX;
                 if (this.player.x > triggerX) {
@@ -1952,7 +1952,7 @@ class Game {
                 }
             }
 
-            // Boss Defeat Logic — skipped in survival mode
+            // Boss Defeat Logic � skipped in survival mode
             if (this.gameMode !== 'survival' && this.bossEncountered && !this.bossDefeated) {
                 // Check if boss instance is dead
                 if (this.enemyManager.bossInstance && (this.enemyManager.bossInstance.health <= 0 || this.enemyManager.enemies.indexOf(this.enemyManager.bossInstance) === -1)) {
@@ -2057,7 +2057,7 @@ class Game {
                                 this.audioManager.resetMusicPlaybackRate();
                             }
                             // On the FINAL stage we don't bounce back into
-                            // the level music — the victory jingle is
+                            // the level music � the victory jingle is
                             // moments away. Let the boss music tail off.
                             const _isFinalLevel = (typeof LEVEL_CONFIGS !== 'undefined')
                                 && ((this.currentLevelIndex || 0) + 1) >= LEVEL_CONFIGS.length;
@@ -2079,7 +2079,7 @@ class Game {
                 }
             }
 
-            // Check Level Completion — skipped in survival mode (endless)
+            // Check Level Completion � skipped in survival mode (endless)
             if (this.gameMode !== 'survival') {
                 // Update exit portal if active
                 if (this.exitPortal) {
@@ -2131,12 +2131,12 @@ class Game {
                 this.gameStats.timeSurvived -= dt;
             }
 
-            // ── Mid-run achievement check (throttled) ──
+            // -- Mid-run achievement check (throttled) --
             // Most achievements are gameplay-driven (kills, combos, accuracy,
             // time survived). Without a periodic check they only trigger at
             // level-clear / game-over, hiding the toast feedback during play.
             // checkAchievements is idempotent (skips already-unlocked) and
-            // dispatches `skunkfu-achievement-unlocked` for the toast UI.
+            // dispatches `chipsavage-achievement-unlocked` for the toast UI.
             this._achCheckAccum = (this._achCheckAccum || 0) + dt;
             if (this._achCheckAccum >= 1.0) {
                 this._achCheckAccum = 0;
@@ -2181,11 +2181,11 @@ class Game {
         }
 
         // Update hit pause
-        // Shadow Strike should not freeze the whole game loop on hits; it makes
+        // Kick should not freeze the whole game loop on hits; it makes
         // the special feel sluggish and can tank perceived performance.
         if (this.hitPauseTimer > 0) {
             this.hitPauseTimer -= dt;
-            if (!(this.player && this.player.isShadowStriking)) {
+            if (!(this.player && this.player.isKicking)) {
                 return; // Pause game during hit pause
             }
         }
@@ -2329,12 +2329,12 @@ class Game {
                     }
                 } catch (e) { __err('game', e); }
 
-                // Grant extra life if applicable (arcade only — survival is single-life)
+                // Grant extra life if applicable (arcade only � survival is single-life)
                 if (result && result.type === 'EXTRA_LIFE' && result.success && this.gameMode !== 'survival') {
                     this.lives = Math.min(this.lives + (result.lives || 1), 9);
                 } else if (result && result.type === 'SKUNK_POWERUP' && result.success) {
-                    // Tutorial hint for skunk shot pickup
-                    if (this.tutorialHints) this.tutorialHints.trigger('skunk_shot');
+                    // Tutorial hint for Golf Shot pickup
+                    if (this.tutorialHints) this.tutorialHints.trigger('golf_shot');
                 } else if (result && result.type === 'GOLDEN_IDOL' && result.success) {
                     // Tutorial hint for first golden idol
                     if (this.tutorialHints) this.tutorialHints.trigger('golden_idol');
@@ -2420,7 +2420,7 @@ class Game {
                             try { this._scorePulse = 1.0; } catch (e) { __err('game', e); }
                             try { this.audioManager && this.audioManager.playSound && this.audioManager.playSound('powerup', 0.7); } catch (e) { __err('game', e); }
                             
-                            // Full set bonus: Extra life! (arcade only — survival is single-life)
+                            // Full set bonus: Extra life! (arcade only � survival is single-life)
                             if (this.gameMode !== 'survival') {
                                 this.lives = Math.min(this.lives + 1, 9);
                             }
@@ -2448,12 +2448,12 @@ class Game {
         try {
             if (this.player && this.player._attackJustStarted) {
                 this.gameStats.attacksAttempted++;
-                // Track shadow strikes separately
-                if (this.player.isShadowStriking) {
-                    this.gameStats.shadowStrikesUsed = (this.gameStats.shadowStrikesUsed || 0) + 1;
+                // Track Kicks separately
+                if (this.player.isKicking) {
+                    this.gameStats.kicksUsed = (this.gameStats.kicksUsed || 0) + 1;
                     try {
                         if (typeof Analytics !== 'undefined') {
-                            Analytics.trackShadowStrike({
+                            Analytics.trackKick({
                                 level: (this.currentLevelIndex || 0) + 1,
                                 enemiesHit: 0, // updated after hit detection
                                 score: this.score || 0
@@ -2465,11 +2465,11 @@ class Game {
             }
         } catch (e) { __err('game', e); }
 
-        // Track skunk projectile fires (player decrements ammo in shootSkunkProjectile)
+        // Track skunk projectile fires (player decrements ammo in shootGolfProjectile)
         try {
-            if (this.player && this.player._skunkShotJustFired) {
-                this.gameStats.skunkShotsFired = (this.gameStats.skunkShotsFired || 0) + 1;
-                this.player._skunkShotJustFired = false;
+            if (this.player && this.player._golfShotJustFired) {
+                this.gameStats.golfShotsFired = (this.gameStats.golfShotsFired || 0) + 1;
+                this.player._golfShotJustFired = false;
             }
         } catch (e) { __err('game', e); }
 
@@ -2486,8 +2486,8 @@ class Game {
                 if (this.player && !this.player._attackDidHit) {
                     this.gameStats.attacksHit++;
                     this.player._attackDidHit = true;
-                    // Track shadow strike hits for kill attribution
-                    if (this.player.isShadowStriking) {
+                    // Track Kick hits for kill attribution
+                    if (this.player.isKicking) {
                         this.player._lastHitWasShadowStrike = true;
                     }
                     // Track air kills (player not on ground)
@@ -2565,20 +2565,20 @@ class Game {
                                     enemy.x + enemy.width / 2,
                                     enemy.y,
                                     damagePerEnemy,
-                                    this.player.isShadowStriking,
+                                    this.player.isKicking,
                                     dnOpts
                                 ));
                             }
                         } catch (e) {
                             const damagePerEnemy = Math.floor(attackResult.totalDamage / attackResult.enemiesHit);
-                            this.damageNumbers.push(new DamageNumber(enemy.x + enemy.width / 2, enemy.y, damagePerEnemy, this.player.isShadowStriking, dnOpts));
+                            this.damageNumbers.push(new DamageNumber(enemy.x + enemy.width / 2, enemy.y, damagePerEnemy, this.player.isKicking, dnOpts));
                         }
 
                         // Spawn hit sparks only if allowed by mobile config
                         try {
                             const maxParticles = (this.isMobile && typeof Config !== 'undefined' && typeof Config.MOBILE_MAX_PARTICLES === 'number') ? Config.MOBILE_MAX_PARTICLES : Infinity;
                             if (!this.isMobile || (maxParticles > 0 && this.hitSparks.length < maxParticles)) {
-                                const isShadow = !!this.player.isShadowStriking;
+                                const isShadow = !!this.player.isKicking;
                                 this.hitSparks.push(new HitSpark(
                                     enemy.x + enemy.width / 2,
                                     enemy.y + enemy.height / 2,
@@ -2597,7 +2597,7 @@ class Game {
                 const tier = (typeof this.player.getComboTier === 'function') ? this.player.getComboTier() : null;
                 if (tier && tier.threshold > (this.player._lastComboTier || 0)) {
                     this.player._lastComboTier = tier.threshold;
-                    // Milestone floating text — bigger & glowier at higher tiers
+                    // Milestone floating text � bigger & glowier at higher tiers
                     const toastSize = Math.min(56, 32 + tier.threshold * 0.6);
                     const toastBlur = Math.min(40, 22 + tier.threshold * 0.35);
                     this._spawnComboToast(
@@ -2632,8 +2632,8 @@ class Game {
             } catch (e) { __err('game', e); }
 
             // Screen shake and hit pause for impactful hits
-            if (this.player.isShadowStriking) {
-                // Shadow Strike: no screen shake, no hit-pause (keeps the dash snappy)
+            if (this.player.isKicking) {
+                // Kick: no screen shake, no hit-pause (keeps the dash snappy)
                 this.screenShake = null;
                 this.hitPauseTimer = 0;
             } else if (this.player.comboCount >= 5 && !(this.player._lastComboTier > (this.player._prevMilestoneTier || 0))) {
@@ -2658,10 +2658,10 @@ class Game {
         if (killsDelta > 0) {
             try {
                 const seenFirstKill = (() => {
-                    try { return localStorage.getItem('skunkfu_first_kill_seen') === '1'; } catch (e) { return false; }
+                    try { return localStorage.getItem('chipsavage_first_kill_seen') === '1'; } catch (e) { return false; }
                 })();
                 if (!seenFirstKill) {
-                    try { localStorage.setItem('skunkfu_first_kill_seen', '1'); } catch (e) {}
+                    try { localStorage.setItem('chipsavage_first_kill_seen', '1'); } catch (e) {}
                     const px = this.player.x + (this.player.width || 48) / 2;
                     const py = this.player.y;
                     // Big juicy toast
@@ -2698,11 +2698,11 @@ class Game {
                 }
             } catch (e) { __err('game', e); }
         }
-        // Attribute kills to shadow strike or air attacks if applicable
+        // Attribute kills to Kick or air attacks if applicable
         if (killsDelta > 0) {
             try {
                 if (this.player._lastHitWasShadowStrike) {
-                    this.gameStats.shadowStrikeKills = (this.gameStats.shadowStrikeKills || 0) + killsDelta;
+                    this.gameStats.kickKills = (this.gameStats.kickKills || 0) + killsDelta;
                 }
                 if (this.player._lastHitWasAirborne) {
                     this.gameStats.airKills = (this.gameStats.airKills || 0) + killsDelta;
@@ -2788,9 +2788,9 @@ class Game {
             }
         }
 
-        if (this.player && this.player.skunkProjectiles) {
-            for (let i = this.player.skunkProjectiles.length - 1; i >= 0; i--) {
-                const proj = this.player.skunkProjectiles[i];
+        if (this.player && this.player.golfProjectiles) {
+            for (let i = this.player.golfProjectiles.length - 1; i >= 0; i--) {
+                const proj = this.player.golfProjectiles[i];
                 const projRect = {
                     x: proj.x - proj.width / 2,
                     y: proj.y - proj.height / 2,
@@ -2812,22 +2812,22 @@ class Game {
                 
                 // If projectile hit an enemy, create spray cloud and remove projectile
                 if (hitAnyEnemy) {
-                    this.gameStats.skunkShotsHit = (this.gameStats.skunkShotsHit || 0) + 1;
-                    this.player.createSprayCloud(proj.x, proj.y);
-                    this.player.skunkProjectiles.splice(i, 1);
+                    this.gameStats.golfShotsHit = (this.gameStats.golfShotsHit || 0) + 1;
+                    this.player.createGolfImpact(proj.x, proj.y);
+                    this.player.golfProjectiles.splice(i, 1);
                 }
             }
         }
         
         // Check spray cloud collisions with enemies
-        if (this.player && this.player.skunkSprays) {
-            for (const spray of this.player.skunkSprays) {
+        if (this.player && this.player.golfSprays) {
+            for (const spray of this.player.golfSprays) {
                 for (const enemy of this.enemyManager.getEnemies()) {
                     // Skip if already hit by this spray
                     if (spray.hitEnemies.has(enemy)) continue;
                     
                     // Skip if already skunked
-                    if (enemy.isSkunked) continue;
+                    if (enemy.isGolfHit) continue;
                     
                     const enemyRect = enemy.getRect();
                     const enemyCenterX = enemyRect.x + enemyRect.width / 2;
@@ -2840,10 +2840,10 @@ class Game {
                     if (distance <= spray.radius) {
                         // Mark enemy as hit by this spray
                         spray.hitEnemies.add(enemy);
-                        this.gameStats.enemiesSkunked = (this.gameStats.enemiesSkunked || 0) + 1;
+                        this.gameStats.enemiesHitByGolfShot = (this.gameStats.enemiesHitByGolfShot || 0) + 1;
                         
                         // Apply skunk effect
-                        enemy.isSkunked = true;
+                        enemy.isGolfHit = true;
                         enemy.skunkTimer = enemy.skunkDuration;
                         enemy.skunkParticles = [];
                         
@@ -2871,7 +2871,7 @@ class Game {
                         this.damageNumbers.push(new FloatingText(
                             enemy.x + enemy.width / 2,
                             enemy.y - 10,
-                            'SKUNKED!',
+                            'GOLF HIT!',
                             { color: '#40FF40', lifetime: 1.5, velocityY: -60, font: 'bold 18px Arial' }
                         ));
                     }
@@ -2945,7 +2945,7 @@ class Game {
                 this.screenShake = new ScreenShake(0.15, 5);
             }
 
-            // Chain explosion bonus scoring — reward the player for triggering chain reactions
+            // Chain explosion bonus scoring � reward the player for triggering chain reactions
             for (const explosion of this.enemyManager._pendingExplosions) {
                 const depth = (explosion.enemy && typeof explosion.enemy.chainExplosionDepth === 'number')
                     ? explosion.enemy.chainExplosionDepth : 0;
@@ -2959,7 +2959,7 @@ class Game {
                     try {
                         this.damageNumbers.push(new FloatingText(
                             explosion.x, explosion.y - 40,
-                            `💥 CHAIN x${depth}! +${chainBonus}`,
+                            `?? CHAIN x${depth}! +${chainBonus}`,
                             { color: '#FF6600', lifetime: 2.0, velocityY: -130, font: 'bold 24px Arial' }
                         ));
                     } catch (e) { __err('game', e); }
@@ -3012,7 +3012,7 @@ class Game {
                     this.tutorialHints.trigger('attack');
                     // Delay shadow_strike so it doesn't pile on attack hint
                     setTimeout(() => {
-                        if (this.tutorialHints) this.tutorialHints.trigger('shadow_strike');
+                        if (this.tutorialHints) this.tutorialHints.trigger('kick');
                     }, 9000);
                 }
             }
@@ -3084,7 +3084,7 @@ class Game {
         }
 
         // Survival is single-life: force straight to GAME_OVER regardless of
-        // how many lives the counter holds — UNLESS the player just used a revive
+        // how many lives the counter holds � UNLESS the player just used a revive
         // ad (lives=2), in which case the first death after revive should respawn
         // rather than game-over (mirrors the arcade mode behaviour).
         if (this.gameMode === 'survival' && this.lives <= 1) {
@@ -3190,12 +3190,12 @@ class Game {
 
             // Persist cross-run cumulative stats to localStorage
             try {
-                const totalEnemies = (parseInt(localStorage.getItem('skunkfu_totalEnemiesDefeated') || '0') || 0) + (this.gameStats.enemiesDefeated || 0);
-                const totalBosses = (parseInt(localStorage.getItem('skunkfu_totalBossesDefeated') || '0') || 0) + (this.gameStats.bossesDefeated || 0);
-                const totalTime = (parseFloat(localStorage.getItem('skunkfu_totalPlayTime') || '0') || 0) + (this.gameStats.timeSurvived || 0);
-                localStorage.setItem('skunkfu_totalEnemiesDefeated', String(totalEnemies));
-                localStorage.setItem('skunkfu_totalBossesDefeated', String(totalBosses));
-                localStorage.setItem('skunkfu_totalPlayTime', String(totalTime));
+                const totalEnemies = (parseInt(localStorage.getItem('chipsavage_totalEnemiesDefeated') || '0') || 0) + (this.gameStats.enemiesDefeated || 0);
+                const totalBosses = (parseInt(localStorage.getItem('chipsavage_totalBossesDefeated') || '0') || 0) + (this.gameStats.bossesDefeated || 0);
+                const totalTime = (parseFloat(localStorage.getItem('chipsavage_totalPlayTime') || '0') || 0) + (this.gameStats.timeSurvived || 0);
+                localStorage.setItem('chipsavage_totalEnemiesDefeated', String(totalEnemies));
+                localStorage.setItem('chipsavage_totalBossesDefeated', String(totalBosses));
+                localStorage.setItem('chipsavage_totalPlayTime', String(totalTime));
                 this.gameStats.totalEnemiesDefeated = totalEnemies;
                 this.gameStats.totalBossesDefeated = totalBosses;
                 this.gameStats.totalPlayTime = totalTime;
@@ -3230,8 +3230,8 @@ class Game {
             // Analytics: game over
             try {
                 if (typeof Analytics !== 'undefined') {
-                    const sprayAcc = (this.gameStats.skunkShotsFired > 0)
-                        ? Math.round((this.gameStats.skunkShotsHit / this.gameStats.skunkShotsFired) * 100) : 0;
+                    const golfShotAcc = (this.gameStats.golfShotsFired > 0)
+                        ? Math.round((this.gameStats.golfShotsHit / this.gameStats.golfShotsFired) * 100) : 0;
                     Analytics.trackGameOver({
                         score: this.score,
                         levelReached: this._gameOverLevelReached,
@@ -3240,7 +3240,7 @@ class Game {
                         enemiesDefeated: this.gameStats.enemiesDefeated,
                         maxCombo: this.gameStats.maxCombo,
                         accuracy: this.gameStats.accuracy,
-                        sprayAccuracy: sprayAcc,
+                        golfShotAccuracy: golfShotAcc,
                         bossesDefeated: this.gameStats.bossesDefeated || 0,
                         deathsTotal: this.gameStats.deathsThisRun || 0,
                         totalRuns: this.gameStats.totalRuns || 0,
@@ -3266,8 +3266,8 @@ class Game {
             // appears AFTER the achievement breakdown animation finishes and
             // (if applicable) the high-score initials modal has been shown.
             // Mirrors the timing constants used in ui.js drawGameOver():
-            //   statsBaseDelay 1.6s + 6 stats × 0.15s + animDuration 0.35s ≈ 2.85s
-            //   achievement header delay: stats end + 0.3s ≈ 3.15s
+            //   statsBaseDelay 1.6s + 6 stats � 0.15s + animDuration 0.35s � 2.85s
+            //   achievement header delay: stats end + 0.3s � 3.15s
             //   each badge animates in over ~0.4s, staggered 0.18s
             const numAch = (this._gameOverNewAchievements || []).length;
             const statsEnd = 1.6 + 6 * 0.15 + 0.35; // ~2.85s
@@ -3334,7 +3334,7 @@ class Game {
                 if (this.state === 'GAME_OVER') {
                     _tryShowHsPrompt();
                 } else if (this.state === 'PAUSED') {
-                    // A revive ad started while we were waiting — defer until the ad
+                    // A revive ad started while we were waiting � defer until the ad
                     // closes and _resumeGameAfterAd() restores state back to GAME_OVER.
                     // setTimeout(0) lets the state-restore in _resumeGameAfterAd run first.
                     const onAdHide = () => { setTimeout(() => _tryShowHsPrompt(), 0); };
@@ -3384,7 +3384,7 @@ class Game {
      */
     reviveFromAd() {
         // Accept GAME_OVER (normal path) or PAUSED (fallback: _resumeGameAfterAd failed to
-        // restore state — happens on some Android versions due to app-lifecycle timing).
+        // restore state � happens on some Android versions due to app-lifecycle timing).
         if (this.state !== 'GAME_OVER' && this.state !== 'PAUSED') return;
         // Ensure we're cleanly in PLAYING regardless of which entry state we came from.
         if (this.state === 'PAUSED') {
@@ -3411,14 +3411,14 @@ class Game {
             this.player.isDying = false;
             this.player.deathTimer = 0;
             this.player.isAttacking = false;
-            this.player.isShadowStriking = false;
+            this.player.isKicking = false;
             this.player.hitStunTimer = 0;
             // Reset combat state that isn't covered by the properties above
-            this.player.isSkunkShooting   = false;
-            this.player.skunkShotTimer    = 0;
+            this.player.isGolfShooting   = false;
+            this.player.golfShotTimer    = 0;
             this.player.attackTimer       = 0;
             this.player.attackCooldownTimer = 0;
-            this.player.skunkCooldownTimer = 0;
+            this.player.golfCooldownTimer = 0;
             this.player.jumpsRemaining    = this.player.maxJumps || 2;
             this.player._prevAttackHitbox = null;
             try { this.player.hitEnemies && this.player.hitEnemies.clear && this.player.hitEnemies.clear(); } catch (e) { __err('game', e); }
@@ -3452,7 +3452,7 @@ class Game {
 
             // Grant bonus ammo on revive (with floating feedback)
             if (this.player) {
-                this.player.skunkAmmo = (this.player.skunkAmmo || 0) + 2;
+                this.player.golfAmmo = (this.player.golfAmmo || 0) + 2;
                 try {
                     this.damageNumbers.push(new FloatingText(
                         this.player.x + 32, this.player.y - 40,
@@ -3466,7 +3466,7 @@ class Game {
             this.survivalWaveResting  = true;
             this.survivalWaveRestTimer = 4.0;
             this._survivalWaveRestTotal = 4.0;
-            this._survivalWaveBannerText  = `WAVE ${this.survivalWave} — ONE MORE CHANCE!`;
+            this._survivalWaveBannerText  = `WAVE ${this.survivalWave} � ONE MORE CHANCE!`;
             this._survivalWaveBannerTimer = 4.0;
 
             // Resume survival arena music
@@ -3513,7 +3513,7 @@ class Game {
         this.player.isDying = false;
         this.player.deathTimer = 0;
         this.player.isAttacking = false;
-        this.player.isShadowStriking = false;
+        this.player.isKicking = false;
         try { this.player.clearInputState && this.player.clearInputState(); } catch (e) { __err('game', e); }
 
         // Respawn slightly behind death position
@@ -3856,7 +3856,7 @@ class Game {
                 this.ui.drawBossBar(this.ctx, bossInfo);
             }
 
-            // ── Offscreen kamikaze warning arrows ──
+            // -- Offscreen kamikaze warning arrows --
             // Show a pulsing warning arrow at the screen edge when a kamikaze in FUSE or DASH
             // is outside the visible viewport, so the player is never blindsided.
             try {
@@ -3913,7 +3913,7 @@ class Game {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#FFFFFF';
-                    ctx.fillText(isDash ? '💣' : '⚠', -dir * 22, 0);
+                    ctx.fillText(isDash ? '??' : '?', -dir * 22, 0);
 
                     ctx.restore();
                 }

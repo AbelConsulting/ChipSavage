@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -20,10 +20,10 @@ const Analytics = (() => {
 
     // ── opt-out gate ────────────────────────────────────────────
     // Respect a simple flag so players/devs can disable analytics.
-    // Set `localStorage.skunkfu_analytics_optout = '1'` or call
+    // Set `localStorage.chipsavage_analytics_optout = '1'` or call
     // `Analytics.optOut()`.
     let _optedOut = false;
-    try { _optedOut = localStorage.getItem('skunkfu_analytics_optout') === '1'; } catch (e) { /* */ }
+    try { _optedOut = localStorage.getItem('chipsavage_analytics_optout') === '1'; } catch (e) { /* */ }
 
     // ── helpers ──────────────────────────────────────────────────
     const push = (event, params) => {
@@ -77,7 +77,7 @@ const Analytics = (() => {
         // Session count & returning-player flag from cross-run stats
         let totalRuns = 0;
         let perfMode = 'unknown';
-        try { totalRuns = parseInt(localStorage.getItem('skunkfu_totalRuns') || '0') || 0; } catch (e) { /* */ }
+        try { totalRuns = parseInt(localStorage.getItem('chipsavage_totalRuns') || '0') || 0; } catch (e) { /* */ }
         try { perfMode = localStorage.getItem('mobilePerfMode') || 'unknown'; } catch (e) { /* */ }
 
         push('user_properties_set', {
@@ -123,7 +123,7 @@ const Analytics = (() => {
             enemies_defeated: data.enemiesDefeated || 0,
             perfect: !!data.perfect,
             max_combo: data.maxCombo || 0,
-            spray_accuracy: data.sprayAccuracy || 0,
+            golf_shot_accuracy: data.golfShotAccuracy || 0,
             deaths_this_level: data.deathsThisLevel || 0,
             idols_collected: data.idolsCollected || 0,
             input_method: _lastInputMethod
@@ -139,7 +139,7 @@ const Analytics = (() => {
             enemies_defeated: data.enemiesDefeated || 0,
             max_combo: data.maxCombo || 0,
             accuracy: data.accuracy || 0,
-            spray_accuracy: data.sprayAccuracy || 0,
+            golf_shot_accuracy: data.golfShotAccuracy || 0,
             bosses_defeated: data.bossesDefeated || 0,
             deaths_total: data.deathsTotal || 0,
             is_high_score: !!data.isHighScore,
@@ -159,7 +159,7 @@ const Analytics = (() => {
             enemies_defeated: data.enemiesDefeated || 0,
             bosses_defeated: data.bossesDefeated || 0,
             max_combo: data.maxCombo || 0,
-            spray_accuracy: data.sprayAccuracy || 0,
+            golf_shot_accuracy: data.golfShotAccuracy || 0,
             deaths_total: data.deathsTotal || 0,
             total_runs: data.totalRuns || 0,
             input_method: _lastInputMethod,
@@ -332,8 +332,8 @@ const Analytics = (() => {
         });
     }
 
-    function trackShadowStrike(data = {}) {
-        push('shadow_strike', {
+    function trackKick(data = {}) {
+        push('kick', {
             level: data.level || 1,
             enemies_hit: data.enemiesHit || 0,
             score: data.score || 0
@@ -475,7 +475,7 @@ const Analytics = (() => {
         trackBossEncounter,
         trackBossDefeat,
         trackItemPickup,
-        trackShadowStrike,
+        trackKick,
         trackRetry,
         trackSettingsChange,
         trackMenuAction,
@@ -486,8 +486,8 @@ const Analytics = (() => {
         trackError,
         startHeartbeat,
         stopHeartbeat,
-        optOut() { _optedOut = true; try { localStorage.setItem('skunkfu_analytics_optout', '1'); } catch (e) { /* */ } },
-        optIn()  { _optedOut = false; try { localStorage.removeItem('skunkfu_analytics_optout'); } catch (e) { /* */ } },
+        optOut() { _optedOut = true; try { localStorage.setItem('chipsavage_analytics_optout', '1'); } catch (e) { /* */ } },
+        optIn()  { _optedOut = false; try { localStorage.removeItem('chipsavage_analytics_optout'); } catch (e) { /* */ } },
         isOptedOut() { return _optedOut; }
     };
 })();

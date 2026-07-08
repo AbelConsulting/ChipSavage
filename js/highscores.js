@@ -1,11 +1,11 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 // js/highscores.js
-// Global high-score manager using the skunked.io leaderboard API.
+// Global high-score manager using the chipsavage.io leaderboard API.
 
 // Import the REST API functions for the global leaderboard
 import { submitScore as submitAPIScore, getHighScores as getAPIHighScores, checkHealth as checkAPIHealth, getEntitlements as fetchAPIEntitlements, setEntitlement as pushAPIEntitlement } from './firebase.js'; // REST client (no Firebase SDK)
@@ -14,16 +14,16 @@ import { submitScore as submitAPIScore, getHighScores as getAPIHighScores, check
 // modules (PurchaseManager) can use them without bundling. PurchaseManager
 // loads after this module.
 try {
-    window.SkunkEntitlementsAPI = {
+    window.ChipSavageEntitlementsAPI = {
         getEntitlements: fetchAPIEntitlements,
         setEntitlement: pushAPIEntitlement,
     };
 } catch (_) {}
 
 (function(window){
-  const ACHIEVEMENTS_KEY = 'skunkfu_achievements_v1';
+  const ACHIEVEMENTS_KEY = 'chipsavage_achievements_v1';
   const MAX_SCORES = 10; // The number of scores to show on the leaderboard.
-  const PLAYER_NAME_KEY = 'skunkfu.playerName'; // Last submitted name (for own-row highlight).
+  const PLAYER_NAME_KEY = 'chipsavage.playerName'; // Last submitted name (for own-row highlight).
   // Steam leaderboard API name — must match the leaderboard created in
   // Steamworks (Stats & Achievements → Leaderboards). electron/main.js will
   // findOrCreate it (Descending / Numeric) on first submit.
@@ -71,15 +71,15 @@ try {
     { id: 'score_attack', name: 'Score Attack', desc: 'Score over 150,000 points', icon: '👑', check: (stats) => statNumber(stats.score) >= 150000 },
     { id: 'score_legend', name: 'Score Legend', desc: 'Score over 500,000 points', icon: '🏆', check: (stats) => statNumber(stats.score) >= 500000 },
 
-    // ── Shadow Strike ──
-    { id: 'shadow_initiate', name: 'Shadow Initiate', desc: 'Use Shadow Strike 10 times in a run', icon: '🌑', check: (stats) => statNumber(stats.shadowStrikesUsed) >= 10 },
-    { id: 'shadow_master', name: 'Shadow Master', desc: 'Kill 25 enemies with Shadow Strike', icon: '🌘', check: (stats) => statNumber(stats.shadowStrikeKills) >= 25 },
-    { id: 'phantom_blade', name: 'Phantom Blade', desc: 'Kill 75 enemies with Shadow Strike', icon: '👻', check: (stats) => statNumber(stats.shadowStrikeKills) >= 75 },
+    // ── Kick ──
+    { id: 'kick_initiate', name: 'Kick Initiate', desc: 'Use Kick 10 times in a run', icon: '🦵', check: (stats) => statNumber(stats.kicksUsed) >= 10 },
+    { id: 'kick_master', name: 'Kick Master', desc: 'Kill 25 enemies with Kick', icon: '⚡', check: (stats) => statNumber(stats.kickKills) >= 25 },
+    { id: 'kick_legend', name: 'Kick Legend', desc: 'Kill 75 enemies with Kick', icon: '💫', check: (stats) => statNumber(stats.kickKills) >= 75 },
 
-    // ── Skunk Spray ──
-    { id: 'spray_novice', name: 'Spray Novice', desc: 'Fire 5 Skunk Shots in a run', icon: '💨', check: (stats) => statNumber(stats.skunkShotsFired) >= 5 },
-    { id: 'stink_bomber', name: 'Stink Bomber', desc: 'Skunk 20 enemies in a run', icon: '🦨', check: (stats) => statNumber(stats.enemiesSkunked) >= 20 },
-    { id: 'toxic_cloud', name: 'Toxic Cloud', desc: 'Skunk 50 enemies in a run', icon: '☁️', check: (stats) => statNumber(stats.enemiesSkunked) >= 50 },
+    // ── Golf Shot ──
+    { id: 'golf_shot_novice', name: 'Golf Shot Novice', desc: 'Fire 5 Golf Shots in a run', icon: '⛳', check: (stats) => statNumber(stats.golfShotsFired) >= 5 },
+    { id: 'golf_shooter', name: 'Golf Shooter', desc: 'Hit 20 enemies with Golf Shot in a run', icon: '🏌️', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 20 },
+    { id: 'golf_ace', name: 'Golf Ace', desc: 'Hit 50 enemies with Golf Shot in a run', icon: '🏆', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 50 },
 
     // ── Aerial Combat ──
     { id: 'air_juggler', name: 'Air Juggler', desc: 'Defeat 5 enemies while airborne', icon: '🦅', check: (stats) => statNumber(stats.airKills) >= 5 },
@@ -192,20 +192,20 @@ try {
   // Weighted achievement points — harder achievements are worth more.
   const PRESTIGE_WEIGHTS = Object.freeze({
     // Easy (1 pt)
-    first_kill: 1, spray_novice: 1, combo_master: 1, chain_reaction: 1, boss_slayer: 1,
+    first_kill: 1, golf_shot_novice: 1, combo_master: 1, chain_reaction: 1, boss_slayer: 1,
     close_call: 1, relic_hunter: 1, halfway_there: 1, dedicated: 1,
     // Medium (3 pt)
-    enemy_slayer: 3, combo_adept: 3, high_scorer: 3, shadow_initiate: 3, stink_bomber: 3,
+    enemy_slayer: 3, combo_adept: 3, high_scorer: 3, kick_initiate: 3, golf_shooter: 3,
     air_juggler: 3, precision_striker: 3, boss_crusher: 3, perfect_level: 3, survivor: 3,
     no_lives_lost: 3, power_hungry: 3, demolition_expert: 3, multi_hit_master: 3,
     mass_extinction: 3, time_invested: 3, multiplier_max: 3, idol_hoarder: 3,
     // Hard (5 pt)
-    exterminator: 5, combo_legend: 5, score_attack: 5, shadow_master: 5, toxic_cloud: 5,
+    exterminator: 5, combo_legend: 5, score_attack: 5, kick_master: 5, golf_ace: 5,
     sky_warrior: 5, sharpshooter: 5, boss_hunter: 5, iron_fur: 5, cheating_death: 5,
     endurance: 5, master_collector: 5, speed_demon: 5, world_saver: 5,
     veteran_hunter: 5, addicted: 5, armageddon: 5, berserker: 5,
     // Epic (10 pt)
-    genocide: 10, combo_god: 10, score_legend: 10, phantom_blade: 10,
+    genocide: 10, combo_god: 10, score_legend: 10, kick_legend: 10,
     never_miss: 10, flawless_run: 10, completionist: 10, speed_god: 10,
     veteran: 10, no_lifer: 10, glass_cannon: 10, pacifist_start: 10,
   });
@@ -289,7 +289,7 @@ try {
       try {
         if (typeof window !== 'undefined' && typeof CustomEvent === 'function') {
           for (const ach of newAchievements) {
-            window.dispatchEvent(new CustomEvent('skunkfu-achievement-unlocked', {
+            window.dispatchEvent(new CustomEvent('chipsavage-achievement-unlocked', {
               detail: { id: ach.id, name: ach.name, desc: ach.desc, icon: ach.icon, date: Date.now() }
             }));
           }
@@ -381,7 +381,7 @@ try {
   // --- End of achievement logic ---
 
   /**
-   * Fetches scores from the skunked.io leaderboard.
+   * Fetches scores from the chipsavage.io leaderboard.
    * @returns {Promise<Array>} A promise that resolves to an array of score objects.
    */
   async function loadScores(period) {
@@ -389,7 +389,7 @@ try {
       const scores = await getAPIHighScores(MAX_SCORES, period || 'alltime');
       return scores || [];
     } catch(e) { 
-      console.warn('Failed to load highscores from skunked.io', e);
+      console.warn('Failed to load highscores from chipsavage.io', e);
       return null; 
     }
   }
@@ -467,7 +467,7 @@ try {
   }
 
   /**
-   * Submits a score to the skunked.io leaderboard.
+   * Submits a score to the chipsavage.io leaderboard.
    * @param {number} score The player's score.
    * @param {string} name The player's name/initials.
    * @param {object} [gameStats] Game session stats for achievement checks.
@@ -587,7 +587,7 @@ try {
       } catch (e) { /* */ }
       return apiOk || playGamesOk || steamOk;
       } catch (e) {
-        console.error("Failed to submit score to skunked.io", e);
+        console.error("Failed to submit score to chipsavage.io", e);
         return false;
       } finally {
         _submitInflight.delete(runId);
@@ -994,7 +994,7 @@ try {
   }
 
   // ── Survival Mode Local Leaderboard ─────────────────────────────────────────
-  const SURVIVAL_SCORES_KEY = 'skunkfu_survival_scores_v1';
+  const SURVIVAL_SCORES_KEY = 'chipsavage_survival_scores_v1';
   const MAX_SURVIVAL_SCORES = 10;
 
   /**

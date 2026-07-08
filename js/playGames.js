@@ -1,5 +1,5 @@
 /*!
- * Skunked: Way of the Spray
+ * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
@@ -41,7 +41,7 @@ try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('playGames.
         _playerId = result.playerId;
         _playerDisplayName = (typeof result.displayName === 'string') ? result.displayName : '';
         try {
-          window.dispatchEvent(new CustomEvent('skunkfu-pgs-signed-in', {
+          window.dispatchEvent(new CustomEvent('chipsavage-pgs-signed-in', {
             detail: { playerId: _playerId, displayName: _playerDisplayName }
           }));
         } catch (_) {}
@@ -72,7 +72,7 @@ try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('playGames.
     score_attack:     'CgkI5NbknI4GEAIQDA',
     score_legend:     'CgkI5NbknI4GEAIQDQ',
 
-    // ── Shadow Strike ──
+    // ── Kick ──
     shadow_initiate:  'CgkI5NbknI4GEAIQDg',
     shadow_master:    'CgkI5NbknI4GEAIQDw',
     phantom_blade:    'CgkI5NbknI4GEAIQEA',
