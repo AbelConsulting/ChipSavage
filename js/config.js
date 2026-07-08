@@ -199,7 +199,7 @@ const Config = {
     // How long (seconds) after game over before the high-score prompt appears
     GAME_OVER_HIGHSCORE_DELAY: 8.0,
 
-    // Global leaderboard API (skunkedscores service)
+    // Global leaderboard API (Chip Savage leaderboard service)
     // All score reads/writes go through this endpoint.
     // Empty string = same origin (relative URLs). Set a full URL only if
     // the leaderboard service lives on a different host.

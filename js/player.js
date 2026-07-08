@@ -142,14 +142,14 @@ class Player {
     }
 
     loadSprites() {
-        const ninja_idle = spriteLoader.getSprite('ninja_idle');
-        const ninja_walk = spriteLoader.getSprite('ninja_walk');
-        const ninja_jump = spriteLoader.getSprite('ninja_jump');
-        const ninja_attack = spriteLoader.getSprite('ninja_attack');
+        const chip_idle = spriteLoader.getSprite('chip_idle');
+        const chip_walk = spriteLoader.getSprite('chip_walk');
+        const chip_jump = spriteLoader.getSprite('chip_jump');
+        const chip_attack = spriteLoader.getSprite('chip_attack');
         const chip_golf_shot = spriteLoader.getSprite('chip_golf_shot');
         const chip_kick = spriteLoader.getSprite('chip_kick');
-        const ninja_hurt = spriteLoader.getSprite('ninja_hurt');
-        const ninja_death = spriteLoader.getSprite('ninja_death');
+        const chip_hurt = spriteLoader.getSprite('chip_hurt');
+        const chip_death = spriteLoader.getSprite('chip_death');
 
         // Use spriteLoader.createAnimation when available so frameStride can be
         // inferred from sheet dimensions (handles padding between frames).
@@ -157,28 +157,28 @@ class Player {
             // Let the SpriteLoader infer frame width/stride (it can detect
             // per-sheet padding) instead of forcing a hardcoded value.
             this.animations = {
-                idle: spriteLoader.createAnimation('ninja_idle', 4, 0.15),
-                walk: spriteLoader.createAnimation('ninja_walk', 4, 0.1),
-                jump: spriteLoader.createAnimation('ninja_jump', 4, 0.12),
-                attack: spriteLoader.createAnimation('ninja_attack', 4, 0.08),
+                idle: spriteLoader.createAnimation('chip_idle', 4, 0.15),
+                walk: spriteLoader.createAnimation('chip_walk', 4, 0.1),
+                jump: spriteLoader.createAnimation('chip_jump', 4, 0.12),
+                attack: spriteLoader.createAnimation('chip_attack', 4, 0.08),
                 golf_shot: spriteLoader.createAnimation('chip_golf_shot', 4, 0.08),
                 // Kick: 4 frames, snappy timing.
                 // Note: the current sheet is 256x64 (4x 64px frames) so we let
                 // SpriteLoader infer correct slicing.
                 kick: spriteLoader.createAnimation('chip_kick', 4, 0.06),
-                hurt: spriteLoader.createAnimation('ninja_hurt', 2, 0.1),
-                death: spriteLoader.createAnimation('ninja_death', 4, 0.37)
+                hurt: spriteLoader.createAnimation('chip_hurt', 2, 0.1),
+                death: spriteLoader.createAnimation('chip_death', 4, 0.37)
             };
         } else {
             this.animations = {
-                idle: new Animation(ninja_idle, 4, 0.15, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                walk: new Animation(ninja_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                jump: new Animation(ninja_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                attack: new Animation(ninja_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                idle: new Animation(chip_idle, 4, 0.15, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                walk: new Animation(chip_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                jump: new Animation(chip_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                attack: new Animation(chip_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 golf_shot: new Animation(chip_golf_shot, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
                 kick: new Animation(chip_kick, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
-                hurt: new Animation(ninja_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                death: new Animation(ninja_death, 4, 0.37, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
+                hurt: new Animation(chip_hurt, 2, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                death: new Animation(chip_death, 4, 0.37, { frameWidth: 64, frameHeight: 64, frameStride: 65 })
             };
         }
 

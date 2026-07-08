@@ -1,0 +1,1097 @@
+<!--
+  Chip Savage
+  Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
+  Proprietary and confidential — unauthorized copying, distribution, or use
+  of this file, via any medium, is strictly prohibited. See LICENSE for terms.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>Chip Savage — Golf Brawler</title>
+
+    <meta name="description" content="Chip Savage — the most savage golf brawler ever. Punch, kick, and drive your way through enemy hordes. Free in browser.">
+    <meta name="keywords" content="chip savage, golf brawler, beat em up, 2D action, arcade fighter, combo brawler, free browser game">
+    <meta name="author" content="Mephitideus Interactive">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="color-scheme" content="dark">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Chip Savage">
+    <meta property="og:title" content="Chip Savage — Golf Brawler">
+    <meta property="og:description" content="The most savage golf brawler ever. Punch, kick, and drive your way through enemy hordes.">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <span class="font-preload" aria-hidden="true">.</span>
+
+    <style>
+        /* ── Reset & base ── */
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        html { background-color: #000; }
+
+        /* ── Safe-area CSS variables ── */
+        :root {
+            --safe-top:    env(safe-area-inset-top,    0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left:   env(safe-area-inset-left,   0px);
+            --safe-right:  env(safe-area-inset-right,  0px);
+            --ad-width: 0px;
+        }
+
+        /* ── Layout ── */
+        #main-wrapper { display: flex; width: 100%; height: 100%; }
+
+        #content-wrapper { flex-grow: 1; height: 100%; position: relative; }
+
+        #game-container {
+            position: relative; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            touch-action: none;
+        }
+
+        canvas {
+            max-width:  calc(100vw - var(--safe-left) - var(--safe-right));
+            max-height: calc(100vh - var(--safe-top)  - var(--safe-bottom));
+            object-fit: contain;
+            display: block;
+        }
+
+        /* ── Loading screen ── */
+        #loading-screen {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 30%, #0d1f12, #000);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+            font-family: 'Bangers', 'Arial Black', sans-serif;
+            color: #fff;
+        }
+        .loading-content { text-align: center; }
+        .loading-logo { font-size: 72px; line-height: 1; margin-bottom: 8px; }
+        .loading-content h1 {
+            margin: 0;
+            font-size: clamp(36px, 8vw, 64px);
+            background: linear-gradient(180deg, #FFD700 0%, #FF6600 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .loading-subtitle {
+            margin: 0 0 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(8px, 1.8vw, 12px);
+            color: #aaa;
+            letter-spacing: 0.12em;
+        }
+        .loading-divider {
+            width: 200px; height: 2px; margin: 8px auto 16px;
+            background: linear-gradient(90deg, transparent, rgba(255,200,0,0.7), transparent);
+        }
+        .loading-bar {
+            width: 280px; height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 3px; margin: 0 auto 12px; overflow: hidden;
+        }
+        .loading-progress {
+            height: 100%; background: linear-gradient(90deg, #FFD700, #FF6600);
+            border-radius: 3px; width: 0%; transition: width 0.3s ease;
+        }
+        #loading-text {
+            margin: 0 0 6px;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            font-size: 13px; color: rgba(255,255,255,0.7);
+        }
+        .loading-tip {
+            margin: 0 0 6px;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            font-size: 12px; color: rgba(255,215,0,0.8);
+            min-height: 18px;
+        }
+        .loading-footer {
+            margin: 8px 0 0;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            font-size: 10px; color: rgba(255,255,255,0.35);
+        }
+
+        /* ── Touch controls ── */
+        #touch-controls {
+            position: fixed;
+            left: 0; right: 0;
+            bottom: calc(20px + var(--safe-bottom));
+            height: 240px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 220ms cubic-bezier(.2,.9,.2,1), transform 220ms cubic-bezier(.2,.9,.2,1);
+        }
+        #touch-controls.visible { opacity: 1; transform: translateY(0); }
+        .control-group {
+            position: absolute; bottom: 20px;
+            pointer-events: auto;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.32) 0%, transparent 75%);
+            border-radius: 20px; padding: 10px 8px 4px;
+        }
+        #d-pad { left: 12px; }
+        #actions { right: 12px; }
+        #game-over-controls { display: none !important; }
+
+        .touch-btn {
+            width: clamp(56px, 9vw, 84px); height: clamp(56px, 9vw, 84px);
+            background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.22), rgba(0,0,0,0.45));
+            border: 2px solid rgba(255,255,255,0.22);
+            border-radius: 16px; color: white;
+            font-size: clamp(20px, 3.2vw, 28px); font-weight: 900;
+            display: inline-flex; justify-content: center; align-items: center;
+            margin: 5px;
+            -webkit-user-select: none; user-select: none;
+            outline: 2px solid transparent; outline-offset: 2px;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+            box-shadow: 0 12px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 90ms ease, filter 160ms ease, box-shadow 160ms ease;
+        }
+        #btn-left, #btn-right { width: clamp(64px, 11vw, 96px); }
+        .touch-btn--move   { border-color: rgba(80,255,244,0.26); }
+        .touch-btn--attack { border-color: rgba(255,80,80,0.30); }
+        .touch-btn--special{ border-color: rgba(180,90,255,0.30); }
+        .touch-btn--jump   { border-color: rgba(120,220,255,0.28); }
+        .touch-btn--golf   { border-color: rgba(80,255,80,0.30); transition: opacity 0.3s ease, filter 0.3s ease; }
+        .touch-btn--golf.disabled { opacity: 0.35; filter: grayscale(0.7) brightness(0.5); pointer-events: none; }
+        .touch-btn--pause  { border-color: rgba(255,255,255,0.18); }
+        .touch-btn--restart{ border-color: rgba(255,160,80,0.28); }
+        .touch-btn:active  { filter: brightness(1.18); transform: scale(0.92); }
+
+        /* ── Pause button ── */
+        #pause-btn {
+            position: fixed; top: 12px; right: 12px; z-index: 3000;
+            width: 44px; height: 44px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.14), rgba(0,0,0,0.55));
+            color: #fff; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 120ms ease, filter 180ms ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #pause-btn:hover { filter: brightness(1.08); }
+        #pause-btn:active { transform: scale(0.96); }
+
+        /* ── Game-over action bar ── */
+        .game-over-action-bar {
+            position: absolute; left: 50%; bottom: 110px;
+            transform: translateX(-50%);
+            z-index: 151; display: flex; flex-wrap: wrap; gap: 10px;
+            align-items: center; justify-content: center;
+            max-width: calc(100vw - 24px); pointer-events: none;
+        }
+        .game-over-action-bar .game-over-cta,
+        .game-over-action-bar .game-over-cta.visible,
+        .game-over-action-bar .game-over-cta:active {
+            position: static; left: auto; right: auto; bottom: auto;
+        }
+        .game-over-action-bar .game-over-cta       { transform: translateY(8px); }
+        .game-over-action-bar .game-over-cta.visible{ transform: translateY(0); }
+        .game-over-action-bar .game-over-cta:active { transform: translateY(0) scale(0.97); }
+
+        .game-over-cta {
+            position: absolute; left: 50%; bottom: 110px;
+            transform: translateX(-50%) translateY(8px);
+            z-index: 150;
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 22px;
+            font: 700 15px 'Space Grotesk', 'Segoe UI', sans-serif;
+            letter-spacing: 0.04em; color: #FFE07A;
+            background: linear-gradient(180deg, rgba(255,215,0,0.22), rgba(60,40,0,0.78));
+            border: 1px solid rgba(255,215,0,0.55); border-radius: 14px;
+            cursor: pointer;
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.45), 0 0 22px rgba(255,215,0,0.18);
+            opacity: 0; pointer-events: none;
+            transition: opacity 240ms ease, transform 240ms cubic-bezier(.2,.9,.2,1), filter 160ms ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .game-over-cta[hidden] { display: none; }
+        .game-over-cta.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        .game-over-cta:hover { filter: brightness(1.15); }
+        .game-over-cta:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+        .game-over-cta-icon { font-size: 18px; line-height: 1; }
+        .game-over-cta--restart { color: #FFE4A8; background: linear-gradient(180deg, rgba(255,200,80,0.20), rgba(60,40,0,0.78)); border-color: rgba(255,200,80,0.55); }
+        .game-over-cta--menu    { color: #C8D8FF; background: linear-gradient(180deg, rgba(120,160,255,0.18), rgba(0,20,60,0.78)); border-color: rgba(120,160,255,0.50); }
+        .game-over-cta--icon { padding: 12px 16px; min-width: 52px; justify-content: center; }
+        .game-over-cta--icon .game-over-cta-icon { font-size: 20px; }
+
+        /* ── Reusable button ── */
+        .menu-btn {
+            appearance: none;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.55));
+            color: #fff; padding: 12px 18px; border-radius: 12px;
+            font-size: 16px; font-weight: 700; letter-spacing: 0.02em;
+            cursor: pointer;
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            transition: transform 120ms ease, filter 180ms ease, box-shadow 180ms ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none; user-select: none;
+        }
+        .menu-btn:hover  { filter: brightness(1.10); }
+        .menu-btn:active { transform: scale(0.98); }
+        .menu-btn--primary {
+            border-color: rgba(255,200,0,0.45);
+            background: linear-gradient(180deg, rgba(255,200,0,0.22), rgba(0,0,0,0.55));
+            box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 0 22px rgba(255,200,0,0.18);
+        }
+
+        /* ── Start menu overlay ── */
+        #start-menu-overlay {
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 500; pointer-events: auto;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(80,50,0,0.4), transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(40,20,80,0.35), transparent 60%),
+                linear-gradient(135deg, #0a0800 0%, #100e00 50%, #0a0800 100%);
+            overflow: hidden;
+        }
+        #start-menu-overlay.hidden { display: none; }
+        .start-menu-panel {
+            position: relative; display: flex; flex-direction: column;
+            align-items: stretch; gap: 18px; padding: 30px 34px 24px;
+            border-radius: 28px; border: 1px solid rgba(255,255,255,0.14);
+            background:
+                linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+                linear-gradient(180deg, rgba(10,8,0,0.97), rgba(5,4,0,0.94));
+            -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+            box-shadow: 0 0 100px rgba(255,200,0,0.08), 0 30px 80px rgba(0,0,0,0.65);
+            width: min(860px, 92vw); max-height: 90vh; overflow-y: auto;
+        }
+        .start-menu-title {
+            margin: 0;
+            font-family: 'Bangers', 'Arial Black', Impact, sans-serif;
+            font-size: clamp(42px, 8vw, 72px); letter-spacing: 0.04em;
+            background: linear-gradient(180deg, #FFD700 0%, #FF8800 60%, #FFD700 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 18px rgba(255,160,0,0.55));
+            line-height: 1.1;
+        }
+        .start-menu-subtitle {
+            margin: 0;
+            font-family: 'Bangers', 'Arial Black', Impact, sans-serif;
+            font-size: clamp(22px, 4vw, 40px); letter-spacing: 0.03em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #CCCCCC 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1.1;
+        }
+        .start-menu-copy {
+            margin: 0; max-width: 46ch; color: #E6EEF6;
+            font: 500 clamp(14px, 1.8vw, 17px)/1.6 'Space Grotesk', 'Segoe UI', sans-serif;
+        }
+        .start-menu-actions {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px; width: 100%;
+        }
+        .start-menu-actions .menu-btn {
+            width: 100%; min-height: 88px; text-align: left; padding: 16px 18px;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: flex-start; gap: 4px;
+        }
+        .menu-btn-label { display: block; color: #fff; font: 700 clamp(15px, 2vw, 19px) 'Space Grotesk', 'Segoe UI', sans-serif; }
+        .menu-btn-meta  { display: block; color: #DCE6F0; font: 500 12px/1.45 'Space Grotesk', 'Segoe UI', sans-serif; }
+        .menu-btn--play {
+            grid-column: 1 / -1; min-height: 108px !important; padding: 20px 22px !important;
+            border-color: rgba(255,200,0,0.4) !important;
+            background: linear-gradient(180deg, rgba(255,200,0,0.22), rgba(60,40,0,0.65)) !important;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.35), 0 0 28px rgba(255,200,0,0.18) !important;
+        }
+        .menu-btn--play .menu-btn-label { font-size: clamp(20px, 2.8vw, 26px) !important; }
+        .menu-btn--survival {
+            grid-column: 1 / -1;
+            border-color: rgba(255,80,0,0.55) !important;
+            background: linear-gradient(135deg, rgba(200,30,0,0.45) 0%, rgba(255,120,0,0.30) 50%, rgba(120,0,0,0.55) 100%) !important;
+        }
+        .start-menu-footer {
+            margin: 2px 0 0; font-size: 11.5px; color: rgba(225,232,240,0.62);
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            text-align: center; letter-spacing: 0.02em;
+        }
+        .start-menu-enter-hint {
+            margin: 2px 0 0;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            font-size: clamp(11px, 1.3vw, 13px); font-weight: 700;
+            color: #EBF0F8; letter-spacing: 0.10em; text-transform: uppercase;
+            text-align: center;
+            animation: hintBlink 2s ease-in-out infinite;
+        }
+        @keyframes hintBlink { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.95; } }
+
+        /* ── Pause overlay ── */
+        #pause-overlay {
+            display: none; position: fixed; inset: 0;
+            background: radial-gradient(120% 120% at 50% 20%, rgba(0,0,0,0.65), rgba(0,0,0,0.92));
+            z-index: 2100; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 220ms cubic-bezier(.2,.9,.2,1);
+        }
+        #pause-overlay.visible { opacity: 1; }
+        .pause-panel {
+            width: min(420px, 90vw); padding: 26px 26px 22px;
+            border-radius: 24px; border: 1px solid rgba(255,255,255,0.12);
+            background: linear-gradient(180deg, rgba(9,12,18,0.96), rgba(3,6,12,0.88));
+            box-shadow: 0 22px 64px rgba(0,0,0,0.58);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+        }
+        .pause-title { margin: 0; color: #fff; font: 700 clamp(32px,5vw,40px) 'Space Grotesk','Segoe UI',sans-serif; letter-spacing: -0.03em; }
+        .pause-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.08); margin: 0; border: none; }
+        .pause-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; align-items: center; }
+        .pause-actions .menu-btn { width: 100%; max-width: 100%; text-align: center; padding: 16px 18px; font-size: 16px; }
+        .pause-actions .menu-btn--primary { padding: 18px; font-size: 19px; }
+        .pause-secondary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .menu-btn--pause-secondary { padding: 12px 14px !important; font-size: 14px !important; min-height: 50px; }
+        .pause-esc-hint { margin: 0; font: 500 12px 'Space Grotesk','Segoe UI',sans-serif; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; text-align: center; }
+        .volume-row { display: flex; align-items: center; gap: 10px; }
+        .volume-row label { color: rgba(255,255,255,0.85); font-size: 14px; min-width: 65px; text-align: right; }
+        .volume-row input[type=range] {
+            flex: 1; height: 6px; -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.15); border-radius: 3px; outline: none; cursor: pointer;
+        }
+        .volume-row input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: rgba(255,200,0,0.9); border: 2px solid rgba(255,255,255,0.3); cursor: pointer;
+        }
+        .volume-value { color: rgba(255,255,255,0.6); font-size: 13px; min-width: 36px; }
+
+        /* ── Overlays ── */
+        #error-overlay, #file-protocol-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92); color: #fff; padding: 20px; overflow: auto;
+        }
+        #error-overlay { z-index: 4000; }
+        #file-protocol-overlay { z-index: 4001; }
+        #error-content { white-space: pre-wrap; font-size: 13px; line-height: 1.4; }
+        .overlay-actions { margin-top: 12px; }
+        .overlay-btn { padding: 8px 12px; }
+        #error-overlay[hidden], #file-protocol-overlay[hidden] { display: none; }
+
+        /* ── Mobile overlays ── */
+        #mobile-start-overlay {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.45), rgba(0,0,0,0.7));
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column; z-index: 200; color: white;
+            font-family: 'Bangers', 'Arial Black', sans-serif;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity 280ms cubic-bezier(.2,.9,.2,1), transform 280ms cubic-bezier(.2,.9,.2,1);
+        }
+        #mobile-start-overlay.visible { opacity: 1; transform: translateY(0); }
+        #mobile-start-btn {
+            padding: 18px 48px;
+            font-family: 'Bangers', 'Arial Black', sans-serif;
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            background: linear-gradient(180deg, rgba(255,200,0,0.25), rgba(80,50,0,0.7));
+            border: 1px solid rgba(255,200,0,0.35);
+            color: #fff; border-radius: 14px; text-transform: uppercase;
+            letter-spacing: 0.06em; cursor: pointer;
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+        }
+
+        /* ── Rotate message ── */
+        #rotate-message {
+            position: fixed; inset: 0;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; gap: 14px; padding: 24px;
+            background: linear-gradient(135deg, #0a0800 0%, #0d0b00 50%, #0a0800 100%);
+            z-index: 9999; color: white;
+            font-family: 'Bangers', 'Arial Black', Impact, sans-serif;
+        }
+        @media screen and (orientation: portrait) {
+            #rotate-message { display: flex !important; }
+            #game-container { display: none !important; }
+            #start-menu-overlay { z-index: 10000 !important; }
+            #start-menu-overlay.hidden { display: none !important; }
+        }
+
+        /* ── Score container ── */
+        #score-container { position: absolute; right: 12px; top: 88px; z-index: 900; max-width: 320px; color: #fff; }
+
+        /* ── Achievement toast stack ── */
+        .achievement-toast-stack {
+            position: fixed; top: 16px; right: 16px; z-index: 9500;
+            display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .achievement-toast {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 14px;
+            background: linear-gradient(135deg, rgba(20,14,4,0.96), rgba(40,28,8,0.96));
+            border: 1px solid rgba(255,200,0,0.45);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45), 0 0 18px rgba(255,200,0,0.18);
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            opacity: 0; transform: translateX(30px);
+            transition: opacity 300ms ease, transform 300ms cubic-bezier(.2,.9,.2,1);
+            max-width: 300px;
+        }
+        .achievement-toast.show { opacity: 1; transform: translateX(0); }
+        .achievement-toast.hide { opacity: 0; transform: translateX(30px); }
+        .ach-icon { font-size: 26px; line-height: 1; }
+        .ach-eyebrow { margin: 0 0 2px; font-size: 10px; color: rgba(255,200,0,0.75); letter-spacing: 0.18em; text-transform: uppercase; }
+        .ach-name { margin: 0 0 2px; font-size: 14px; font-weight: 700; color: #fff; }
+        .ach-desc { margin: 0; font-size: 11px; color: rgba(255,255,255,0.65); }
+
+        /* ── Font preload ── */
+        .font-preload { font-family: 'Bangers','Press Start 2P','Space Grotesk'; position:absolute; left:-9999px; font-size:0; pointer-events:none; }
+
+        /* ── Canvas rotator ── */
+        #canvas-rotator { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+        /* ── Scoreboard ── */
+        .scoreboard-empty-msg { color: rgba(255,255,255,0.5); text-align: center; padding: 20px; }
+
+        /* ── High-score overlay (game-over) ── */
+        .menu-sub-panel {
+            display: flex; flex-direction: column; align-items: stretch; gap: 16px;
+            padding: 26px 28px 22px; border-radius: 28px; border: 1px solid rgba(255,255,255,0.10);
+            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015)), linear-gradient(180deg, rgba(9,12,18,0.96), rgba(3,5,10,0.90));
+            box-shadow: 0 26px 80px rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            width: min(440px,90vw); max-height: 85vh; overflow-y: auto;
+        }
+        #menu-scores-overlay, #menu-info-overlay, #menu-settings-overlay, #menu-howtoplay-overlay {
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 510;
+            background: radial-gradient(ellipse at 50% 30%, rgba(0,0,22,0.92), rgba(0,0,0,0.96));
+        }
+        #menu-scores-overlay[hidden], #menu-info-overlay[hidden], #menu-settings-overlay[hidden], #menu-howtoplay-overlay[hidden] { display: none; }
+    </style>
+</head>
+<body>
+    <div id="main-wrapper">
+        <div id="content-wrapper">
+
+            <div id="rotate-message">
+                <h1>Rotate Your Device</h1>
+                <p style="font-family:'Press Start 2P',monospace;font-size:10px;color:rgba(255,255,255,0.6)">Best experienced in landscape.</p>
+                <button id="rotate-play-btn" style="padding:14px 32px;font-family:'Bangers',sans-serif;font-size:17px;border-radius:12px;border:1px solid rgba(255,200,0,0.3);background:linear-gradient(180deg,rgba(255,200,0,0.18),rgba(60,40,0,0.55));color:#fff;cursor:pointer">▶ Play Anyway</button>
+            </div>
+
+            <div id="game-container">
+                <div id="canvas-rotator">
+                    <canvas id="game-canvas" width="1280" height="720"></canvas>
+                </div>
+
+                <!-- Loading screen -->
+                <div id="loading-screen">
+                    <div class="loading-content">
+                        <div class="loading-logo">⛳</div>
+                        <h1>CHIP SAVAGE</h1>
+                        <p class="loading-subtitle">GOLF BRAWLER</p>
+                        <div class="loading-divider"></div>
+                        <div class="loading-bar">
+                            <div id="loading-progress" class="loading-progress"></div>
+                        </div>
+                        <p id="loading-text">Loading assets...</p>
+                        <p class="loading-tip" id="loading-tip"></p>
+                        <p class="loading-footer">&copy; 2026 Mephitideus Interactive</p>
+                    </div>
+                </div>
+
+                <!-- Pause button -->
+                <button id="pause-btn" aria-label="Pause game" title="Pause" hidden>⏸</button>
+
+                <!-- Game-over action bar -->
+                <div id="game-over-action-bar" class="game-over-action-bar">
+                    <button id="game-over-leaderboard-btn" type="button" class="game-over-cta" aria-label="View leaderboard" hidden>
+                        <span class="game-over-cta-icon" aria-hidden="true">🏆</span>
+                        <span class="game-over-cta-label">View Leaderboard</span>
+                    </button>
+                    <button id="game-over-restart-btn" type="button" class="game-over-cta game-over-cta--restart game-over-cta--icon" aria-label="Restart" title="Restart" hidden>
+                        <span class="game-over-cta-icon" aria-hidden="true">↺</span>
+                        <span class="game-over-cta-label">Restart</span>
+                    </button>
+                    <button id="game-over-menu-btn" type="button" class="game-over-cta game-over-cta--menu game-over-cta--icon" aria-label="Main menu" title="Main menu" hidden>
+                        <span class="game-over-cta-icon" aria-hidden="true">☰</span>
+                        <span class="game-over-cta-label">Menu</span>
+                    </button>
+                </div>
+
+                <div id="mobile-start-overlay" hidden>
+                    <button id="mobile-start-btn">Tap to Start</button>
+                </div>
+
+                <!-- Error overlay -->
+                <div id="error-overlay" hidden>
+                    <h2>Runtime Error</h2>
+                    <pre id="error-content"></pre>
+                    <div class="overlay-actions">
+                        <button id="error-close" class="overlay-btn">Close</button>
+                        <button id="error-copy" class="overlay-btn">Copy</button>
+                    </div>
+                </div>
+
+                <!-- File-protocol overlay -->
+                <div id="file-protocol-overlay" hidden>
+                    <h2>Serving over HTTP is recommended</h2>
+                    <p>Run <code>python -m http.server 8000</code> and open <a href="http://localhost:8000">http://localhost:8000</a>.</p>
+                    <div class="overlay-actions">
+                        <button id="file-overlay-start" class="overlay-btn">Start Anyway</button>
+                        <button id="file-overlay-close" class="overlay-btn">Close</button>
+                    </div>
+                </div>
+
+                <div id="score-container" hidden></div>
+            </div><!-- /#game-container -->
+
+            <!-- ── START MENU ── -->
+            <div id="start-menu-overlay">
+                <div class="start-menu-panel">
+                    <h1 class="start-menu-title">CHIP</h1>
+                    <h2 class="start-menu-subtitle">SAVAGE</h2>
+                    <p class="start-menu-copy">Punch, kick, and drive your way through enemy hordes. Chain combos, master the Kick dash, and blast with Golf Shots. The fairway just got a lot more dangerous.</p>
+                    <div class="start-menu-actions" role="navigation" aria-label="Main menu">
+                        <button id="menu-play-btn" class="menu-btn menu-btn--play">
+                            <span class="menu-btn-label">▶ Launch Run</span>
+                            <span class="menu-btn-meta">Drop into Stage 1 and keep momentum.</span>
+                        </button>
+                        <button id="menu-survival-btn" class="menu-btn menu-btn--survival">
+                            <span class="menu-btn-label">🔥 Survival Mode</span>
+                            <span class="menu-btn-meta">Endless waves — fight until you fall.</span>
+                        </button>
+                        <button id="menu-scores-btn" class="menu-btn">
+                            <span class="menu-btn-label">🏆 High Scores</span>
+                            <span class="menu-btn-meta">Check the board and chase the next target.</span>
+                        </button>
+                        <button id="menu-settings-btn" class="menu-btn">
+                            <span class="menu-btn-label">⚙ Settings</span>
+                            <span class="menu-btn-meta">Tune SFX and music.</span>
+                        </button>
+                    </div>
+                    <p class="start-menu-enter-hint">PRESS ENTER TO PLAY</p>
+                    <p class="start-menu-footer">&copy; 2026 Mephitideus Interactive</p>
+                </div>
+            </div>
+
+            <!-- ── HIGH SCORES OVERLAY ── -->
+            <div id="menu-scores-overlay" hidden>
+                <div class="menu-sub-panel">
+                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">🏆 High Scores</h2>
+                    <div id="menu-scores-board"></div>
+                    <button id="menu-scores-back" class="menu-btn menu-btn--primary">← BACK</button>
+                </div>
+            </div>
+
+            <!-- ── SETTINGS OVERLAY ── -->
+            <div id="menu-settings-overlay" hidden>
+                <div class="menu-sub-panel">
+                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">⚙ Settings</h2>
+                    <div class="volume-row">
+                        <label for="menu-sfx-volume">🔊 SFX</label>
+                        <input type="range" id="menu-sfx-volume" min="0" max="100" value="70">
+                        <span class="volume-value" id="menu-sfx-volume-value">70%</span>
+                    </div>
+                    <div class="volume-row">
+                        <label for="menu-music-volume">🎵 Music</label>
+                        <input type="range" id="menu-music-volume" min="0" max="100" value="50">
+                        <span class="volume-value" id="menu-music-volume-value">50%</span>
+                    </div>
+                    <button id="reset-tutorial-btn" class="menu-btn">💡 Reset Tutorial Hints</button>
+                    <button id="menu-settings-back" class="menu-btn menu-btn--primary">← BACK</button>
+                </div>
+            </div>
+
+            <!-- ── PAUSE OVERLAY ── -->
+            <div id="pause-overlay" hidden>
+                <div class="pause-panel">
+                    <h1 class="pause-title">PAUSED</h1>
+                    <div class="pause-level-info" id="pause-level-info">Stage 1 — Score: 0</div>
+                    <hr class="pause-divider">
+                    <div class="volume-row">
+                        <label for="sfx-volume">🔊 SFX</label>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="70" aria-label="SFX volume">
+                        <span class="volume-value" id="sfx-volume-value">70%</span>
+                    </div>
+                    <div class="volume-row">
+                        <label for="music-volume">🎵 Music</label>
+                        <input type="range" id="music-volume" min="0" max="100" value="50" aria-label="Music volume">
+                        <span class="volume-value" id="music-volume-value">50%</span>
+                    </div>
+                    <hr class="pause-divider">
+                    <div class="pause-actions">
+                        <button id="resume-btn" class="menu-btn menu-btn--primary">▶ Resume</button>
+                        <div class="pause-secondary-actions">
+                            <button id="pause-restart-btn" class="menu-btn menu-btn--pause-secondary" type="button">↺ Restart Stage</button>
+                            <button id="pause-quit-btn"    class="menu-btn menu-btn--pause-secondary" type="button">↩ Main Menu</button>
+                        </div>
+                    </div>
+                    <p class="pause-esc-hint">PRESS ESC TO RESUME</p>
+                </div>
+            </div>
+
+            <!-- ── TOUCH CONTROLS ── -->
+            <div id="touch-controls">
+                <div id="d-pad" class="control-group" style="pointer-events:auto;display:flex;gap:8px;">
+                    <button class="touch-btn touch-btn--move" id="btn-left"  aria-label="Move left">⟸</button>
+                    <button class="touch-btn touch-btn--move" id="btn-right" aria-label="Move right">⟹</button>
+                </div>
+                <div id="game-over-controls" class="control-group" style="pointer-events:auto;display:flex;gap:8px;align-items:center;">
+                    <button class="touch-btn touch-btn--menu"    id="btn-menu"    style="display:none;font-size:18px;opacity:0.7;" aria-label="Menu">☰</button>
+                    <button class="touch-btn touch-btn--restart" id="btn-restart" style="display:none;" aria-label="Restart">↺</button>
+                </div>
+                <div id="actions" class="control-group" style="pointer-events:auto;display:flex;gap:8px;">
+                    <button class="touch-btn touch-btn--attack"  id="btn-attack"  aria-label="Attack">🗡</button>
+                    <button class="touch-btn touch-btn--jump"    id="btn-jump"    aria-label="Jump">⤴</button>
+                    <button class="touch-btn touch-btn--special" id="btn-special" aria-label="Kick">💥</button>
+                    <button class="touch-btn touch-btn--golf"    id="btn-skunk"   aria-label="Golf Shot">⛳</button>
+                </div>
+            </div>
+
+        </div><!-- /#content-wrapper -->
+    </div><!-- /#main-wrapper -->
+
+    <!-- ── SCRIPTS ── -->
+    <script src="js/errorHandler.js?v=1.0.0"></script>
+    <script src="js/firebase.js?v=1.0.0" type="module"></script>
+    <script src="js/config.js?v=1.0.0"></script>
+    <script src="js/analytics.js?v=1.0.0"></script>
+    <script src="js/utils.js?v=1.0.0"></script>
+    <script src="js/highscores.js?v=1.0.0" type="module"></script>
+    <script src="js/playGames.js?v=1.0.0"></script>
+    <script src="js/spriteLoader.js?v=1.0.0"></script>
+    <script src="js/audioManager.js?v=1.0.0"></script>
+    <script src="js/visualEffects.js?v=1.0.0"></script>
+    <script src="js/levelData.js?v=1.0.0"></script>
+    <script src="js/level.js?v=1.0.0"></script>
+    <script src="js/levelEditor.js?v=1.0.0"></script>
+    <script src="js/player.js?v=1.0.0"></script>
+    <script src="js/enemy.js?v=1.0.0"></script>
+    <script src="js/enemyManager.js?v=1.0.0"></script>
+    <script src="js/itemManager.js?v=1.0.0"></script>
+    <script src="js/touchControls.js?v=1.0.0"></script>
+    <script src="js/ui.js?v=1.0.0"></script>
+    <script src="js/achievements.js?v=1.0.0"></script>
+    <script src="js/tutorialHints.js?v=1.0.0"></script>
+    <script src="js/game.js?v=1.0.0"></script>
+    <script src="js/purchaseManager.js?v=1.0.0"></script>
+    <script src="js/founderManager.js?v=1.0.0"></script>
+    <script src="js/goldenSkin.js?v=1.0.0"></script>
+    <script src="js/adManager.js?v=1.0.0"></script>
+    <script src="js/main.js?v=1.0.0" type="module"></script>
+
+    <script>
+    // ── UTILITY HELPERS ──────────────────────────────────────────────────────
+
+    function isMobile() {
+        const ua = navigator.userAgent || '';
+        if (/Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(ua)) return true;
+        try { if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return true; } catch(e){}
+        return false;
+    }
+    function isLandscape() {
+        return window.matchMedia && window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
+    }
+    function triggerKeyEvent(key, type) {
+        const map = { ' ': 'Space', 'enter': 'Enter', 'escape': 'Escape', 'esc': 'Escape', 'x': 'KeyX', 'z': 'KeyZ', 'c': 'KeyC' };
+        const k = key === ' ' ? ' ' : key;
+        const code = map[k.toLowerCase()] || key;
+        window.dispatchEvent(new KeyboardEvent(type, { key: k, code, bubbles: true, cancelable: true }));
+    }
+    function debounce(fn, wait = 150) {
+        let t = null;
+        return function(...args) { if (t) clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+    }
+
+    // ── TOUCH CONTROLS ───────────────────────────────────────────────────────
+    function initTouchControls() {
+        if (!isMobile()) return;
+        const setupBtn = (id, key) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.oncontextmenu = (e) => { e.preventDefault(); return false; };
+            const down = (e) => { try { e && e.preventDefault(); } catch(_){} triggerKeyEvent(key, 'keydown'); };
+            const up   = (e) => { try { e && e.preventDefault(); } catch(_){} triggerKeyEvent(key, 'keyup'); };
+            btn.addEventListener('touchstart', down, { passive: false });
+            btn.addEventListener('touchend',   up,   { passive: false });
+            btn.addEventListener('pointerdown', down);
+            btn.addEventListener('pointerup',   up);
+        };
+        setupBtn('btn-left',    'ArrowLeft');
+        setupBtn('btn-right',   'ArrowRight');
+        setupBtn('btn-jump',    ' ');
+        setupBtn('btn-attack',  'x');
+        setupBtn('btn-special', 'z');
+        setupBtn('btn-skunk',   'c');
+    }
+
+    window.showTouchControls = function(ms = 1000) {
+        const tc = document.getElementById('touch-controls');
+        if (!tc) return;
+        tc.style.display = 'flex'; void tc.offsetWidth; tc.classList.add('visible');
+        window._touchLockUntil = Date.now() + ms;
+    };
+    window.hideTouchControls = function() {
+        if (window._touchLockUntil && Date.now() < window._touchLockUntil) return;
+        const tc = document.getElementById('touch-controls');
+        if (!tc) return;
+        tc.classList.remove('visible');
+        setTimeout(() => { if (!tc.classList.contains('visible')) tc.style.display = 'none'; }, 300);
+    };
+    initTouchControls();
+
+    // ── GOLF SHOT BUTTON AVAILABILITY ────────────────────────────────────────
+    setInterval(() => {
+        try {
+            const btn = document.getElementById('btn-skunk');
+            if (!btn) return;
+            const hasAmmo = window.game && window.game.player && window.game.player.golfAmmo > 0;
+            btn.classList.toggle('disabled', !hasAmmo);
+        } catch(e){}
+    }, 100);
+
+    // ── PAUSE BUTTON ─────────────────────────────────────────────────────────
+    try {
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.style.display = 'flex';
+            const onPress = (e) => {
+                try { e && e.preventDefault(); e && e.stopPropagation(); } catch(_){}
+                const now = performance.now();
+                if (pauseBtn._last && (now - pauseBtn._last) < 350) return;
+                pauseBtn._last = now;
+                if (!window.game) return;
+                const st = window.game.state;
+                if (st !== 'PLAYING' && st !== 'PAUSED') return;
+                if (window.game && typeof window.game.togglePause === 'function') window.game.togglePause();
+                else triggerKeyEvent('Escape', 'keydown');
+            };
+            pauseBtn.addEventListener('touchstart', onPress, { passive: false });
+            pauseBtn.addEventListener('click', onPress);
+        }
+    } catch(e){}
+
+    // ── RESUME BUTTON ────────────────────────────────────────────────────────
+    try {
+        const resumeBtn = document.getElementById('resume-btn');
+        if (resumeBtn) {
+            const onResume = (e) => {
+                try { e && e.preventDefault(); e && e.stopPropagation(); } catch(_){}
+                if (!window.game || window.game.state !== 'PAUSED') return;
+                if (typeof window.game.togglePause === 'function') window.game.togglePause();
+                else triggerKeyEvent('Escape', 'keydown');
+            };
+            resumeBtn.addEventListener('touchstart', onResume, { passive: false });
+            resumeBtn.addEventListener('click', onResume);
+        }
+    } catch(e){}
+
+    // ── PAUSE SECONDARY ACTIONS ───────────────────────────────────────────────
+    try {
+        const restartBtn = document.getElementById('pause-restart-btn');
+        const quitBtn    = document.getElementById('pause-quit-btn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                if (!window.game || window.game.state !== 'PAUSED') return;
+                const idx = window.game.currentLevelIndex || 0;
+                window.game.state = 'PLAYING';
+                const overlay = document.getElementById('pause-overlay');
+                if (overlay) { overlay.classList.remove('visible'); setTimeout(() => overlay.style.display = 'none', 240); }
+                try { window.game.audioManager && window.game.audioManager.unpauseMusic && window.game.audioManager.unpauseMusic(); } catch(_){}
+                if (typeof window.game.startGame === 'function') window.game.startGame(idx);
+            });
+        }
+        if (quitBtn) {
+            quitBtn.addEventListener('click', () => { try { location.reload(); } catch(_){} });
+        }
+    } catch(e){}
+
+    // ── VOLUME SLIDERS (pause) ────────────────────────────────────────────────
+    try {
+        ['sfx', 'music'].forEach(type => {
+            const slider = document.getElementById(type + '-volume');
+            const valEl  = document.getElementById(type + '-volume-value');
+            if (!slider) return;
+            slider.addEventListener('input', () => {
+                const v = slider.value / 100;
+                if (valEl) valEl.textContent = slider.value + '%';
+                try {
+                    const am = window.game && window.game.audioManager;
+                    if (am) {
+                        if (type === 'sfx')   { am._pendingSfxVol   = v; am.setSfxVolume   && am.setSfxVolume(v);   }
+                        if (type === 'music') { am._pendingMusicVol = v; am.setMusicVolume && am.setMusicVolume(v); }
+                    }
+                } catch(_){}
+            });
+        });
+    } catch(e){}
+
+    // ── START MENU WIRING ─────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            window._startMenuVisible = true;
+            const startOverlay   = document.getElementById('start-menu-overlay');
+            const scoresOverlay  = document.getElementById('menu-scores-overlay');
+            const settingsOverlay= document.getElementById('menu-settings-overlay');
+            const scoresBoardEl  = document.getElementById('menu-scores-board');
+
+            const hideAll = () => {
+                if (startOverlay)  startOverlay.classList.add('hidden');
+                if (scoresOverlay) scoresOverlay.style.display  = 'none';
+                if (settingsOverlay) settingsOverlay.style.display = 'none';
+                window._startMenuVisible = false;
+            };
+            window._hideStartMenu = hideAll;
+
+            const showStart = () => {
+                if (startOverlay) { startOverlay.classList.remove('hidden'); startOverlay.style.display = ''; }
+                if (scoresOverlay) scoresOverlay.style.display = 'none';
+                if (settingsOverlay) settingsOverlay.style.display = 'none';
+                window._startMenuVisible = true;
+            };
+
+            const startGame = () => {
+                if (!window.gameReady || !window.game) {
+                    const btn = document.getElementById('menu-play-btn');
+                    if (btn) { btn.disabled = true; btn.textContent = '⏳ LOADING…'; }
+                    window.addEventListener('gameReady', function once() {
+                        window.removeEventListener('gameReady', once);
+                        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="menu-btn-label">▶ Launch Run</span>'; }
+                        startGame();
+                    });
+                    return;
+                }
+                hideAll();
+                try { window.game.audioManager && window.game.audioManager.playSound && window.game.audioManager.playSound('ui_confirm'); } catch(_){}
+                try { window.game.startGame(0); } catch(_){}
+            };
+
+            const startSurvival = () => {
+                if (!window.gameReady || !window.game) {
+                    window.addEventListener('gameReady', function once() { window.removeEventListener('gameReady', once); startSurvival(); });
+                    return;
+                }
+                hideAll();
+                try { window.game.startGame(0, 'survival'); } catch(_){}
+            };
+
+            const playBtn     = document.getElementById('menu-play-btn');
+            const survivalBtn = document.getElementById('menu-survival-btn');
+            const scoresBtn   = document.getElementById('menu-scores-btn');
+            const settingsBtn = document.getElementById('menu-settings-btn');
+            const scoresBack  = document.getElementById('menu-scores-back');
+            const settingsBack= document.getElementById('menu-settings-back');
+
+            if (playBtn)     playBtn.addEventListener('click',     (e) => { e.preventDefault(); startGame(); });
+            if (survivalBtn) survivalBtn.addEventListener('click', (e) => { e.preventDefault(); startSurvival(); });
+
+            if (scoresBtn) {
+                scoresBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (startOverlay) startOverlay.classList.add('hidden');
+                    if (scoresBoardEl && window.Highscores && typeof Highscores.renderScoreboard === 'function') {
+                        Promise.resolve(Highscores.renderScoreboard(scoresBoardEl, true)).catch(()=>{});
+                    }
+                    if (scoresOverlay) scoresOverlay.style.display = 'flex';
+                });
+            }
+            if (scoresBack) scoresBack.addEventListener('click', () => showStart());
+
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (startOverlay) startOverlay.classList.add('hidden');
+                    // Sync sliders
+                    try {
+                        const am = window.game && window.game.audioManager;
+                        const sfxS = document.getElementById('menu-sfx-volume');
+                        const musS = document.getElementById('menu-music-volume');
+                        if (sfxS && am) { sfxS.value = Math.round((am._pendingSfxVol   ?? 0.7) * 100); document.getElementById('menu-sfx-volume-value').textContent   = sfxS.value + '%'; }
+                        if (musS && am) { musS.value = Math.round((am._pendingMusicVol ?? 0.5) * 100); document.getElementById('menu-music-volume-value').textContent = musS.value + '%'; }
+                    } catch(_){}
+                    if (settingsOverlay) settingsOverlay.style.display = 'flex';
+                });
+            }
+            if (settingsBack) settingsBack.addEventListener('click', () => showStart());
+
+            // Settings sliders (menu)
+            ['sfx', 'music'].forEach(type => {
+                const slider = document.getElementById('menu-' + type + '-volume');
+                const valEl  = document.getElementById('menu-' + type + '-volume-value');
+                if (!slider) return;
+                slider.addEventListener('input', () => {
+                    const v = slider.value / 100;
+                    if (valEl) valEl.textContent = slider.value + '%';
+                    try {
+                        const am = window.game && window.game.audioManager;
+                        if (am) {
+                            if (type === 'sfx')   { am._pendingSfxVol   = v; am.setSfxVolume   && am.setSfxVolume(v);   }
+                            if (type === 'music') { am._pendingMusicVol = v; am.setMusicVolume && am.setMusicVolume(v); }
+                        }
+                    } catch(_){}
+                });
+            });
+
+            // Reset tutorial
+            const resetTutBtn = document.getElementById('reset-tutorial-btn');
+            if (resetTutBtn) {
+                resetTutBtn.addEventListener('click', () => {
+                    try {
+                        if (window.game && window.game.tutorialHints) window.game.tutorialHints.resetAll();
+                        else {
+                            ['chipsavage_tutorial_seen_v1','chipsavage_tutorial_done','chipsavage_run_count'].forEach(k => { try { localStorage.removeItem(k); } catch(_){} });
+                        }
+                    } catch(_){}
+                    resetTutBtn.textContent = '✅ Hints Reset!';
+                    setTimeout(() => { resetTutBtn.innerHTML = '💡 Reset Tutorial Hints'; }, 1500);
+                });
+            }
+
+            // Enter key triggers play
+            window.addEventListener('keydown', (e) => {
+                if (!window._startMenuVisible) return;
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startGame(); }
+            });
+
+            // Return to menu on MENU state
+            window.addEventListener('gameStateChange', (ev) => {
+                try {
+                    const state = ev.detail && ev.detail.state;
+                    if (state === 'MENU') showStart();
+                    else hideAll();
+                } catch(_){}
+            });
+
+        } catch(e) { console.warn('Start menu wiring failed', e); }
+
+        // ── GAME-OVER CTAs ────────────────────────────────────────────────────
+        function wireGameOverCta(btnId, action) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            let revealTimer = null;
+            const hide = () => { btn.classList.remove('visible'); btn.setAttribute('hidden', ''); if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; } };
+            const show = () => { btn.removeAttribute('hidden'); requestAnimationFrame(() => btn.classList.add('visible')); };
+            window.addEventListener('gameStateChange', (e) => {
+                const isGO = e && e.detail && e.detail.state === 'GAME_OVER';
+                if (!isGO) { hide(); return; }
+                hide();
+                const lockMs = (typeof Config !== 'undefined' && typeof Config.GAME_OVER_LOCKOUT === 'number') ? Config.GAME_OVER_LOCKOUT * 1000 : 3000;
+                revealTimer = setTimeout(() => { try { if (window.game && window.game.state === 'GAME_OVER') show(); } catch(_){} }, lockMs + 200);
+            });
+            btn.addEventListener('click', action);
+        }
+        wireGameOverCta('game-over-leaderboard-btn', () => {
+            const overlay = document.getElementById('menu-scores-overlay');
+            const board   = document.getElementById('menu-scores-board');
+            if (board && window.Highscores && typeof Highscores.renderScoreboard === 'function') {
+                Promise.resolve(Highscores.renderScoreboard(board, true)).catch(()=>{});
+            }
+            if (overlay) overlay.style.display = 'flex';
+        });
+        wireGameOverCta('game-over-restart-btn', () => {
+            if (!window.game || !window.game._isGameOverLocked || window.game._isGameOverLocked()) return;
+            triggerKeyEvent('Enter', 'keydown'); setTimeout(() => triggerKeyEvent('Enter', 'keyup'), 100);
+        });
+        wireGameOverCta('game-over-menu-btn', () => {
+            if (!window.game || !window.game._isGameOverLocked || window.game._isGameOverLocked()) return;
+            triggerKeyEvent('Escape', 'keydown'); setTimeout(() => triggerKeyEvent('Escape', 'keyup'), 100);
+        });
+
+        // ── ACHIEVEMENT TOAST ─────────────────────────────────────────────────
+        function ensureToastStack() {
+            let s = document.getElementById('achievement-toast-stack');
+            if (!s) { s = document.createElement('div'); s.id = 'achievement-toast-stack'; s.className = 'achievement-toast-stack'; document.body.appendChild(s); }
+            return s;
+        }
+        window.addEventListener('chipsavage-achievement-unlocked', (ev) => {
+            try {
+                const d = ev && ev.detail;
+                if (!d) return;
+                const stack = ensureToastStack();
+                const el = document.createElement('div');
+                el.className = 'achievement-toast';
+                el.innerHTML = `<div class="ach-icon">${d.icon || '🏅'}</div><div class="ach-body"><p class="ach-eyebrow">Achievement Unlocked</p><p class="ach-name">${String(d.name||'').replace(/[<>]/g,'')}</p>${d.desc ? `<p class="ach-desc">${String(d.desc).replace(/[<>]/g,'')}</p>` : ''}</div>`;
+                stack.appendChild(el);
+                requestAnimationFrame(() => el.classList.add('show'));
+                setTimeout(() => { el.classList.remove('show'); el.classList.add('hide'); setTimeout(() => { try { el.remove(); } catch(_){} }, 500); }, 4200);
+                try { const am = window.game && window.game.audioManager; if (am && am.playSound) am.playSound('achievement_unlock', { volume: 0.85 }); } catch(_){}
+            } catch(e){}
+        });
+
+        // ── ROTATE PLAY ANYWAY ────────────────────────────────────────────────
+        try {
+            const rp = document.getElementById('rotate-play-btn');
+            if (rp) {
+                rp.addEventListener('click', () => {
+                    document.body.classList.add('force-landscape');
+                    window._forcedLandscapeMode = true;
+                    const rm = document.getElementById('rotate-message');
+                    if (rm) rm.style.display = 'none';
+                });
+            }
+        } catch(_){}
+    });
+
+    // ── MOBILE TOUCH CONTROL SHOW/HIDE ────────────────────────────────────────
+    window.addEventListener('gameStateChange', (e) => {
+        if (!isMobile()) return;
+        const st = e && e.detail && e.detail.state;
+        if (st === 'PLAYING') {
+            showTouchControls(3600000);
+        } else if (st === 'MENU') {
+            hideTouchControls();
+        }
+    });
+
+    // ── ERROR OVERLAY ─────────────────────────────────────────────────────────
+    (function () {
+        const overlay = document.getElementById('error-overlay');
+        const content = document.getElementById('error-content');
+        const closeBtn = document.getElementById('error-close');
+        const copyBtn  = document.getElementById('error-copy');
+        function showError(msg) { if (!overlay || !content) return; content.textContent = msg; overlay.style.display = 'block'; }
+        if (closeBtn) closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+        if (copyBtn)  copyBtn.addEventListener('click',  () => { if (navigator.clipboard) navigator.clipboard.writeText(content.textContent || ''); });
+        window.addEventListener('error', (e) => {
+            const msg = `${e.message} at ${e.filename}:${e.lineno}:${e.colno}\n${e.error && e.error.stack || ''}`;
+            if (/fullscreen|user.*activation|autoplay/i.test(msg)) return;
+            showError(msg);
+        });
+        window.addEventListener('unhandledrejection', (ev) => {
+            const r = String(ev.reason ? (ev.reason.stack || ev.reason) : 'Unknown');
+            if (/MetaMask|extension|fullscreen|autoplay|play\(\)/i.test(r)) { ev.preventDefault(); return; }
+            showError('Unhandled Rejection: ' + r);
+        });
+    })();
+
+    // ── FILE-PROTOCOL OVERLAY ─────────────────────────────────────────────────
+    try {
+        if (location.protocol === 'file:') {
+            const fo = document.getElementById('file-protocol-overlay');
+            if (fo) fo.style.display = 'block';
+        }
+        const fb = document.getElementById('file-overlay-close');
+        if (fb) fb.addEventListener('click', () => { document.getElementById('file-protocol-overlay').style.display = 'none'; });
+        const fs = document.getElementById('file-overlay-start');
+        if (fs) fs.addEventListener('click', () => { document.getElementById('file-protocol-overlay').style.display = 'none'; });
+    } catch(_){}
+    </script>
+</body>
+</html>

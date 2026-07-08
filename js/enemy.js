@@ -604,7 +604,7 @@ class Enemy {
             }
         }
 
-        // AI behavior (only if not stunned or skunked)
+        // AI behavior (only if not stunned or golf-hit)
         if (this.hitStunTimer <= 0 && !this.isGolfHit) {
             const playerRect = (player && typeof player.getRect === 'function')
                 ? player.getRect()
@@ -1879,7 +1879,7 @@ class Enemy {
                 }
             }
         
-        // Draw skunk effect if skunked
+        // Draw golf-hit effect if active
         if (this.isGolfHit) {
             // Draw skunk particles (bubbles)
             if (this.skunkParticles && this.skunkParticles.length > 0) {

@@ -73,14 +73,14 @@ try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('playGames.
     score_legend:     'CgkI5NbknI4GEAIQDQ',
 
     // ── Kick ──
-    shadow_initiate:  'CgkI5NbknI4GEAIQDg',
-    shadow_master:    'CgkI5NbknI4GEAIQDw',
-    phantom_blade:    'CgkI5NbknI4GEAIQEA',
+    kick_initiate: 'TODO_chip_savage_play_games_achievement_id',
+    kick_master:   'TODO_chip_savage_play_games_achievement_id',
+    kick_legend:   'TODO_chip_savage_play_games_achievement_id',
 
-    // ── Skunk Spray ──
-    spray_novice:     'CgkI5NbknI4GEAIQEQ',
-    stink_bomber:     'CgkI5NbknI4GEAIQEg',
-    toxic_cloud:      'CgkI5NbknI4GEAIQEw',
+    // ── Golf Shot ──
+    golf_shot_novice: 'TODO_chip_savage_play_games_achievement_id',
+    golf_shooter:     'TODO_chip_savage_play_games_achievement_id',
+    golf_ace:         'TODO_chip_savage_play_games_achievement_id',
 
     // ── Aerial Combat ──
     air_juggler:      'CgkI5NbknI4GEAIQFA',

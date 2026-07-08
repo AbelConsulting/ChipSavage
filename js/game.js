@@ -1,7 +1,7 @@
 /*!
  * Chip Savage
  * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
- * Proprietary and confidential — unauthorized copying, distribution, or use
+ * Proprietary and confidential ï¿½ unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 /**
@@ -404,7 +404,7 @@ class Game {
                                 if (rewarded && this.state === 'GAME_OVER') {
                                     this.reviveFromAd();
                                 } else {
-                                    // Ad dismissed — restart normally
+                                    // Ad dismissed ï¿½ restart normally
                                     this.audioManager.playSound && this.audioManager.playSound('ui_confirm');
                                     this.startGame(0, this.gameMode);
                                     this.dispatchGameStateChange();
@@ -900,7 +900,7 @@ class Game {
                     setTimeout(() => {
                         if (this.tutorialHints) this.tutorialHints.trigger('objective');
                     }, 10000);
-                    // Pulsing glyphs on touch buttons (mobile only) — teaches
+                    // Pulsing glyphs on touch buttons (mobile only) ï¿½ teaches
                     // brand-new players which buttons matter without text.
                     try { this.tutorialHints.enableButtonGlyphs(); } catch (e) { __err('game', e); }
                 }
@@ -1019,7 +1019,7 @@ class Game {
                 // if the audio layer throws (Android WebView can leave AudioContext
                 // in a broken state after backgrounding). Previously a throw here
                 // would abort the function leaving the overlay stuck on screen
-                // while `this.state` was already 'PLAYING' — making subsequent
+                // while `this.state` was already 'PLAYING' ï¿½ making subsequent
                 // Resume taps no-op due to the `state !== 'PAUSED'` guard.
                 const overlay = document.getElementById('pause-overlay');
                 if (overlay) {
@@ -1390,7 +1390,7 @@ class Game {
             const wave = this.survivalWave;
 
             // Difficulty scaling
-            const enemiesThisWave = Math.min(40, 4 + (wave - 1) * 3);        // 4, 7, 10 … capped at 40
+            const enemiesThisWave = Math.min(40, 4 + (wave - 1) * 3);        // 4, 7, 10 ï¿½ capped at 40
             const aggression      = Math.min(2.0, 1.0 + (wave - 1) * 0.15); // 1.0 ? 2.0
             const spawnInterval   = Math.max(0.8, 2.5 - (wave - 1) * 0.1);  // 2.5s ? 0.8s
             const maxSimultaneous = Math.min(12, 3 + Math.floor(wave * 1.2));
@@ -1419,14 +1419,14 @@ class Game {
 
             // Milestone banner text for landmark waves
             let bannerText = `WAVE ${wave}`;
-            if      (wave === 5)              bannerText = 'WAVE 5 — HALFWAY?!';
-            else if (wave === 10)             bannerText = 'WAVE 10 — STILL STANDING?!';
-            else if (wave === 15)             bannerText = 'WAVE 15 — UNSTOPPABLE!';
-            else if (wave >= 20 && wave % 5 === 0) bannerText = `WAVE ${wave} — LEGENDARY!`;
+            if      (wave === 5)              bannerText = 'WAVE 5 ï¿½ HALFWAY?!';
+            else if (wave === 10)             bannerText = 'WAVE 10 ï¿½ STILL STANDING?!';
+            else if (wave === 15)             bannerText = 'WAVE 15 ï¿½ UNSTOPPABLE!';
+            else if (wave >= 20 && wave % 5 === 0) bannerText = `WAVE ${wave} ï¿½ LEGENDARY!`;
             this._survivalWaveBannerText  = bannerText;
             this._survivalWaveBannerTimer = 2.5;
 
-            // Screen flash + shake — intensity scales with wave number
+            // Screen flash + shake ï¿½ intensity scales with wave number
             try {
                 const flashAlpha = Math.min(0.5, 0.15 + wave * 0.025);
                 this.screenFlash = new ScreenFlash(`rgba(255, 80, 0, ${flashAlpha.toFixed(2)})`, 0.4);
@@ -1493,7 +1493,7 @@ class Game {
                 const allKilled  = defeatedThisWave >= this.survivalWaveKillTarget;
 
                 if (allKilled) {
-                    // Kill target reached — advance immediately. Clear remaining
+                    // Kill target reached ï¿½ advance immediately. Clear remaining
                     // enemies so the player isn't juggling stragglers during the
                     // rest countdown.
                     if (this.enemyManager) {
@@ -1559,7 +1559,7 @@ class Game {
             this.dispatchGameStateChange();
             if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Level Complete!');
             // Is this the final campaign stage? If so, skip the per-stage
-            // jingle and the interstitial cue — both feel jarring right
+            // jingle and the interstitial cue ï¿½ both feel jarring right
             // before the victory screen.
             const _isFinalStage = (typeof LEVEL_CONFIGS !== 'undefined')
                 && ((this.currentLevelIndex || 0) + 1) >= LEVEL_CONFIGS.length;
@@ -1593,7 +1593,7 @@ class Game {
                 }
             } catch (e) { /* analytics must never break gameplay */ }
 
-            // Notify ad manager for interstitial pacing — but never on the
+            // Notify ad manager for interstitial pacing ï¿½ but never on the
             // final stage; an interstitial sandwiched between the boss kill
             // and the victory screen is a guaranteed bad review.
             try {
@@ -1615,7 +1615,7 @@ class Game {
             // Wait then transition. Use a dt-driven timer (not setTimeout)
             // so the wait is paused while a full-screen ad is on screen.
             // Previously this used setTimeout(2000) which fired even when the
-            // WebView was backgrounded by an AdMob interstitial — by the time
+            // WebView was backgrounded by an AdMob interstitial ï¿½ by the time
             // the ad closed the next level had already loaded behind it,
             // causing damage / game-overs the player couldn't see.
             // Final stage holds a touch longer so the "FINAL BOSS DOWN!"
@@ -1628,7 +1628,7 @@ class Game {
             this.dispatchGameStateChange();
             if (typeof Config !== 'undefined' && Config.DEBUG) console.log('GAME VICTORY!');
 
-            // Tutorial complete — suppress hints on future playthroughs
+            // Tutorial complete ï¿½ suppress hints on future playthroughs
             if (this.tutorialHints) this.tutorialHints.markDone();
 
             // Mark completion for achievements
@@ -1718,7 +1718,7 @@ class Game {
                     Promise.resolve(Highscores.isHighScore(this.score)).then((isHigh) => {
                         if (!isHigh) return;
                         // Delay the prompt so the victory screen lands
-                        // first — modal-on-celebration is jarring.
+                        // first ï¿½ modal-on-celebration is jarring.
                         setTimeout(() => {
                             // Bail if the player already started the
                             // return-to-menu fade.
@@ -1739,7 +1739,7 @@ class Game {
                                         if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Highscores updated (victory)', updated);
                                     }
                                 } catch (e) { console.warn('Failed to render scoreboard (victory)', e); }
-                                // High-score flow done — gently return
+                                // High-score flow done ï¿½ gently return
                                 // to the main menu via a full reload so
                                 // the next run starts on a clean slate.
                                 this._victoryPromptOpen = false;
@@ -1882,7 +1882,7 @@ class Game {
                 dt *= 0.3; // Slow everything to 30% speed briefly
             }
 
-            // Boss Trigger Logic — skipped in survival mode (no boss in survival arena)
+            // Boss Trigger Logic ï¿½ skipped in survival mode (no boss in survival arena)
             if (this.gameMode !== 'survival' && !this.bossEncountered && this.level.bossConfig && this.level.completionConfig) {
                 const triggerX = this.level.completionConfig.bossTriggerX;
                 if (this.player.x > triggerX) {
@@ -1952,7 +1952,7 @@ class Game {
                 }
             }
 
-            // Boss Defeat Logic — skipped in survival mode
+            // Boss Defeat Logic ï¿½ skipped in survival mode
             if (this.gameMode !== 'survival' && this.bossEncountered && !this.bossDefeated) {
                 // Check if boss instance is dead
                 if (this.enemyManager.bossInstance && (this.enemyManager.bossInstance.health <= 0 || this.enemyManager.enemies.indexOf(this.enemyManager.bossInstance) === -1)) {
@@ -2057,7 +2057,7 @@ class Game {
                                 this.audioManager.resetMusicPlaybackRate();
                             }
                             // On the FINAL stage we don't bounce back into
-                            // the level music — the victory jingle is
+                            // the level music ï¿½ the victory jingle is
                             // moments away. Let the boss music tail off.
                             const _isFinalLevel = (typeof LEVEL_CONFIGS !== 'undefined')
                                 && ((this.currentLevelIndex || 0) + 1) >= LEVEL_CONFIGS.length;
@@ -2079,7 +2079,7 @@ class Game {
                 }
             }
 
-            // Check Level Completion — skipped in survival mode (endless)
+            // Check Level Completion ï¿½ skipped in survival mode (endless)
             if (this.gameMode !== 'survival') {
                 // Update exit portal if active
                 if (this.exitPortal) {
@@ -2329,7 +2329,7 @@ class Game {
                     }
                 } catch (e) { __err('game', e); }
 
-                // Grant extra life if applicable (arcade only — survival is single-life)
+                // Grant extra life if applicable (arcade only ï¿½ survival is single-life)
                 if (result && result.type === 'EXTRA_LIFE' && result.success && this.gameMode !== 'survival') {
                     this.lives = Math.min(this.lives + (result.lives || 1), 9);
                 } else if (result && result.type === 'SKUNK_POWERUP' && result.success) {
@@ -2420,7 +2420,7 @@ class Game {
                             try { this._scorePulse = 1.0; } catch (e) { __err('game', e); }
                             try { this.audioManager && this.audioManager.playSound && this.audioManager.playSound('powerup', 0.7); } catch (e) { __err('game', e); }
                             
-                            // Full set bonus: Extra life! (arcade only — survival is single-life)
+                            // Full set bonus: Extra life! (arcade only ï¿½ survival is single-life)
                             if (this.gameMode !== 'survival') {
                                 this.lives = Math.min(this.lives + 1, 9);
                             }
@@ -2597,7 +2597,7 @@ class Game {
                 const tier = (typeof this.player.getComboTier === 'function') ? this.player.getComboTier() : null;
                 if (tier && tier.threshold > (this.player._lastComboTier || 0)) {
                     this.player._lastComboTier = tier.threshold;
-                    // Milestone floating text — bigger & glowier at higher tiers
+                    // Milestone floating text ï¿½ bigger & glowier at higher tiers
                     const toastSize = Math.min(56, 32 + tier.threshold * 0.6);
                     const toastBlur = Math.min(40, 22 + tier.threshold * 0.35);
                     this._spawnComboToast(
@@ -2826,7 +2826,7 @@ class Game {
                     // Skip if already hit by this spray
                     if (spray.hitEnemies.has(enemy)) continue;
                     
-                    // Skip if already skunked
+                    // Skip if already golf-hit
                     if (enemy.isGolfHit) continue;
                     
                     const enemyRect = enemy.getRect();
@@ -2945,7 +2945,7 @@ class Game {
                 this.screenShake = new ScreenShake(0.15, 5);
             }
 
-            // Chain explosion bonus scoring — reward the player for triggering chain reactions
+            // Chain explosion bonus scoring ï¿½ reward the player for triggering chain reactions
             for (const explosion of this.enemyManager._pendingExplosions) {
                 const depth = (explosion.enemy && typeof explosion.enemy.chainExplosionDepth === 'number')
                     ? explosion.enemy.chainExplosionDepth : 0;
@@ -3084,7 +3084,7 @@ class Game {
         }
 
         // Survival is single-life: force straight to GAME_OVER regardless of
-        // how many lives the counter holds — UNLESS the player just used a revive
+        // how many lives the counter holds ï¿½ UNLESS the player just used a revive
         // ad (lives=2), in which case the first death after revive should respawn
         // rather than game-over (mirrors the arcade mode behaviour).
         if (this.gameMode === 'survival' && this.lives <= 1) {
@@ -3266,8 +3266,8 @@ class Game {
             // appears AFTER the achievement breakdown animation finishes and
             // (if applicable) the high-score initials modal has been shown.
             // Mirrors the timing constants used in ui.js drawGameOver():
-            //   statsBaseDelay 1.6s + 6 stats × 0.15s + animDuration 0.35s ˜ 2.85s
-            //   achievement header delay: stats end + 0.3s ˜ 3.15s
+            //   statsBaseDelay 1.6s + 6 stats ï¿½ 0.15s + animDuration 0.35s ï¿½ 2.85s
+            //   achievement header delay: stats end + 0.3s ï¿½ 3.15s
             //   each badge animates in over ~0.4s, staggered 0.18s
             const numAch = (this._gameOverNewAchievements || []).length;
             const statsEnd = 1.6 + 6 * 0.15 + 0.35; // ~2.85s
@@ -3334,7 +3334,7 @@ class Game {
                 if (this.state === 'GAME_OVER') {
                     _tryShowHsPrompt();
                 } else if (this.state === 'PAUSED') {
-                    // A revive ad started while we were waiting — defer until the ad
+                    // A revive ad started while we were waiting ï¿½ defer until the ad
                     // closes and _resumeGameAfterAd() restores state back to GAME_OVER.
                     // setTimeout(0) lets the state-restore in _resumeGameAfterAd run first.
                     const onAdHide = () => { setTimeout(() => _tryShowHsPrompt(), 0); };
@@ -3384,7 +3384,7 @@ class Game {
      */
     reviveFromAd() {
         // Accept GAME_OVER (normal path) or PAUSED (fallback: _resumeGameAfterAd failed to
-        // restore state — happens on some Android versions due to app-lifecycle timing).
+        // restore state ï¿½ happens on some Android versions due to app-lifecycle timing).
         if (this.state !== 'GAME_OVER' && this.state !== 'PAUSED') return;
         // Ensure we're cleanly in PLAYING regardless of which entry state we came from.
         if (this.state === 'PAUSED') {
@@ -3466,7 +3466,7 @@ class Game {
             this.survivalWaveResting  = true;
             this.survivalWaveRestTimer = 4.0;
             this._survivalWaveRestTotal = 4.0;
-            this._survivalWaveBannerText  = `WAVE ${this.survivalWave} — ONE MORE CHANCE!`;
+            this._survivalWaveBannerText  = `WAVE ${this.survivalWave} ï¿½ ONE MORE CHANCE!`;
             this._survivalWaveBannerTimer = 4.0;
 
             // Resume survival arena music

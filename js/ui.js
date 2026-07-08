@@ -931,12 +931,12 @@ class UI {
         ctx.shadowColor = 'rgba(255, 120, 0, 0.85)';
         ctx.shadowBlur = 10;
         ctx.letterSpacing = '0.03em';
-        ctx.fillText("Congratulations \u2014 you defeated the minions of Malador!", cx, titleY + 42);
+        ctx.fillText("Congratulations \u2014 you defeated them all, Chip Savage!", cx, titleY + 42);
         ctx.font = "16px 'Space Grotesk', 'Segoe UI', sans-serif";
         ctx.fillStyle = 'rgba(255, 215, 0, 0.85)';
         ctx.shadowColor = 'rgba(255, 215, 0, 0.55)';
         ctx.shadowBlur = 8;
-        ctx.fillText('The streets are safe \u2014 for now. The Way of the Spray endures.', cx, titleY + 66);
+        ctx.fillText('The streets are safe \u2014 for now. Chip Savage endures.', cx, titleY + 66);
         ctx.restore();
 
         // ── Achievement banners ──

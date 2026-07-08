@@ -28,14 +28,14 @@ class SpriteLoader {
         // Known animation frame counts for player sheets — used to synthesize
         // placeholder sheets when the real asset is missing.
         this.expectedFrames = {
-            'ninja_idle': 4,
-            'ninja_walk': 4,
-            'ninja_jump': 4,
-            'ninja_attack': 4,
+            'chip_idle': 4,
+            'chip_walk': 4,
+            'chip_jump': 4,
+            'chip_attack': 4,
             'chip_golf_shot': 4,
             'chip_kick': 4,
-            'ninja_hurt': 2,
-            'ninja_death': 4,
+            'chip_hurt': 2,
+            'chip_death': 4,
             'basic_idle': 4,
             'basic_walk': 4,
             'basic_attack': 4,
@@ -276,14 +276,14 @@ class SpriteLoader {
 
         const baseList = [
             // Player sprites
-            ['ninja_idle', 'assets/sprites/characters/ninja_idle.png'],
-            ['ninja_walk', 'assets/sprites/characters/ninja_walk.png'],
-            ['ninja_jump', 'assets/sprites/characters/ninja_jump.png'],
-            ['ninja_attack', 'assets/sprites/characters/ninja_attack.png'],
+            ['chip_idle', 'assets/sprites/characters/chip_idle.png'],
+            ['chip_walk', 'assets/sprites/characters/chip_walk.png'],
+            ['chip_jump', 'assets/sprites/characters/chip_jump.png'],
+            ['chip_attack', 'assets/sprites/characters/chip_attack.png'],
             ['chip_golf_shot', 'assets/sprites/characters/chip_golf_shot.png'],
             ['chip_kick', 'assets/sprites/characters/chip_kick.png'],
-            ['ninja_hurt', 'assets/sprites/characters/ninja_hurt.png'],
-            ['ninja_death', 'assets/sprites/characters/ninja_death.png'],
+            ['chip_hurt', 'assets/sprites/characters/chip_hurt.png'],
+            ['chip_death', 'assets/sprites/characters/chip_death.png'],
             
             // Enemy sprites
             ['basic_idle', 'assets/sprites/enemies/basic_idle.png'],
