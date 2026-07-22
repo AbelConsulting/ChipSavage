@@ -58,22 +58,23 @@ Same horizontal strip format. Standard enemies use 64 × 64 frames; bosses use 9
 
 ### Panorama backgrounds
 
-The key in `levelData.js` is `bg_<name>`. The engine strips `bg_` and appends `_bg`, so:
+The key in `levelData.js` is `bg_<name>`. Two naming conventions are supported:
 
-> `bg_forest` → loads `assets/sprites/backgrounds/forest_bg.png`
+- **Numbered** (e.g. `bg_1`): loads `assets/sprites/backgrounds/bg_1.png` directly.
+- **Named** (e.g. `bg_forest`): strips the `bg_` prefix and appends `_bg`, so `bg_forest` → loads `assets/sprites/backgrounds/forest_bg.png`.
 
-| File | Used in level |
-|---|---|
-| `forest_bg.png` | Worlds 1–2 |
-| `city_bg.png` | Worlds 3–4 (also the default fallback) |
-| `dojo_bg.png` | World 5 |
-| `caves_crystal_bg.png` | World 6 |
-| `cave_depths_bg.png` | World 7 |
-| `neon_bg.png` | World 8 |
-| `mountains_bg.png` | World 9 |
-| `alleyway_bg.png` | World 10 |
-| `space_bg.png` | World 11 |
-| `final_bg.png` | World 12 (final boss) |
+| File | Key | Used in level |
+|---|---|---|
+| `bg_1.png` | `bg_1` | Worlds 1–2 (Forest Outskirts) |
+| `bg_2.png` | `bg_2` | Worlds 3–4 (Skunk City) |
+| `bg_3.png` | `bg_3` | Worlds 5–6 (Mountain Dojo) |
+| `caves_crystal_bg.png` | `bg_caves_crystal` | World 7 |
+| `cave_depths_bg.png` | `bg_cave_depths` | World 8 |
+| `neon_bg.png` | `bg_neon` | World 9 |
+| `mountains_bg.png` | `bg_mountains` | World 10 |
+| `alleyway_bg.png` | `bg_alleyway` | World 11 |
+| `space_bg.png` | `bg_space` | World 12 |
+| `final_bg.png` | `bg_final` | World 13 (final boss) |
 
 **Recommended size:** 1920 × 720 px minimum (wider than the 1280 px viewport to allow parallax scrolling).
 The engine scales the image to fill the canvas height, so any wide landscape image works.

@@ -18,7 +18,7 @@ const LEVEL_CONFIGS = [
         id: "level_1",
         width: 10000,
         completion: { exitX: 9900 },
-        background: 'bg_forest',
+        background: 'bg_1',
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [ 
             { x: 1200, y: 300 }, 
@@ -113,7 +113,7 @@ const LEVEL_CONFIGS = [
             speedMultiplier: 1.0,
             attackDamageMultiplier: 1.4
         },
-        background: 'bg_forest',
+        background: 'bg_1',
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [
             { x: 200, y: 300 },
@@ -149,7 +149,7 @@ const LEVEL_CONFIGS = [
         id: "level_2",
         width: 12000,
         completion: { exitX: 11900 },
-        background: 'bg_city',
+        background: 'bg_2',
         music: ['city_theme', 'action_theme', 'gameplay'],
         spawnPoints: [ 
             { x: 'right', y: 300 }, 
@@ -251,7 +251,7 @@ const LEVEL_CONFIGS = [
             speedMultiplier: 1.1,
             attackDamageMultiplier: 1.6
         },
-        background: 'bg_city',
+        background: 'bg_2',
         music: ['city_theme', 'action_theme', 'gameplay'],
         spawnPoints: [
             { x: 200, y: 300 },
@@ -288,7 +288,7 @@ const LEVEL_CONFIGS = [
         id: "level_3",
         width: 15000,
         completion: { exitX: 14900 },
-        background: 'bg_dojo',
+        background: 'bg_3',
         music: ['gameplay', 'action_theme'],
         spawnPoints: [ 
             { x: 'right', y: 300 }, 
@@ -396,7 +396,7 @@ const LEVEL_CONFIGS = [
             speedMultiplier: 1.15,
             attackDamageMultiplier: 2.0
         },
-        background: 'bg_dojo',
+        background: 'bg_3',
         music: ['gameplay', 'action_theme'],
         spawnPoints: [
             { x: 200, y: 300 },
@@ -1482,7 +1482,7 @@ const SURVIVAL_ARENA_CONFIG = {
     id: "survival_arena",
     width: 2800,
     height: 780,
-    background: 'bg_city',
+    background: 'bg_2',
     music: ['city_theme', 'action_theme', 'gameplay'],
     spawnPoints: [
         { x: 'right', y: 300 },

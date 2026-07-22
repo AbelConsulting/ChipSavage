@@ -25,9 +25,13 @@ class Level {
                 const ensureLoaded = (name) => {
                     if (!name) return;
                     if (spriteLoader.getSprite(name)) return; // already present
-                    // map bg_xxx -> assets/sprites/backgrounds/xxx_bg
+                    // Numbered keys (bg_1, bg_2, …) map directly to assets/sprites/backgrounds/bg_N.png.
+                    // Named keys (bg_forest, bg_city, …) use the legacy xxx_bg suffix convention.
+                    const isNumbered = /^bg_\d+$/.test(name);
                     const base = name.replace(/^bg_/, '');
-                    const basePath = `assets/sprites/backgrounds/${base}_bg`;
+                    const basePath = isNumbered
+                        ? `assets/sprites/backgrounds/${name}`
+                        : `assets/sprites/backgrounds/${base}_bg`;
                     // Use the robust variant loader which tries webp/png and suffixes
                     try {
                         spriteLoader.loadSpriteBest(name, basePath).then(img => { try { this.cachedSprites[name] = img; } catch (e) { __err('level', e); } }).catch((e) => { __err('level', e); });

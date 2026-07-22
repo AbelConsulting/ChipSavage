@@ -162,7 +162,7 @@ class Game {
             const levelData = {
                 width: worldWidth,
                 height: this.height,
-                background: 'bg_forest',
+                background: 'bg_1',
                 backgroundLayers: [],
                 spawnPoints: [ { x: 'right', y: 300 }, { x: Math.floor(worldWidth / 2), y: 300 }, { x: 'left', y: 300 } ],
                 platforms: [
@@ -1313,7 +1313,7 @@ class Game {
         _initSurvivalMode() {
             // Increment run counter and pick a background (rotates every 2 runs)
             this._survivalRunCount++;
-            const _survivalBgs = ['bg_city', 'bg_dojo', 'bg_alleyway'];
+            const _survivalBgs = ['bg_2', 'bg_3', 'bg_alleyway'];
             const _bgIndex = Math.floor((this._survivalRunCount - 1) / 2) % _survivalBgs.length;
             const _chosenBg = _survivalBgs[_bgIndex];
 
