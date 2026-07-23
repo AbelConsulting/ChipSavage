@@ -93,7 +93,7 @@ const LEVEL_CONFIGS = [
             spawnInterval: 3.0,
             maxEnemies: 5,
             aggression: 0.5,
-            allowedTypes: ['BASIC', 'SECOND_BASIC']
+            allowedTypes: ['BASIC']
         }
     },
 

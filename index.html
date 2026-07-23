@@ -82,7 +82,11 @@
             z-index: 1000;
             font-family: 'Bangers', 'Arial Black', sans-serif;
             color: #fff;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
+        #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+        #loading-screen.hidden { display: none; pointer-events: none; }
         .loading-content { text-align: center; }
         .loading-logo { font-size: 72px; line-height: 1; margin-bottom: 8px; }
         .loading-content h1 {
