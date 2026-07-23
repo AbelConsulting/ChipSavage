@@ -389,7 +389,7 @@ class UI {
                 { label: '\uD83D\uDD25 Max Combo',        value: `x${gameStats.maxCombo || 0}`,                              color: '#FFD93D' },
                 { label: '\uD83D\uDCA5 Best Multiplier',  value: `${(gameStats.bestMultiplier || 1.0).toFixed(1)}x`,         color: '#FF9500' },
                 { label: '\uD83C\uDFAF Accuracy',         value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`,          color: '#95E1D3' },
-                { label: '\uD83C\uDFFA Idols Collected',  value: gameStats.idolsCollected || 0,                              color: '#F38181' }
+                { label: '\uD83C\uDFC6 Trophies Collected',  value: gameStats.idolsCollected || 0,                              color: '#F38181' }
             ];
 
         const lineHeight = 30;
@@ -1106,7 +1106,7 @@ class UI {
         // Right column
         const rightStats = [
             { label: '\uD83C\uDFAF Accuracy', value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`, color: '#95E1D3' },
-            { label: '\uD83D\uDDFF Idols', value: `${gameStats.idolsCollected || 0}/30`, color: '#F38181' },
+            { label: '\uD83C\uDFC6 Trophies', value: `${gameStats.idolsCollected || 0}/30`, color: '#F38181' },
             { label: '\uD83D\uDC8E Sets', value: `${gameStats.idolSetsCompleted || 0}/10`, color: '#A8E6CF' },
             { label: '\u2728 Perfect Lvls', value: perfectLevels, color: perfectLevels > 0 ? '#FFD700' : '#808080' },
             { label: '\uD83C\uDFB2 Multi-Kills', value: gameStats.multiKills || 0, color: '#FF6B9D' }
@@ -1118,7 +1118,7 @@ class UI {
         if (damageTaken === 0 && completionTime <= 900) flavorText = 'A LEGENDARY performance! You are truly The One!';
         else if (damageTaken === 0) flavorText = 'FLAWLESS! A shadow master walks among us!';
         else if (completionTime <= 600) flavorText = 'INCREDIBLE SPEED! A true speedrunner!';
-        else if ((gameStats.idolSetsCompleted || 0) >= 10) flavorText = 'Every relic recovered! A true collector!';
+        else if ((gameStats.idolSetsCompleted || 0) >= 10) flavorText = 'Every trophy recovered! A true collector!';
 
         ctx.save();
         ctx.font = "italic 18px 'Bangers', 'Arial Black', sans-serif";
@@ -1426,12 +1426,26 @@ class UI {
                         const ix = ammoX + 4 + i * (ammoIconSize + ammoGap);
                         const iy = ammoY + 3;
                         
-                        // Draw skunk emoji
-                        ctx.font = `${ammoIconSize}px Arial`;
-                        ctx.textAlign = 'left';
-                        ctx.textBaseline = 'top';
-                        ctx.fillStyle = '#000000'; // Reset to full black for emojis
-                        ctx.fillText('🦨', ix, iy);
+                        // Draw a tiny white golf ball icon
+                        const r = ammoIconSize * 0.42;
+                        const bx = ix + r + 1;
+                        const by = iy + r + 1;
+                        ctx.save();
+                        const miniBallGrad = ctx.createRadialGradient(bx - r * 0.35, by - r * 0.35, r * 0.1, bx, by, r);
+                        miniBallGrad.addColorStop(0, '#FFFFFF');
+                        miniBallGrad.addColorStop(0.7, '#F0F0F0');
+                        miniBallGrad.addColorStop(1, '#D0D0D0');
+                        ctx.fillStyle = miniBallGrad;
+                        ctx.strokeStyle = 'rgba(150, 150, 150, 0.8)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.arc(bx, by, r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.fillStyle = 'rgba(180, 180, 180, 0.6)';
+                        ctx.beginPath(); ctx.arc(bx - r * 0.3, by - r * 0.25, r * 0.16, 0, Math.PI * 2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(bx + r * 0.25, by + r * 0.2, r * 0.16, 0, Math.PI * 2); ctx.fill();
+                        ctx.restore();
                     }
                     
                     // If more than 9, show "+X" text

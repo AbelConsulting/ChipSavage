@@ -446,7 +446,7 @@ class Player {
                 age: 0,
                 lifetime: 0.6 + Math.random() * 0.4,
                 size: 3 + Math.random() * 5,
-                color: Math.random() > 0.5 ? '#40FF40' : '#80FF80'
+                color: Math.random() > 0.5 ? '#FFFFFF' : '#E0E0E0'
             });
         }
         
@@ -1131,9 +1131,9 @@ class Player {
             // Draw expanding spray cloud area
             const alpha = 1 - (spray.age / spray.duration);
             const cloudGrad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, spray.radius);
-            cloudGrad.addColorStop(0, `rgba(80, 255, 80, ${alpha * 0.3})`);
-            cloudGrad.addColorStop(0.5, `rgba(50, 255, 50, ${alpha * 0.2})`);
-            cloudGrad.addColorStop(1, 'rgba(50, 255, 50, 0)');
+            cloudGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.3})`);
+            cloudGrad.addColorStop(0.5, `rgba(230, 230, 230, ${alpha * 0.2})`);
+            cloudGrad.addColorStop(1, 'rgba(230, 230, 230, 0)');
             ctx.fillStyle = cloudGrad;
             ctx.beginPath();
             ctx.arc(screenX, screenY, spray.radius, 0, Math.PI * 2);
@@ -1151,7 +1151,7 @@ class Player {
                 );
                 pGrad.addColorStop(0, '#FFFFFF');
                 pGrad.addColorStop(0.4, p.color);
-                pGrad.addColorStop(1, 'rgba(50, 255, 50, 0)');
+                pGrad.addColorStop(1, 'rgba(230, 230, 230, 0)');
                 
                 ctx.fillStyle = pGrad;
                 ctx.beginPath();
@@ -1182,30 +1182,43 @@ class Player {
                 const trailY = -normalizedVelY * j * 8;
                 const trailSize = proj.width * (1 - j / trailLength * 0.5);
                 
-                ctx.fillStyle = `rgba(50, 255, 50, ${trailAlpha})`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${trailAlpha})`;
                 ctx.beginPath();
                 ctx.arc(trailX, trailY, trailSize / 2, 0, Math.PI * 2);
                 ctx.fill();
             }
             
-            // Draw green glow
+            // Draw soft white glow
             const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, proj.width * 1.2);
-            glowGrad.addColorStop(0, 'rgba(80, 255, 80, 0.6)');
-            glowGrad.addColorStop(0.5, 'rgba(50, 255, 50, 0.3)');
-            glowGrad.addColorStop(1, 'rgba(50, 255, 50, 0)');
+            glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+            glowGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
+            glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
             ctx.fillStyle = glowGrad;
             ctx.beginPath();
             ctx.arc(0, 0, proj.width * 1.2, 0, Math.PI * 2);
             ctx.fill();
             
-            // Draw a simple green projectile
-            ctx.fillStyle = '#40FF40';
-            ctx.strokeStyle = '#20DD20';
-            ctx.lineWidth = 2;
+            // Draw a white golf ball projectile with a couple of dimples
+            const ballR = proj.width / 2;
+            const ballShade = ctx.createRadialGradient(-ballR * 0.35, -ballR * 0.35, ballR * 0.1, 0, 0, ballR);
+            ballShade.addColorStop(0, '#FFFFFF');
+            ballShade.addColorStop(0.7, '#F0F0F0');
+            ballShade.addColorStop(1, '#D8D8D8');
+            ctx.fillStyle = ballShade;
+            ctx.strokeStyle = 'rgba(160, 160, 160, 0.8)';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.arc(0, 0, proj.width / 2, 0, Math.PI * 2);
+            ctx.arc(0, 0, ballR, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
+
+            ctx.fillStyle = 'rgba(180, 180, 180, 0.55)';
+            const dimples = [[0, -ballR * 0.4], [ballR * 0.4, ballR * 0.15], [-ballR * 0.4, ballR * 0.15]];
+            for (const [dx, dy] of dimples) {
+                ctx.beginPath();
+                ctx.arc(dx, dy, ballR * 0.14, 0, Math.PI * 2);
+                ctx.fill();
+            }
             
             ctx.restore();
         }

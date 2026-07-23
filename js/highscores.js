@@ -107,10 +107,10 @@ try {
     { id: 'no_lives_lost', name: 'No Lives Lost', desc: 'Complete a level without losing a life', icon: '💚', check: (stats) => statNumber(stats.levelsCompleted) >= 1 && statNumber(stats.deathsThisRun) === 0 },
 
     // ── Collection & Exploration ──
-    { id: 'relic_hunter', name: 'Relic Hunter', desc: 'Collect 10 Golden Idols across all runs', icon: '🗿', check: (stats) => statNumber(stats.totalIdolsCollected) >= 10 },
-    { id: 'idol_hoarder', name: 'Idol Hoarder', desc: 'Collect 50 Golden Idols across all runs', icon: '🏺', check: (stats) => statNumber(stats.totalIdolsCollected) >= 50 },
-    { id: 'master_collector', name: 'Master Collector', desc: 'Complete 3 idol sets in one run', icon: '🏅', check: (stats) => statNumber(stats.idolSetsCompleted) >= 3 },
-    { id: 'completionist', name: 'Completionist', desc: 'Collect all 18 idols in a single run', icon: '🌈', check: (stats) => statNumber(stats.idolsCollected) >= 18 },
+    { id: 'relic_hunter', name: 'Trophy Hunter', desc: 'Collect 10 Golden Trophies across all runs', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 10 },
+    { id: 'idol_hoarder', name: 'Trophy Hoarder', desc: 'Collect 50 Golden Trophies across all runs', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 50 },
+    { id: 'master_collector', name: 'Master Collector', desc: 'Complete 3 trophy sets in one run', icon: '🏅', check: (stats) => statNumber(stats.idolSetsCompleted) >= 3 },
+    { id: 'completionist', name: 'Completionist', desc: 'Collect all 18 trophies in a single run', icon: '🌈', check: (stats) => statNumber(stats.idolsCollected) >= 18 },
     { id: 'power_hungry', name: 'Power Hungry', desc: 'Collect 15 power-ups in a run', icon: '⚡', check: (stats) => statNumber(stats.powerUpsCollected) >= 15 },
 
     // ── Chain Reactions ──

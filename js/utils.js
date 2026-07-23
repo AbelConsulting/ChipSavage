@@ -299,9 +299,9 @@ class Utils {
     }
 
     /**
-     * Draw the golden idol collectible.
+     * Draw the golden trophy collectible.
      * Uses the loaded sprite `golden_idol` when available; otherwise draws
-     * a simple gold plaque with a mask symbol.
+     * a simple gold plaque with a trophy cup glyph.
      */
     static drawGoldenIdol(ctx, x, y, size = 32, opts = {}) {
         if (!ctx) return;
@@ -334,15 +334,18 @@ class Utils {
         ctx.fillStyle = '#f5c542';
         ctx.fillRect(dx + 1, dy + 1, Math.max(0, ds - 2), Math.max(0, ds - 2));
 
-        // Simple mask glyph
+        // Simple trophy cup glyph
         const unit = Math.max(1, Math.floor(ds / 16));
         const cx = dx + Math.floor(ds / 2);
         const cy = dy + Math.floor(ds / 2);
         ctx.fillStyle = '#3a2400';
-        ctx.fillRect(cx - 3 * unit, cy - 4 * unit, 6 * unit, 7 * unit);
+        ctx.fillRect(cx - 4 * unit, cy - 5 * unit, 8 * unit, unit); // rim
+        ctx.fillRect(cx - 3 * unit, cy - 4 * unit, 6 * unit, 3 * unit); // bowl
+        ctx.fillRect(cx - unit, cy - 1 * unit, 2 * unit, 2 * unit); // stem
+        ctx.fillRect(cx - 3 * unit, cy + 1 * unit, 6 * unit, unit); // base
         ctx.fillStyle = '#f5c542';
-        ctx.fillRect(cx - 2 * unit, cy - 2 * unit, 4 * unit, unit);
-        ctx.fillRect(cx - 1 * unit, cy + 1 * unit, 2 * unit, unit);
+        ctx.fillRect(cx - 3 * unit, cy - 4 * unit, unit, unit); // highlight
+        ctx.fillRect(cx + 2 * unit, cy - 4 * unit, unit, unit); // highlight
 
         try { ctx.imageSmoothingEnabled = prevSmooth; } catch (e) { __err('render', e); }
     }

@@ -60,7 +60,7 @@ class Level {
         // Optional enemy spawn points (array of { x: number|'left'|'right', y: number })
         this.spawnPoints = Array.isArray(levelData.spawnPoints) ? levelData.spawnPoints.slice() : null;
 
-        // Optional golden idol spawn points (array of { x: number, y: number })
+        // Optional golden trophy spawn points (array of { x: number, y: number })
         this.idols = Array.isArray(levelData.idols) ? levelData.idols.map(p => ({ ...p })) : [];
         
         // Store boss and completion config for Game logic

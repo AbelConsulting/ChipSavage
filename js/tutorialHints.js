@@ -91,15 +91,15 @@ class TutorialHints {
                 duration: 10,
                 kb:    ['Press C to fire Golf Shot!',
                         'Ranged spray that stuns enemies.'],
-                touch: ['Tap 🦨 for Golf Shot!',
+                touch: ['Tap ⚪ for Golf Shot!',
                         'Ranged spray that stuns enemies.']
             },
             golden_idol: {
                 id: 'golden_idol',
                 duration: 10,
-                kb:    ['✦ Golden Idol spotted!',
+                kb:    ['✦ Golden Trophy spotted!',
                         'Collect all 3 per stage for boosts!'],
-                touch: ['✦ Golden Idol spotted!',
+                touch: ['✦ Golden Trophy spotted!',
                         'Collect all 3 per stage for boosts!']
             },
             boss_encounter: {

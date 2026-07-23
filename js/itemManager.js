@@ -66,7 +66,7 @@ class ItemManager {
     }
 
     /**
-     * Spawn a golden idol collectible at the specified location
+     * Spawn a golden trophy collectible at the specified location
      */
     spawnGoldenIdol(x, y, idolIndex = 0, levelId = null) {
         const item = {
@@ -661,35 +661,37 @@ class ItemManager {
                 
                 Utils.drawDamageBoostItem(ctx, -item.width / 2, -item.height / 2, item.width);
             } else if (item.type === 'SKUNK_POWERUP') {
-                // Draw green glow behind skunk powerup
+                // Rainbow color-cycling glow behind the floating golf ball
+                const hue = (Date.now() / 15) % 360;
                 ctx.save();
                 const glowSize = item.width * 1.1;
                 const glowPulse = 0.4 + Math.sin(Date.now() / 160) * 0.25;
                 const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
-                gradient.addColorStop(0, `rgba(50, 255, 50, ${glowPulse})`);
-                gradient.addColorStop(0.3, `rgba(80, 255, 120, ${glowPulse * 0.6})`);
-                gradient.addColorStop(1, 'rgba(50, 255, 50, 0)');
+                gradient.addColorStop(0, `hsla(${hue}, 100%, 65%, ${glowPulse})`);
+                gradient.addColorStop(0.3, `hsla(${(hue + 40) % 360}, 100%, 60%, ${glowPulse * 0.6})`);
+                gradient.addColorStop(1, `hsla(${hue}, 100%, 60%, 0)`);
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
                 
-                // Draw glow particles
+                // Draw glow particles, each cycling through the rainbow
                 if (item.glowParticles && item.glowParticles.length > 0) {
                     ctx.save();
                     ctx.globalCompositeOperation = 'lighter';
                     for (const glow of item.glowParticles) {
                         const alpha = 1 - (glow.age / glow.life);
                         ctx.globalAlpha = alpha * 0.7;
+                        const glowHue = (hue + (glow.x + glow.y) * 4) % 360;
                         
                         const glowGrad = ctx.createRadialGradient(
                             glow.x, glow.y, 0,
                             glow.x, glow.y, glow.size
                         );
-                        glowGrad.addColorStop(0, '#80FF80');
-                        glowGrad.addColorStop(0.5, '#40FF40');
-                        glowGrad.addColorStop(1, 'rgba(80, 255, 80, 0)');
+                        glowGrad.addColorStop(0, `hsl(${glowHue}, 100%, 80%)`);
+                        glowGrad.addColorStop(0.5, `hsl(${glowHue}, 100%, 60%)`);
+                        glowGrad.addColorStop(1, `hsla(${glowHue}, 100%, 60%, 0)`);
                         ctx.fillStyle = glowGrad;
                         ctx.beginPath();
                         ctx.arc(glow.x, glow.y, glow.size, 0, Math.PI * 2);
@@ -698,12 +700,37 @@ class ItemManager {
                     ctx.restore();
                 }
                 
-                // Draw the skunk powerup icon (use a skunk emoji or symbol)
-                ctx.fillStyle = '#000000';
-                ctx.font = `${item.width * 0.7}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🦨', 0, 0);
+                // Draw the floating golf ball (white sphere with dimples)
+                const ballRadius = item.width * 0.42;
+                ctx.save();
+                const ballShade = ctx.createRadialGradient(
+                    -ballRadius * 0.35, -ballRadius * 0.35, ballRadius * 0.1,
+                    0, 0, ballRadius
+                );
+                ballShade.addColorStop(0, '#FFFFFF');
+                ballShade.addColorStop(0.7, '#F2F2F2');
+                ballShade.addColorStop(1, '#D8D8D8');
+                ctx.fillStyle = ballShade;
+                ctx.beginPath();
+                ctx.arc(0, 0, ballRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(160, 160, 160, 0.8)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Dimples
+                ctx.fillStyle = 'rgba(180, 180, 180, 0.55)';
+                const dimpleRing = [
+                    [0, -ballRadius * 0.5], [ballRadius * 0.45, -ballRadius * 0.18],
+                    [ballRadius * 0.28, ballRadius * 0.4], [-ballRadius * 0.28, ballRadius * 0.4],
+                    [-ballRadius * 0.45, -ballRadius * 0.18], [0, 0]
+                ];
+                for (const [dx, dy] of dimpleRing) {
+                    ctx.beginPath();
+                    ctx.arc(dx, dy, ballRadius * 0.12, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
             }
 
             ctx.restore();

@@ -104,7 +104,7 @@ Tiles are used for platforms and ground. All tiles are **single-frame square ima
 |---|---|---|
 | `health_regen.png` | 32 × 32 | Health regeneration pickup |
 | `extra_life.png` | 32 × 32 | Extra life heart |
-| `golden_idol.png` | 30 × 30 | Collectible golden idol (3 per level) |
+| `golden_idol.png` | 30 × 30 | Collectible golden trophy (3 per level) |
 | `speed_boost.png` | 32 × 32 | Speed boost pickup |
 | `damage_boost.png` | 32 × 32 | Damage boost pickup |
 | `golf_ammo.png` | 32 × 32 | Golf Shot ammo pickup |
