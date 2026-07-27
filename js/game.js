@@ -1328,8 +1328,12 @@ class Game {
                     this.level.cachedSprites[_chosenBg] = undefined; // force fresh lookup
                     if (typeof spriteLoader !== 'undefined') {
                         try {
+                            const _isNumbered = /^bg_\d+$/.test(_chosenBg);
                             const _bgBase = _chosenBg.replace(/^bg_/, '');
-                            spriteLoader.loadSpriteBest(_chosenBg, `assets/sprites/backgrounds/${_bgBase}_bg`)
+                            const _bgBasePath = _isNumbered
+                                ? `assets/sprites/backgrounds/${_chosenBg}`
+                                : `assets/sprites/backgrounds/${_bgBase}_bg`;
+                            spriteLoader.loadSpriteBest(_chosenBg, _bgBasePath)
                                 .then(img => { try { this.level.cachedSprites[_chosenBg] = img; } catch (e) { __err('game', e); } })
                                 .catch(e => { __err('game', e); });
                         } catch (e) { __err('game', e); }
