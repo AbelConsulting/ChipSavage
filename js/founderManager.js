@@ -71,8 +71,8 @@ const FounderManager = (() => {
     const STORAGE_KEY_AD_FREE       = 'chipsavage.adFree';
     const STORAGE_KEY_FOUNDER_PASS  = 'chipsavage.founderPassOwned';
     const STORAGE_KEY_CODES_USED    = 'chipsavage.founderCodesUsed';
-    // Cosmetic preference — Founders may opt out of the gold ninja skin and
-    // play with the original look. Defaults to enabled (no entry == on).
+    // Cosmetic preference — Founders may opt in to a coloured ninja skin;
+    // defaults to disabled (no entry == off, explicit '1' == on).
     const STORAGE_KEY_GOLD_SKIN     = 'chipsavage.useGoldSkin';
     // Founder skin colour variant (gold | sapphire | amethyst | steel).
     // Default 'gold' if missing or unknown.
@@ -98,9 +98,9 @@ const FounderManager = (() => {
     }
 
     function _readGoldSkinPref() {
-        // Default to enabled; only an explicit '0' opts out.
-        try { return localStorage.getItem(STORAGE_KEY_GOLD_SKIN) !== '0'; }
-        catch (e) { return true; }
+        // Default to disabled; only an explicit '1' opts in.
+        try { return localStorage.getItem(STORAGE_KEY_GOLD_SKIN) === '1'; }
+        catch (e) { return false; }
     }
 
     function _readSkinVariant() {
@@ -198,7 +198,7 @@ const FounderManager = (() => {
                     } catch (e) {}
                     _isFounder = false;
                     _founderSince = null;
-                    _goldSkinEnabled = true;
+                    _goldSkinEnabled = false;
                     _skinVariant = DEFAULT_SKIN_VARIANT;
                     _log('debugSkins=reset — cleared founder/skin state');
                 } else if (dbg === 'adfree') {
@@ -325,8 +325,8 @@ const FounderManager = (() => {
 
     // ── Skin display toggle ────────────────────────────────────────────────
     // The pref is cached in `_goldSkinEnabled` so the per-frame render path
-    // never hits localStorage. Persisted as '0' for opt-out; absence == on,
-    // so users default to skin-on without a migration.
+    // never hits localStorage. Persisted as '1' for opt-in; absence == off,
+    // so users default to the regular skin until they explicitly choose one.
     // Note: kept the function name `isGoldSkinEnabled` for backwards-compat;
     // it now means "render the chosen unlocked skin" (any colour).
     function isGoldSkinEnabled() {
@@ -340,8 +340,8 @@ const FounderManager = (() => {
         if (_goldSkinEnabled === next) return;
         _goldSkinEnabled = next;
         try {
-            if (next) localStorage.removeItem(STORAGE_KEY_GOLD_SKIN);
-            else      localStorage.setItem(STORAGE_KEY_GOLD_SKIN, '0');
+            if (next) localStorage.setItem(STORAGE_KEY_GOLD_SKIN, '1');
+            else      localStorage.removeItem(STORAGE_KEY_GOLD_SKIN);
         } catch (e) {}
         _notify();
     }
