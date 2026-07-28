@@ -1311,11 +1311,9 @@ class Game {
 
         /** Load the compact survival arena and kick off the first wave countdown. */
         _initSurvivalMode() {
-            // Increment run counter and pick a background (rotates every 2 runs)
+            // Survival mode uses the requested background for every run.
             this._survivalRunCount++;
-            const _survivalBgs = ['bg_2', 'bg_3', 'bg_alleyway'];
-            const _bgIndex = Math.floor((this._survivalRunCount - 1) / 2) % _survivalBgs.length;
-            const _chosenBg = _survivalBgs[_bgIndex];
+            const _chosenBg = 'bg_3';
 
             try {
                 if (typeof SURVIVAL_ARENA_CONFIG !== 'undefined') {
