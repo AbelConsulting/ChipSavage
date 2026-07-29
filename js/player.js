@@ -54,7 +54,7 @@ class Player {
         this.attackDuration = 0.3;
         this.attackCooldown = 0.3;
         this.attackCooldownTimer = 0;
-        this.defaultAttackWidth = 120;
+        this.defaultAttackWidth = 108;
         this.defaultAttackHeight = 40;
         this.attackHitbox = { x: 0, y: 0, width: this.defaultAttackWidth, height: this.defaultAttackHeight };
         this.hitEnemies = new Set();
@@ -79,8 +79,8 @@ class Player {
 
         // Kick tuning: active damage window and hitbox size
         // Default: active on all frames except the first/last (windup/recovery)
-        this.kickHitboxWidth = 120;
-        this.kickHitboxHeight = 70;
+        this.kickHitboxWidth = 108;
+        this.kickHitboxHeight = 68;
 
         // Combo system
         this.comboCount = 0;
@@ -1212,7 +1212,7 @@ class Player {
 
     _updateAttackHitboxPosition() {
         // Allow a small overlap with the player body so point-blank hits register.
-        const overlap = Math.min(12, Math.floor(this.attackHitbox.width * 0.25));
+        const overlap = Math.min(8, Math.floor(this.attackHitbox.width * 0.22));
         const offsetX = this.facingRight
             ? (this.width - overlap)
             : (-this.attackHitbox.width + overlap);
