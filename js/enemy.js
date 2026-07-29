@@ -12,20 +12,20 @@
 const ENEMY_TYPE_CONFIG = {
     'BASIC': { prefix: 'basic', size: { width: 48, height: 48 }, fallback: null },
     'FAST_BASIC': { prefix: 'basic', size: { width: 48, height: 48 }, fallback: null },
-    'SECOND_BASIC': { prefix: 'second', size: { width: 48, height: 48 }, fallback: 'basic' },
-    'THIRD_BASIC': { prefix: 'third', size: { width: 48, height: 48 }, fallback: 'second' },
-    'FOURTH_BASIC': { prefix: 'fourth', size: { width: 48, height: 48 }, fallback: 'third' },
-    'FIFTH_BASIC': { prefix: 'fifth', size: { width: 48, height: 48 }, fallback: 'fourth' },
+    'SECOND_BASIC': { prefix: 'second', size: { width: 48, height: 48 }, fallback: 'BASIC' },
+    'THIRD_BASIC': { prefix: 'third', size: { width: 48, height: 48 }, fallback: 'SECOND_BASIC' },
+    'FOURTH_BASIC': { prefix: 'fourth', size: { width: 48, height: 48 }, fallback: 'THIRD_BASIC' },
+    'FIFTH_BASIC': { prefix: 'fifth', size: { width: 48, height: 48 }, fallback: 'FOURTH_BASIC' },
     'FLYING': { prefix: 'fly', size: { width: 40, height: 40 }, fallback: null },
-    'BOSS': { prefix: 'boss', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss_attack1', bossName: 'SHADOW FANG', bossTitle: 'Guardian of the Forest', ability: 'charge' },
-    'BOSS2': { prefix: 'boss2', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss2_attack', bossName: 'IRON CLAW', bossTitle: 'Enforcer of Skunk City', ability: 'groundSlam' },
-    'BOSS3': { prefix: 'boss3', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss3_attack', bossName: 'BURGER FURY', bossTitle: 'Master of the Dojo', ability: 'rapidStrike' },
-    'BOSS4': { prefix: 'boss4', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss4_attack', bossName: 'MALODOR', bossTitle: 'Enemy Kingpin', ability: 'projectile' },
-    'BOSS5': { prefix: 'boss5', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss5_attack', bossName: 'STEAMPUNK WRAITH', bossTitle: 'Depths Dweller', ability: 'teleport' },
-    'BOSS6': { prefix: 'boss6', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss6_attack', bossName: 'DR OBSIDIAN', bossTitle: 'Cavern Sentinel', ability: 'summon' },
-    'BOSS7': { prefix: 'boss7', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss7_attack', bossName: 'KYLE', bossTitle: 'Crystal Flower Chief', ability: 'crystalBarrage' },
-    'BOSS8': { prefix: 'boss8', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss8_attack', bossName: 'VENOM FANG', bossTitle: 'Ruler of the Underbelly', ability: 'charge' },
-    'BOSS9': { prefix: 'boss9', size: { width: 128, height: 128 }, fallback: 'basic', attackAnim: 'boss9_attack', bossName: 'ASTRAL TYRANT', bossTitle: 'Warden of the Void', ability: 'projectile' }
+    'BOSS': { prefix: 'boss', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss_attack1', bossName: 'SHADOW FANG', bossTitle: 'Guardian of the Forest', ability: 'charge' },
+    'BOSS2': { prefix: 'boss2', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss2_attack', bossName: 'IRON CLAW', bossTitle: 'Enforcer of Skunk City', ability: 'groundSlam' },
+    'BOSS3': { prefix: 'boss3', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss3_attack', bossName: 'BURGER FURY', bossTitle: 'Master of the Dojo', ability: 'rapidStrike' },
+    'BOSS4': { prefix: 'boss4', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss4_attack', bossName: 'MALODOR', bossTitle: 'Enemy Kingpin', ability: 'projectile' },
+    'BOSS5': { prefix: 'boss5', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss5_attack', bossName: 'STEAMPUNK WRAITH', bossTitle: 'Depths Dweller', ability: 'teleport' },
+    'BOSS6': { prefix: 'boss6', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss6_attack', bossName: 'DR OBSIDIAN', bossTitle: 'Cavern Sentinel', ability: 'summon' },
+    'BOSS7': { prefix: 'boss7', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss7_attack', bossName: 'KYLE', bossTitle: 'Crystal Flower Chief', ability: 'crystalBarrage' },
+    'BOSS8': { prefix: 'boss8', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss8_attack', bossName: 'VENOM FANG', bossTitle: 'Ruler of the Underbelly', ability: 'charge' },
+    'BOSS9': { prefix: 'boss9', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss9_attack', bossName: 'ASTRAL TYRANT', bossTitle: 'Warden of the Void', ability: 'projectile' }
 };
 
 const HEAVY_BOSS_ATTACK_TYPES = new Set(['BOSS5', 'BOSS6', 'BOSS7', 'BOSS8', 'BOSS9']);
