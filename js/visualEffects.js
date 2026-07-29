@@ -253,17 +253,17 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
 
     for (let i = 0; i < wispCount; i++) {
         const t = i / Math.max(1, wispCount - 1);
-        const wobble = Math.sin(now * 0.006 + i * 1.7) * (8 + fxH * 0.03);
-        const drift = Math.cos(now * 0.0045 + i * 2.1) * (10 + fxH * 0.04);
-        const widthBias = Math.max(18, fxW * (0.16 + t * 0.14));
-        const heightBias = Math.max(12, fxH * (0.22 + (1 - t) * 0.08));
-        const anchorX = leadX + leadDir * (12 + t * 24 + Math.sin(now * 0.008 + i) * 5);
+        const wobble = Math.sin(now * 0.006 + i * 1.7) * (5 + fxH * 0.02);
+        const drift = Math.cos(now * 0.0045 + i * 2.1) * (8 + fxH * 0.03);
+        const widthBias = Math.max(22, fxW * (0.24 + t * 0.2));
+        const heightBias = Math.max(10, fxH * (0.16 + (1 - t) * 0.05));
+        const anchorX = leadX + leadDir * (14 + t * 30 + Math.sin(now * 0.008 + i) * 4);
         const anchorY = centerY + wobble;
 
-        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.4);
+        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.25);
         grad.addColorStop(0, coreColor);
-        grad.addColorStop(0.22, tintA);
-        grad.addColorStop(0.58, tintB);
+        grad.addColorStop(0.18, tintA);
+        grad.addColorStop(0.48, tintB);
         grad.addColorStop(1, tintC);
 
         ctx.fillStyle = grad;
@@ -273,20 +273,53 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
             anchorY,
             widthBias,
             heightBias,
-            leadDir * 0.18 + Math.sin(now * 0.003 + i) * 0.08,
+            leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
             0,
             Math.PI * 2
         );
         ctx.fill();
 
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.16, baseAlpha * 0.55);
+        ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = Math.max(1, Math.min(2.5, heightBias * 0.12));
+        ctx.beginPath();
+        ctx.ellipse(
+            anchorX + leadDir * drift * 0.2,
+            anchorY,
+            widthBias * 0.98,
+            heightBias * 0.92,
+            leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
+            0,
+            Math.PI * 2
+        );
+        ctx.stroke();
+        ctx.restore();
+
         const puffAlpha = Math.max(0.12, baseAlpha * 0.75);
         ctx.globalAlpha = puffAlpha;
         ctx.fillStyle = tintA;
         ctx.beginPath();
-        ctx.arc(anchorX - leadDir * (10 + t * 8), anchorY - 2 + Math.sin(now * 0.01 + i) * 3, Math.max(5, widthBias * 0.45), 0, Math.PI * 2);
+        ctx.ellipse(
+            anchorX - leadDir * (12 + t * 10),
+            anchorY - 2 + Math.sin(now * 0.01 + i) * 2,
+            Math.max(5, widthBias * 0.34),
+            Math.max(4, heightBias * 0.45),
+            leadDir * 0.22,
+            0,
+            Math.PI * 2
+        );
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(anchorX - leadDir * (18 + t * 10), anchorY + 2 + Math.cos(now * 0.012 + i) * 3, Math.max(4, widthBias * 0.32), 0, Math.PI * 2);
+        ctx.ellipse(
+            anchorX - leadDir * (22 + t * 14),
+            anchorY + 2 + Math.cos(now * 0.012 + i) * 2,
+            Math.max(4, widthBias * 0.24),
+            Math.max(3, heightBias * 0.34),
+            leadDir * 0.18,
+            0,
+            Math.PI * 2
+        );
         ctx.fill();
         ctx.globalAlpha = baseAlpha;
     }
