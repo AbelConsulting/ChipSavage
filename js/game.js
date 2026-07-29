@@ -1133,10 +1133,11 @@ class Game {
         async playMenuMusic() {
             if (!this.audioManager) return;
             try {
-                if (!this.audioManager.musicElements['menu_theme']) {
-                    await this.audioManager.loadMusic('menu_theme', 'assets/audio/music/menu_theme.wav');
+                // This repo currently does not ship menu music assets, so avoid
+                // requesting a missing file and keep the game silent instead.
+                if (this.audioManager.musicElements['menu_theme']) {
+                    this.audioManager.playMusic('menu_theme', true);
                 }
-                this.audioManager.playMusic('menu_theme', true);
             } catch (e) {
                 console.warn('Failed to load menu music:', e);
             }
@@ -1938,12 +1939,11 @@ class Game {
                         if (this.audioManager) {
                             (async () => {
                                 try {
-                                    if (!this.audioManager.musicElements['boss_battle']) {
-                                        await this.audioManager.loadMusic('boss_battle', 'assets/audio/music/boss_battle.wav');
+                                    if (this.audioManager.musicElements['boss_battle']) {
+                                        this.audioManager.playMusic('boss_battle', true);
+                                        // Also increase playback rate for extra intensity
+                                        if (this.audioManager.setMusicPlaybackRate) this.audioManager.setMusicPlaybackRate(1.5);
                                     }
-                                    this.audioManager.playMusic('boss_battle', true);
-                                    // Also increase playback rate for extra intensity
-                                    if (this.audioManager.setMusicPlaybackRate) this.audioManager.setMusicPlaybackRate(1.5);
                                 } catch (e) {
                                     // Fallback: just speed up current music
                                     if (this.audioManager.setMusicPlaybackRate) this.audioManager.setMusicPlaybackRate(2.0);
