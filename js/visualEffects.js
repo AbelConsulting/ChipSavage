@@ -249,7 +249,7 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
     const startInset = (typeof opts.startInset === 'number') ? opts.startInset : 4;
     const trailLength = (typeof opts.trailLength === 'number')
         ? opts.trailLength
-        : (fxW * 0.85 + 44);
+        : (fxW * 0.72 + 36);
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -257,70 +257,81 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
 
     for (let i = 0; i < wispCount; i++) {
         const t = i / Math.max(1, wispCount - 1);
-        const wobble = Math.sin(now * 0.006 + i * 1.7) * (5 + fxH * 0.02);
-        const drift = Math.cos(now * 0.0045 + i * 2.1) * (8 + fxH * 0.03);
-        const widthBias = Math.max(24, fxW * (0.28 + t * 0.28));
-        const heightBias = Math.max(10, fxH * (0.14 + (1 - t) * 0.04));
-        const anchorX = leadX + leadDir * (startInset + t * trailLength + Math.sin(now * 0.008 + i) * 3);
+        const wobble = Math.sin(now * 0.006 + i * 1.7) * (4 + fxH * 0.015);
+        const drift = Math.cos(now * 0.0045 + i * 2.1) * (6 + fxH * 0.02);
+        const widthBias = Math.max(26, fxW * (0.32 + t * 0.16));
+        const heightBias = Math.max(14, fxH * (0.22 + (1 - t) * 0.06));
+        const anchorX = leadX + leadDir * (startInset + t * trailLength + Math.sin(now * 0.008 + i) * 2);
         const anchorY = centerY + wobble;
 
         const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.25);
         grad.addColorStop(0, coreColor);
-        grad.addColorStop(0.18, tintA);
-        grad.addColorStop(0.48, tintB);
+        grad.addColorStop(0.14, tintA);
+        grad.addColorStop(0.42, tintB);
         grad.addColorStop(1, tintC);
 
         ctx.fillStyle = grad;
         ctx.beginPath();
+        const cloudScale = 1.0 + t * 0.08;
+        const cloudOffset = leadDir * drift * 0.12;
+        const lobeY = heightBias * 0.28;
+
+        // Main cloud mass
         ctx.ellipse(
-            anchorX + leadDir * drift * 0.2,
+            anchorX + cloudOffset,
             anchorY,
-            widthBias * (1.0 + t * 0.15),
+            widthBias * cloudScale,
             heightBias,
-            leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
+            leadDir * 0.05 + Math.sin(now * 0.003 + i) * 0.03,
             0,
             Math.PI * 2
         );
         ctx.fill();
 
-        ctx.save();
-        ctx.globalAlpha = Math.max(0.16, baseAlpha * 0.55);
-        ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.35)';
-        ctx.lineWidth = Math.max(1, Math.min(2.5, heightBias * 0.12));
+        // Rounded lobes to read more like a cloud puff.
         ctx.beginPath();
-        ctx.ellipse(
-            anchorX + leadDir * drift * 0.2,
-            anchorY,
-            widthBias * 0.96,
-            heightBias * 0.92,
-            leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
-            0,
-            Math.PI * 2
-        );
+        ctx.arc(anchorX - leadDir * (widthBias * 0.28), anchorY - lobeY, heightBias * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + leadDir * (widthBias * 0.02), anchorY - lobeY * 1.18, heightBias * 0.88, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + leadDir * (widthBias * 0.28), anchorY - lobeY * 0.95, heightBias * 0.74, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + leadDir * (widthBias * 0.48), anchorY + lobeY * 0.08, heightBias * 0.66, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.18, baseAlpha * 0.45);
+        ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.28)';
+        ctx.lineWidth = Math.max(1, Math.min(2.2, heightBias * 0.1));
+        ctx.beginPath();
+        ctx.ellipse(anchorX + cloudOffset, anchorY, widthBias * 0.98, heightBias * 0.95, leadDir * 0.05, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
-        const puffAlpha = Math.max(0.12, baseAlpha * 0.75);
+        const puffAlpha = Math.max(0.16, baseAlpha * 0.68);
         ctx.globalAlpha = puffAlpha;
         ctx.fillStyle = tintA;
         ctx.beginPath();
         ctx.ellipse(
-            anchorX - leadDir * (8 + t * 8),
+            anchorX - leadDir * (6 + t * 7),
             anchorY - 2 + Math.sin(now * 0.01 + i) * 2,
-            Math.max(5, widthBias * 0.42),
-            Math.max(4, heightBias * 0.45),
-            leadDir * 0.22,
+            Math.max(6, widthBias * 0.34),
+            Math.max(5, heightBias * 0.38),
+            leadDir * 0.08,
             0,
             Math.PI * 2
         );
         ctx.fill();
         ctx.beginPath();
         ctx.ellipse(
-            anchorX - leadDir * (14 + t * 12),
-            anchorY + 2 + Math.cos(now * 0.012 + i) * 2,
-            Math.max(4, widthBias * 0.3),
-            Math.max(3, heightBias * 0.34),
-            leadDir * 0.18,
+            anchorX + leadDir * (widthBias * 0.14),
+            anchorY + 1 + Math.cos(now * 0.012 + i) * 2,
+            Math.max(5, widthBias * 0.26),
+            Math.max(4, heightBias * 0.3),
+            leadDir * 0.06,
             0,
             Math.PI * 2
         );
