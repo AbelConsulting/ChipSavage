@@ -246,6 +246,10 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
     const tintB = opts.tintB || 'rgba(255, 120, 80, 0.24)';
     const tintC = opts.tintC || 'rgba(255, 90, 60, 0)';
     const wispCount = Math.max(3, Math.round((opts.wispCount || 5) * intensity));
+    const startInset = (typeof opts.startInset === 'number') ? opts.startInset : 4;
+    const trailLength = (typeof opts.trailLength === 'number')
+        ? opts.trailLength
+        : (fxW * 0.85 + 44);
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
@@ -255,9 +259,9 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
         const t = i / Math.max(1, wispCount - 1);
         const wobble = Math.sin(now * 0.006 + i * 1.7) * (5 + fxH * 0.02);
         const drift = Math.cos(now * 0.0045 + i * 2.1) * (8 + fxH * 0.03);
-        const widthBias = Math.max(22, fxW * (0.24 + t * 0.2));
-        const heightBias = Math.max(10, fxH * (0.16 + (1 - t) * 0.05));
-        const anchorX = leadX + leadDir * (14 + t * 30 + Math.sin(now * 0.008 + i) * 4);
+        const widthBias = Math.max(24, fxW * (0.28 + t * 0.28));
+        const heightBias = Math.max(10, fxH * (0.14 + (1 - t) * 0.04));
+        const anchorX = leadX + leadDir * (startInset + t * trailLength + Math.sin(now * 0.008 + i) * 3);
         const anchorY = centerY + wobble;
 
         const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.25);
@@ -271,7 +275,7 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
         ctx.ellipse(
             anchorX + leadDir * drift * 0.2,
             anchorY,
-            widthBias,
+            widthBias * (1.0 + t * 0.15),
             heightBias,
             leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
             0,
@@ -287,7 +291,7 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
         ctx.ellipse(
             anchorX + leadDir * drift * 0.2,
             anchorY,
-            widthBias * 0.98,
+            widthBias * 0.96,
             heightBias * 0.92,
             leadDir * 0.12 + Math.sin(now * 0.003 + i) * 0.05,
             0,
@@ -301,9 +305,9 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
         ctx.fillStyle = tintA;
         ctx.beginPath();
         ctx.ellipse(
-            anchorX - leadDir * (12 + t * 10),
+            anchorX - leadDir * (8 + t * 8),
             anchorY - 2 + Math.sin(now * 0.01 + i) * 2,
-            Math.max(5, widthBias * 0.34),
+            Math.max(5, widthBias * 0.42),
             Math.max(4, heightBias * 0.45),
             leadDir * 0.22,
             0,
@@ -312,9 +316,9 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
         ctx.fill();
         ctx.beginPath();
         ctx.ellipse(
-            anchorX - leadDir * (22 + t * 14),
+            anchorX - leadDir * (14 + t * 12),
             anchorY + 2 + Math.cos(now * 0.012 + i) * 2,
-            Math.max(4, widthBias * 0.24),
+            Math.max(4, widthBias * 0.3),
             Math.max(3, heightBias * 0.34),
             leadDir * 0.18,
             0,
