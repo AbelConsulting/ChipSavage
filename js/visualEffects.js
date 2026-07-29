@@ -226,6 +226,74 @@ class HitSpark {
     }
 }
 
+function drawAttackWispTelegraph(ctx, hb, opts = {}) {
+    if (!ctx || !hb) return;
+
+    const fxX = hb.x || 0;
+    const fxY = hb.y || 0;
+    const fxW = hb.width || 0;
+    const fxH = hb.height || 0;
+    const facingRight = opts.facingRight !== false;
+    const leadDir = facingRight ? 1 : -1;
+    const centerY = fxY + fxH / 2;
+    const leadX = facingRight ? fxX + fxW : fxX;
+    const now = Date.now();
+    const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : 0.5;
+    const intensity = (typeof opts.intensity === 'number') ? Math.max(0.2, opts.intensity) : 1;
+    const baseAlpha = (typeof opts.alpha === 'number') ? Math.max(0, Math.min(1, opts.alpha)) : (0.38 + progress * 0.18);
+    const coreColor = opts.coreColor || 'rgba(255, 255, 255, 0.95)';
+    const tintA = opts.tintA || 'rgba(255, 190, 120, 0.60)';
+    const tintB = opts.tintB || 'rgba(255, 120, 80, 0.24)';
+    const tintC = opts.tintC || 'rgba(255, 90, 60, 0)';
+    const wispCount = Math.max(3, Math.round((opts.wispCount || 5) * intensity));
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = baseAlpha;
+
+    for (let i = 0; i < wispCount; i++) {
+        const t = i / Math.max(1, wispCount - 1);
+        const wobble = Math.sin(now * 0.006 + i * 1.7) * (8 + fxH * 0.03);
+        const drift = Math.cos(now * 0.0045 + i * 2.1) * (10 + fxH * 0.04);
+        const widthBias = Math.max(18, fxW * (0.16 + t * 0.14));
+        const heightBias = Math.max(12, fxH * (0.22 + (1 - t) * 0.08));
+        const anchorX = leadX + leadDir * (12 + t * 24 + Math.sin(now * 0.008 + i) * 5);
+        const anchorY = centerY + wobble;
+
+        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.4);
+        grad.addColorStop(0, coreColor);
+        grad.addColorStop(0.22, tintA);
+        grad.addColorStop(0.58, tintB);
+        grad.addColorStop(1, tintC);
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(
+            anchorX + leadDir * drift * 0.2,
+            anchorY,
+            widthBias,
+            heightBias,
+            leadDir * 0.18 + Math.sin(now * 0.003 + i) * 0.08,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        const puffAlpha = Math.max(0.12, baseAlpha * 0.75);
+        ctx.globalAlpha = puffAlpha;
+        ctx.fillStyle = tintA;
+        ctx.beginPath();
+        ctx.arc(anchorX - leadDir * (10 + t * 8), anchorY - 2 + Math.sin(now * 0.01 + i) * 3, Math.max(5, widthBias * 0.45), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX - leadDir * (18 + t * 10), anchorY + 2 + Math.cos(now * 0.012 + i) * 3, Math.max(4, widthBias * 0.32), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = baseAlpha;
+    }
+
+    ctx.restore();
+}
+
 /**
  * ScreenFlash — full-screen color wash that fades out quickly.
  * Used to punctuate big combo milestones and special hits.

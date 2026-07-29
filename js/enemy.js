@@ -1920,19 +1920,21 @@ class Enemy {
         if (this.isAttacking && this.attackHitbox && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
             try {
                 const hb = this.attackHitbox;
-                const fxX = hb.x;
-                const fxY = hb.y;
-                const fxW = hb.width;
-                const fxH = hb.height;
-                const grad = ctx.createLinearGradient(fxX, fxY, fxX + fxW, fxY + fxH);
-                grad.addColorStop(0, 'rgba(120, 255, 140, 0.12)');
-                grad.addColorStop(1, 'rgba(60, 220, 120, 0.22)');
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                ctx.fillStyle = grad;
-                const r = Math.max(4, Math.min(10, Math.floor(fxH * 0.2)));
-                ctx.beginPath();
-                ctx.moveTo(fxX + r, fxY);
+                if (typeof drawAttackWispTelegraph === 'function') {
+                    drawAttackWispTelegraph(ctx, hb, {
+                        facingRight: this.facingRight,
+                        progress: (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5,
+                        intensity: this.isBossType() ? 1.2 : 1,
+                        alpha: this.isBossType() ? 0.45 : 0.38,
+                        coreColor: 'rgba(236, 255, 244, 0.95)',
+                        tintA: this.isBossType() ? 'rgba(160, 255, 200, 0.64)' : 'rgba(130, 255, 150, 0.58)',
+                        tintB: this.isBossType() ? 'rgba(70, 220, 150, 0.22)' : 'rgba(60, 220, 120, 0.22)',
+                        tintC: 'rgba(40, 180, 100, 0)'
+                    });
+                }
+            } catch (e) { __err('enemy', e); }
+        }
+
         // Draw rush sparks (behind body)
         if (this.enemyType === 'THIRD_BASIC' && this.rushSparks && this.rushSparks.length > 0) {
             ctx.save();
@@ -1950,20 +1952,6 @@ class Enemy {
                 ctx.fill();
             }
             ctx.restore();
-        }
-
-                ctx.lineTo(fxX + fxW - r, fxY);
-                ctx.quadraticCurveTo(fxX + fxW, fxY, fxX + fxW, fxY + r);
-                ctx.lineTo(fxX + fxW, fxY + fxH - r);
-                ctx.quadraticCurveTo(fxX + fxW, fxY + fxH, fxX + fxW - r, fxY + fxH);
-                ctx.lineTo(fxX + r, fxY + fxH);
-                ctx.quadraticCurveTo(fxX, fxY + fxH, fxX, fxY + fxH - r);
-                ctx.lineTo(fxX, fxY + r);
-                ctx.quadraticCurveTo(fxX, fxY, fxX + r, fxY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            } catch (e) { __err('enemy', e); }
         }
 
         // THIRD_BASIC Kamikaze: fuse flash overlay (during FUSE phase)

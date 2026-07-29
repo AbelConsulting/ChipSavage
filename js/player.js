@@ -1054,36 +1054,18 @@ class Player {
         if (this.isAttacking && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
             try {
                 const hb = this.getAttackHitboxForCollision() || this.attackHitbox;
-                const fxX = hb.x;
-                const fxY = hb.y;
-                const fxW = hb.width;
-                const fxH = hb.height;
-                const grad = ctx.createLinearGradient(fxX, fxY, fxX + fxW, fxY + fxH);
-                if (this.isKicking) {
-                    grad.addColorStop(0, 'rgba(255, 215, 0, 0.18)');
-                    grad.addColorStop(1, 'rgba(255, 180, 60, 0.28)');
-                } else {
-                    grad.addColorStop(0, 'rgba(255, 160, 80, 0.12)');
-                    grad.addColorStop(1, 'rgba(255, 80, 80, 0.22)');
+                if (typeof drawAttackWispTelegraph === 'function') {
+                    drawAttackWispTelegraph(ctx, hb, {
+                        facingRight: this.facingRight,
+                        progress: (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5,
+                        intensity: this.isKicking ? 1.15 : 1,
+                        alpha: this.isKicking ? 0.5 : 0.42,
+                        coreColor: this.isKicking ? 'rgba(255, 246, 210, 0.95)' : 'rgba(255, 240, 220, 0.95)',
+                        tintA: this.isKicking ? 'rgba(255, 220, 110, 0.68)' : 'rgba(255, 170, 110, 0.58)',
+                        tintB: this.isKicking ? 'rgba(255, 170, 60, 0.26)' : 'rgba(255, 110, 90, 0.24)',
+                        tintC: 'rgba(255, 90, 60, 0)'
+                    });
                 }
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                // Slightly rounded rectangle for a softer look
-                const r = Math.max(4, Math.min(10, Math.floor(fxH * 0.2)));
-                ctx.moveTo(fxX + r, fxY);
-                ctx.lineTo(fxX + fxW - r, fxY);
-                ctx.quadraticCurveTo(fxX + fxW, fxY, fxX + fxW, fxY + r);
-                ctx.lineTo(fxX + fxW, fxY + fxH - r);
-                ctx.quadraticCurveTo(fxX + fxW, fxY + fxH, fxX + fxW - r, fxY + fxH);
-                ctx.lineTo(fxX + r, fxY + fxH);
-                ctx.quadraticCurveTo(fxX, fxY + fxH, fxX, fxY + fxH - r);
-                ctx.lineTo(fxX, fxY + r);
-                ctx.quadraticCurveTo(fxX, fxY, fxX + r, fxY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
             } catch (e) { __err('player', e); }
         }
 
