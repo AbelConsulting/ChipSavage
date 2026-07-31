@@ -10,12 +10,12 @@
 
 // Enemy type configuration lookup table - centralizes all type-specific settings
 const ENEMY_TYPE_CONFIG = {
-    'BASIC': { prefix: 'basic', size: { width: 48, height: 48 }, fallback: null },
-    'FAST_BASIC': { prefix: 'basic', size: { width: 48, height: 48 }, fallback: null },
-    'SECOND_BASIC': { prefix: 'second', size: { width: 48, height: 48 }, fallback: 'BASIC' },
-    'THIRD_BASIC': { prefix: 'third', size: { width: 48, height: 48 }, fallback: 'SECOND_BASIC' },
-    'FOURTH_BASIC': { prefix: 'fourth', size: { width: 48, height: 48 }, fallback: 'THIRD_BASIC' },
-    'FIFTH_BASIC': { prefix: 'fifth', size: { width: 48, height: 48 }, fallback: 'FOURTH_BASIC' },
+    'BASIC': { prefix: 'basic', size: { width: 65, height: 65 }, fallback: null },
+    'FAST_BASIC': { prefix: 'basic', size: { width: 65, height: 65 }, fallback: null },
+    'SECOND_BASIC': { prefix: 'second', size: { width: 65, height: 65 }, fallback: 'BASIC' },
+    'THIRD_BASIC': { prefix: 'third', size: { width: 65, height: 65 }, fallback: 'SECOND_BASIC' },
+    'FOURTH_BASIC': { prefix: 'fourth', size: { width: 65, height: 65 }, fallback: 'THIRD_BASIC' },
+    'FIFTH_BASIC': { prefix: 'fifth', size: { width: 65, height: 65 }, fallback: 'FOURTH_BASIC' },
     'FLYING': { prefix: 'fly', size: { width: 40, height: 40 }, fallback: null },
     'BOSS': { prefix: 'boss', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss_attack1', bossName: 'SHADOW FANG', bossTitle: 'Guardian of the Forest', ability: 'charge' },
     'BOSS2': { prefix: 'boss2', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss2_attack', bossName: 'IRON CLAW', bossTitle: 'Enforcer of Skunk City', ability: 'groundSlam' },
