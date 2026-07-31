@@ -106,7 +106,7 @@ const LEVEL_CONFIGS = [
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
         boss: {
-            type: "BOSS7",
+            type: "BOSS",
             spawnX: 3480,
             spawnY: 520,
             healthMultiplier: 6.5,
@@ -244,7 +244,7 @@ const LEVEL_CONFIGS = [
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
         boss: {
-            type: "BOSS2",
+            type: "BOSS",
             spawnX: 3480,
             spawnY: 520,
             healthMultiplier: 8.5,
@@ -389,7 +389,7 @@ const LEVEL_CONFIGS = [
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
         boss: {
-            type: "BOSS3",
+            type: "BOSS",
             spawnX: 3980,
             spawnY: 520,
             healthMultiplier: 10.5,
@@ -538,7 +538,7 @@ const LEVEL_CONFIGS = [
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
         boss: {
-            type: "BOSS6",
+            type: "BOSS",
             spawnX: 3980,
             spawnY: 520,
             healthMultiplier: 11.5,
@@ -691,7 +691,7 @@ const LEVEL_CONFIGS = [
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
         boss: {
-            type: "BOSS5",
+            type: "BOSS",
             spawnX: 3980,
             spawnY: 520,
             healthMultiplier: 12.5,
@@ -833,7 +833,7 @@ const LEVEL_CONFIGS = [
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
         boss: {
-            type: "BOSS4",
+            type: "BOSS",
             spawnX: 3480,
             spawnY: 520,
             healthMultiplier: 13.5,
@@ -1139,7 +1139,7 @@ const LEVEL_CONFIGS = [
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
         boss: {
-            type: "BOSS8",
+            type: "BOSS",
             spawnX: 4480,
             spawnY: 520,
             healthMultiplier: 15.5,
@@ -1288,7 +1288,7 @@ const LEVEL_CONFIGS = [
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
         boss: {
-            type: "BOSS9",
+            type: "BOSS",
             spawnX: 3480,
             spawnY: 520,
             healthMultiplier: 16.5,
@@ -1436,7 +1436,7 @@ const LEVEL_CONFIGS = [
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
         boss: {
-            type: "BOSS4",
+            type: "BOSS",
             spawnX: 4480,
             spawnY: 520,
             healthMultiplier: 19.0,
