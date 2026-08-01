@@ -233,10 +233,11 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
     const fxY = hb.y || 0;
     const fxW = hb.width || 0;
     const fxH = hb.height || 0;
+    if (fxW <= 0 || fxH <= 0) return;
+
     const facingRight = opts.facingRight !== false;
     const leadDir = facingRight ? 1 : -1;
     const centerY = fxY + fxH / 2;
-    const leadX = facingRight ? fxX + fxW : fxX;
     const now = Date.now();
     const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : 0.5;
     const intensity = (typeof opts.intensity === 'number') ? Math.max(0.2, opts.intensity) : 1;
@@ -245,99 +246,96 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
     const tintA = opts.tintA || 'rgba(255, 190, 120, 0.60)';
     const tintB = opts.tintB || 'rgba(255, 120, 80, 0.24)';
     const tintC = opts.tintC || 'rgba(255, 90, 60, 0)';
-    const wispCount = Math.max(3, Math.round((opts.wispCount || 5) * intensity));
-    const startInset = (typeof opts.startInset === 'number') ? opts.startInset : 4;
-    const trailLength = (typeof opts.trailLength === 'number')
-        ? opts.trailLength
-        : (fxW * 0.72 + 36);
+    const cloudCount = Math.max(3, Math.round((opts.wispCount || 6) * intensity));
+    const padX = Math.max(2, Math.min(8, fxW * 0.08));
+    const padY = Math.max(2, Math.min(7, fxH * 0.14));
+    const minX = fxX + padX;
+    const maxX = fxX + fxW - padX;
+    const minY = fxY + padY;
+    const maxY = fxY + fxH - padY;
+    const usableW = Math.max(1, maxX - minX);
+    const usableH = Math.max(1, maxY - minY);
 
     ctx.save();
+    // Keep all cloud pixels inside the real hit field.
+    ctx.beginPath();
+    ctx.rect(fxX, fxY, fxW, fxH);
+    ctx.clip();
     ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = baseAlpha;
 
-    for (let i = 0; i < wispCount; i++) {
-        const t = i / Math.max(1, wispCount - 1);
-        const wobble = Math.sin(now * 0.006 + i * 1.7) * (4 + fxH * 0.015);
-        const drift = Math.cos(now * 0.0045 + i * 2.1) * (6 + fxH * 0.02);
-        const widthBias = Math.max(26, fxW * (0.32 + t * 0.16));
-        const heightBias = Math.max(14, fxH * (0.22 + (1 - t) * 0.06));
-        const anchorX = leadX + leadDir * (startInset + t * trailLength + Math.sin(now * 0.008 + i) * 2);
-        const anchorY = centerY + wobble;
+    const laneGrad = ctx.createLinearGradient(
+        facingRight ? fxX : (fxX + fxW),
+        centerY,
+        facingRight ? (fxX + fxW) : fxX,
+        centerY
+    );
+    laneGrad.addColorStop(0, tintC);
+    laneGrad.addColorStop(0.12, tintB);
+    laneGrad.addColorStop(0.5, tintA);
+    laneGrad.addColorStop(1, tintC);
+    ctx.fillStyle = laneGrad;
+    ctx.beginPath();
+    const laneRadius = Math.max(3, Math.min(fxH * 0.42, 14));
+    ctx.roundRect(fxX, fxY, fxW, fxH, laneRadius);
+    ctx.fill();
 
-        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.25);
+    for (let i = 0; i < cloudCount; i++) {
+        const t = i / Math.max(1, cloudCount - 1);
+        const pulse = Math.sin(now * 0.0055 + i * 1.9);
+        const sway = Math.cos(now * 0.004 + i * 1.3);
+        const baseX = facingRight
+            ? (minX + usableW * t)
+            : (maxX - usableW * t);
+        const anchorX = Utils.clamp(baseX + leadDir * sway * Math.max(1.5, usableW * 0.02), minX, maxX);
+        const anchorY = Utils.clamp(centerY + pulse * Math.max(1.5, usableH * 0.16), minY, maxY);
+        const widthBias = Math.max(8, usableW * (0.16 + (1 - Math.abs(0.5 - t) * 1.15) * 0.2));
+        const heightBias = Math.max(6, usableH * (0.34 + Math.sin(now * 0.0045 + i) * 0.06));
+
+        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.05);
         grad.addColorStop(0, coreColor);
-        grad.addColorStop(0.14, tintA);
-        grad.addColorStop(0.42, tintB);
+        grad.addColorStop(0.2, tintA);
+        grad.addColorStop(0.55, tintB);
         grad.addColorStop(1, tintC);
 
         ctx.fillStyle = grad;
         ctx.beginPath();
-        const cloudScale = 1.0 + t * 0.08;
-        const cloudOffset = leadDir * drift * 0.12;
-        const lobeY = heightBias * 0.28;
+        const lobeY = heightBias * 0.3;
+        const lobeOffset = leadDir * Math.max(1.5, widthBias * 0.08);
 
-        // Main cloud mass
         ctx.ellipse(
-            anchorX + cloudOffset,
+            anchorX,
             anchorY,
-            widthBias * cloudScale,
+            widthBias,
             heightBias,
-            leadDir * 0.05 + Math.sin(now * 0.003 + i) * 0.03,
+            leadDir * 0.04 + pulse * 0.02,
             0,
             Math.PI * 2
         );
         ctx.fill();
 
-        // Rounded lobes to read more like a cloud puff.
         ctx.beginPath();
-        ctx.arc(anchorX - leadDir * (widthBias * 0.28), anchorY - lobeY, heightBias * 0.72, 0, Math.PI * 2);
+        ctx.arc(anchorX - lobeOffset * 1.4, anchorY - lobeY, heightBias * 0.7, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(anchorX + leadDir * (widthBias * 0.02), anchorY - lobeY * 1.18, heightBias * 0.88, 0, Math.PI * 2);
+        ctx.arc(anchorX + lobeOffset * 0.2, anchorY - lobeY * 1.1, heightBias * 0.86, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(anchorX + leadDir * (widthBias * 0.28), anchorY - lobeY * 0.95, heightBias * 0.74, 0, Math.PI * 2);
+        ctx.arc(anchorX + lobeOffset * 1.2, anchorY - lobeY * 0.88, heightBias * 0.72, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(anchorX + leadDir * (widthBias * 0.48), anchorY + lobeY * 0.08, heightBias * 0.66, 0, Math.PI * 2);
+        ctx.arc(anchorX + lobeOffset * 1.9, anchorY + lobeY * 0.1, heightBias * 0.6, 0, Math.PI * 2);
         ctx.fill();
-
-        ctx.save();
-        ctx.globalAlpha = Math.max(0.18, baseAlpha * 0.45);
-        ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.28)';
-        ctx.lineWidth = Math.max(1, Math.min(2.2, heightBias * 0.1));
-        ctx.beginPath();
-        ctx.ellipse(anchorX + cloudOffset, anchorY, widthBias * 0.98, heightBias * 0.95, leadDir * 0.05, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-
-        const puffAlpha = Math.max(0.16, baseAlpha * 0.68);
-        ctx.globalAlpha = puffAlpha;
-        ctx.fillStyle = tintA;
-        ctx.beginPath();
-        ctx.ellipse(
-            anchorX - leadDir * (6 + t * 7),
-            anchorY - 2 + Math.sin(now * 0.01 + i) * 2,
-            Math.max(6, widthBias * 0.34),
-            Math.max(5, heightBias * 0.38),
-            leadDir * 0.08,
-            0,
-            Math.PI * 2
-        );
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(
-            anchorX + leadDir * (widthBias * 0.14),
-            anchorY + 1 + Math.cos(now * 0.012 + i) * 2,
-            Math.max(5, widthBias * 0.26),
-            Math.max(4, heightBias * 0.3),
-            leadDir * 0.06,
-            0,
-            Math.PI * 2
-        );
-        ctx.fill();
-        ctx.globalAlpha = baseAlpha;
     }
+
+    // Defined contour so it reads like a cloud field, not just glow.
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = Math.max(0.2, baseAlpha * 0.72);
+    ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.36)';
+    ctx.lineWidth = Math.max(1, Math.min(2.4, fxH * 0.09));
+    ctx.beginPath();
+    ctx.roundRect(fxX + 0.5, fxY + 0.5, Math.max(0, fxW - 1), Math.max(0, fxH - 1), laneRadius);
+    ctx.stroke();
 
     ctx.restore();
 }

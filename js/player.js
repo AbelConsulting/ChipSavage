@@ -1050,8 +1050,8 @@ class Player {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
 
-        // Attack range FX (subtle overlay, not a hitbox)
-        if (this.isAttacking && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
+        // Attack range FX: render only during active damage frames.
+        if (this.isAttacking && this.isAttackDamageActive() && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
             try {
                 const hb = this.getAttackHitboxForCollision() || this.attackHitbox;
                 if (typeof drawAttackWispTelegraph === 'function') {
