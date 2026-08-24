@@ -1164,6 +1164,17 @@ class Enemy {
             this.velocityY = 0;
         }
 
+        // Resolve solid wall overlap so enemies can't walk through wall geometry
+        if (typeof level.resolveSolidCollision === 'function') {
+            const solid = level.resolveSolidCollision(
+                { x: this.x, y: this.y, width: this.width, height: this.height },
+                prevRect
+            );
+            this.x = solid.x;
+            this.y = solid.y;
+            if (solid.collidedY) this.velocityY = 0;
+        }
+
         // Safety clamp: prevent bosses from falling through the world entirely.
         // If the enemy is below all known platforms, snap them onto the nearest one.
         if (this.isBossType() && this.y + this.height > level.height + 40) {
@@ -1185,6 +1196,7 @@ class Enemy {
         let bestDist = Infinity;
         for (const p of level.platforms) {
             if (!p || typeof p.x !== 'number') continue;
+            if (p.type === 'climb') continue; // climbables are not standable
             // Must overlap horizontally
             if (bx + bw <= p.x || bx >= p.x + p.width) continue;
             const dist = Math.abs((this.y + bh) - p.y);
@@ -1533,6 +1545,13 @@ class Enemy {
             if (p.age >= p.lifetime) { this.thrownProjectiles.splice(i, 1); continue; }
             if (level && (p.x < -100 || p.x > level.width + 100 || p.y > level.height + 100)) {
                 this.thrownProjectiles.splice(i, 1); continue;
+            }
+            // Cull on solid wall impact
+            if (level && typeof level.getWallAt === 'function') {
+                const hw = (p.width || 16) / 2, hh = (p.height || 16) / 2;
+                if (level.getWallAt({ x: p.x - hw, y: p.y - hh, width: hw * 2, height: hh * 2 })) {
+                    this.thrownProjectiles.splice(i, 1); continue;
+                }
             }
         }
     }
@@ -2360,8 +2379,9 @@ class Enemy {
             height: 2 // Small height to check for platform intersection
         };
 
-        // Check collision with all platforms
+        // Check collision with all solid platforms (climbables don't support standing)
         for (const platform of level.platforms) {
+            if (platform.type === 'climb') continue;
             if (Utils.rectCollision(testRect, platform)) {
                 return true;
             }

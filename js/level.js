@@ -47,7 +47,7 @@ class Level {
         // Per-level background parallax factor (0..1). Lower = slower (farther away).
         this.backgroundParallax = (typeof levelData.backgroundParallax !== 'undefined') ? levelData.backgroundParallax : (typeof Config !== 'undefined' ? Config.BACKGROUND_PARALLAX : 0.5);
         
-        // Initialize platforms (static and moving)
+        // Initialize platforms (static, moving, and climbable)
         // Accept partial data: if platforms is missing, keep existing platforms.
         const incomingPlatforms = Array.isArray(levelData.platforms) ? levelData.platforms : this.platforms;
         this.platforms = (Array.isArray(incomingPlatforms) ? incomingPlatforms : []).map(p => ({
@@ -134,6 +134,8 @@ class Level {
         const prevBottom = prevRect.y + prevRect.height;
 
         for (const platform of this.platforms) {
+            if (platform.type === 'climb' || platform.type === 'wall') continue;
+
             // 1. Horizontal Overlap Check
             if (rect.x + rect.width > platform.x && rect.x < platform.x + platform.width) {
                 
@@ -155,6 +157,100 @@ class Level {
             }
         }
         return { collided: false };
+    }
+
+    /**
+     * Resolve collisions against solid geometry (walls, blockers).
+     * Unlike one-way platforms, these collide from all directions.
+     * @param {Object} rect - Current object bounding rect { x,y,width,height }
+     * @param {Object} prevRect - Previous frame bounding rect
+     * @returns {{x:number,y:number,collidedX:boolean,collidedY:boolean,landed:boolean}}
+     */
+    resolveSolidCollision(rect, prevRect) {
+        let outX = rect.x;
+        let outY = rect.y;
+        let collidedX = false;
+        let collidedY = false;
+        let landed = false;
+
+        for (const platform of this.platforms) {
+            if (platform.type !== 'wall') continue;
+
+            const overlaps = (
+                outX < platform.x + platform.width &&
+                outX + rect.width > platform.x &&
+                outY < platform.y + platform.height &&
+                outY + rect.height > platform.y
+            );
+            if (!overlaps) continue;
+
+            const overlapLeft = outX + rect.width - platform.x;
+            const overlapRight = platform.x + platform.width - outX;
+            const overlapTop = outY + rect.height - platform.y;
+            const overlapBottom = platform.y + platform.height - outY;
+            const minOverlapX = Math.min(overlapLeft, overlapRight);
+            const minOverlapY = Math.min(overlapTop, overlapBottom);
+
+            if (minOverlapX < minOverlapY) {
+                if (prevRect.x + prevRect.width <= platform.x) {
+                    outX = platform.x - rect.width;
+                } else if (prevRect.x >= platform.x + platform.width) {
+                    outX = platform.x + platform.width;
+                } else {
+                    const rectCenterX = outX + rect.width * 0.5;
+                    const wallCenterX = platform.x + platform.width * 0.5;
+                    outX = rectCenterX < wallCenterX ? platform.x - rect.width : platform.x + platform.width;
+                }
+                collidedX = true;
+            } else {
+                if (prevRect.y + prevRect.height <= platform.y) {
+                    outY = platform.y - rect.height;
+                    landed = true;
+                } else if (prevRect.y >= platform.y + platform.height) {
+                    outY = platform.y + platform.height;
+                } else {
+                    const rectCenterY = outY + rect.height * 0.5;
+                    const wallCenterY = platform.y + platform.height * 0.5;
+                    outY = rectCenterY < wallCenterY ? platform.y - rect.height : platform.y + platform.height;
+                    if (rectCenterY < wallCenterY) landed = true;
+                }
+                collidedY = true;
+            }
+        }
+
+        return { x: outX, y: outY, collidedX, collidedY, landed };
+    }
+
+    /**
+     * Find a climbable platform overlapping the given rect.
+     * @param {Object} rect - Current bounding rect
+     * @returns {Object|null}
+     */
+    getClimbableAt(rect) {
+        if (!rect) return null;
+        for (const platform of this.platforms) {
+            if (platform.type !== 'climb') continue;
+            if (rect.x + rect.width > platform.x && rect.x < platform.x + platform.width && rect.y + rect.height > platform.y && rect.y < platform.y + platform.height) {
+                return platform;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find a wall overlapping the given rect (solid geometry probe).
+     * @param {Object} rect
+     * @returns {Object|null}
+     */
+    getWallAt(rect) {
+        if (!rect) return null;
+        for (const platform of this.platforms) {
+            if (platform.type !== 'wall') continue;
+            if (rect.x + rect.width > platform.x && rect.x < platform.x + platform.width && rect.y + rect.height > platform.y && rect.y < platform.y + platform.height) {
+                return platform;
+            }
+        }
+        return null;
     }
 
     /**
@@ -379,6 +475,11 @@ class Level {
     }
 
     drawPlatform(ctx, p) {
+        if (p.type === 'climb') {
+            this.drawClimbable(ctx, p);
+            return;
+        }
+
         // If tile mode is enabled and sprite exists, draw a tiled fill
         if (this.tileMode === 'tiles') {
             const tileName = p.tile || 'platform_tile';
@@ -430,6 +531,52 @@ class Level {
            ctx.restore();
     }
 
+    drawClimbable(ctx, p) {
+        const style = p.style || (p.tile && p.tile.includes('vine') ? 'vine' : 'ladder');
+        if (style === 'vine') {
+            const stemX = p.x + p.width * 0.45;
+            const stemW = Math.max(4, p.width * 0.18);
+            const leafCount = Math.max(4, Math.floor(p.height / 36));
+            ctx.save();
+            const stemGrad = ctx.createLinearGradient(p.x, p.y, p.x + p.width, p.y + p.height);
+            stemGrad.addColorStop(0, '#1f7a2a');
+            stemGrad.addColorStop(1, '#0d4f16');
+            ctx.fillStyle = stemGrad;
+            ctx.fillRect(stemX, p.y, stemW, p.height);
+            ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(stemX, p.y, stemW, p.height);
+            for (let i = 0; i < leafCount; i++) {
+                const y = p.y + (i + 0.5) * (p.height / leafCount);
+                const side = i % 2 === 0 ? -1 : 1;
+                ctx.beginPath();
+                ctx.fillStyle = side < 0 ? '#2aa03b' : '#55c96a';
+                ctx.ellipse(stemX + stemW / 2 + side * p.width * 0.18, y, p.width * 0.16, p.height / (leafCount * 2.3), side * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+            return;
+        }
+
+        const railW = Math.max(4, Math.floor(p.width * 0.16));
+        const rungCount = Math.max(3, Math.floor(p.height / 26));
+        ctx.save();
+        ctx.fillStyle = '#7b4b21';
+        ctx.fillRect(p.x, p.y, railW, p.height);
+        ctx.fillRect(p.x + p.width - railW, p.y, railW, p.height);
+        ctx.fillStyle = '#b07b45';
+        ctx.fillRect(p.x + railW, p.y, p.width - railW * 2, 4);
+        ctx.fillStyle = '#c9a16f';
+        for (let i = 1; i < rungCount; i++) {
+            const y = p.y + (i * p.height) / rungCount;
+            ctx.fillRect(p.x + railW, y, p.width - railW * 2, 3);
+        }
+        ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.x, p.y, p.width, p.height);
+        ctx.restore();
+    }
+
     // ----- Static layer pre-rendering for non-moving platforms -----
     // Call when level content or viewport size changes
     renderStaticLayer(viewWidth = null, viewHeight = null) {
@@ -460,6 +607,12 @@ class Level {
                 const sy = Math.floor((p.y / this.height) * canvas.height);
                 const sw = Math.max(1, Math.floor((p.width / this.width) * canvas.width));
                 const sh = Math.max(1, Math.floor((p.height / this.height) * canvas.height));
+                const scaled = { ...p, x: sx, y: sy, width: sw, height: sh };
+
+                if (p.type === 'climb') {
+                    this.drawClimbable(c, scaled);
+                    continue;
+                }
 
                 // If tile mode with a pattern, create pattern on the static ctx
                 if (this.tileMode === 'tiles') {

@@ -6,7 +6,7 @@
  */
 /*
  * TouchControls - on-screen touch buttons and sensitivity slider
- * Emits `touchcontrol` CustomEvent with detail { action: 'left'|'right'|'jump'|'attack'|'special'|'pause'|'restart', down: boolean }
+ * Emits `touchcontrol` CustomEvent with detail { action: 'left'|'right'|'up'|'down'|'jump'|'attack'|'special'|'pause'|'restart', down: boolean }
  */
 (function(){
     class TouchControls {
@@ -36,6 +36,8 @@
             // Left/Right/JUMP area
             const leftBtn = this._createButton('⟸', 'left-btn touch-btn--move', 'Move left');
             const rightBtn = this._createButton('⟹', 'right-btn touch-btn--move', 'Move right');
+            const upBtn = this._createButton('⇡', 'up-btn touch-btn--jump', 'Climb up');
+            const downBtn = this._createButton('⇣', 'down-btn touch-btn--jump', 'Climb down');
             const jumpBtn = this._createButton('⤒', 'jump-btn touch-btn--jump', 'Jump');
             const attackBtn = this._createButton('🗡', 'attack-btn touch-btn--attack', 'Attack');
             const specialBtn = this._createButton('💥', 'special-btn touch-btn--special', 'Special');
@@ -53,9 +55,34 @@
             rightGroup.style.right = '12px';
             rightGroup.style.bottom = '12px';
             rightGroup.style.pointerEvents = 'auto';
-            rightGroup.appendChild(jumpBtn);
-            rightGroup.appendChild(attackBtn);
-            rightGroup.appendChild(specialBtn);
+            rightGroup.style.display = 'flex';
+            rightGroup.style.flexDirection = 'column';
+            rightGroup.style.alignItems = 'flex-end';
+            rightGroup.style.gap = '8px';
+
+            const climbGroup = document.createElement('div');
+            climbGroup.style.display = 'flex';
+            climbGroup.style.flexDirection = 'column';
+            climbGroup.style.alignItems = 'center';
+            climbGroup.style.gap = '6px';
+
+            upBtn.style.width = '52px';
+            upBtn.style.height = '52px';
+            downBtn.style.width = '52px';
+            downBtn.style.height = '52px';
+
+            climbGroup.appendChild(upBtn);
+            climbGroup.appendChild(downBtn);
+
+            const actionRow = document.createElement('div');
+            actionRow.style.display = 'flex';
+            actionRow.style.gap = '8px';
+            actionRow.appendChild(jumpBtn);
+            actionRow.appendChild(attackBtn);
+            actionRow.appendChild(specialBtn);
+
+            rightGroup.appendChild(climbGroup);
+            rightGroup.appendChild(actionRow);
 
             // Pause button for quick mobile pause/resume - DISABLED: using overlay pause instead
             // const pauseBtn = this._createButton('⏸', 'pause-btn');
@@ -134,6 +161,8 @@
             // Bind buttons (restart has a custom confirm/animation)
             this._bindButton(leftBtn, 'left');
             this._bindButton(rightBtn, 'right');
+            this._bindButton(upBtn, 'up');
+            this._bindButton(downBtn, 'down');
             this._bindButton(jumpBtn, 'jump');
             this._bindButton(attackBtn, 'attack');
             this._bindButton(specialBtn, 'special');

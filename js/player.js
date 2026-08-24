@@ -38,6 +38,9 @@ class Player {
         this.friction = 1800;
         this.facingRight = true;
         this.onGround = false;
+        this.isClimbing = false;
+        this._climbable = null;
+        this.climbSpeed = (Config && Config.CLIMB_SPEED) || 260;
 
         // Jump mechanics
         this.coyoteTime = 0.15;
@@ -160,6 +163,7 @@ class Player {
                 idle: spriteLoader.createAnimation('chip_idle', 4, 0.15),
                 walk: spriteLoader.createAnimation('chip_walk', 4, 0.1),
                 jump: spriteLoader.createAnimation('chip_jump', 4, 0.12),
+                climb: spriteLoader.createAnimation('chip_jump', 4, 0.12),
                 attack: spriteLoader.createAnimation('chip_attack', 4, 0.08),
                 golf_shot: spriteLoader.createAnimation('chip_golf_shot', 4, 0.08),
                 // Kick: 4 frames, snappy timing.
@@ -174,6 +178,7 @@ class Player {
                 idle: new Animation(chip_idle, 4, 0.15, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 walk: new Animation(chip_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 jump: new Animation(chip_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                climb: new Animation(chip_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 attack: new Animation(chip_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 golf_shot: new Animation(chip_golf_shot, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
                 kick: new Animation(chip_kick, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
@@ -199,8 +204,12 @@ class Player {
 
         if (isDown && !wasDown) {
             if (k === 'space' || k === 'spacebar' || k === ' ') {
-                this.jumpBufferTimer = this.jumpBufferTime;
-                this.jumpBufferCount = Math.min(this.jumpBufferCount + 1, this.maxJumps);
+                if (this.isClimbing) {
+                    this.jump();
+                } else {
+                    this.jumpBufferTimer = this.jumpBufferTime;
+                    this.jumpBufferCount = Math.min(this.jumpBufferCount + 1, this.maxJumps);
+                }
             } else if (k === 'keyx' || k === 'x') {
                 this.attack();
             } else if (k === 'keyz' || k === 'z') {
@@ -213,6 +222,19 @@ class Player {
 
     jump() {
         if (this.hitStunTimer > 0) return;
+
+        if (this.isClimbing) {
+            this.isClimbing = false;
+            this._climbable = null;
+            this.velocityY = -this.jumpForce;
+            this.coyoteTimer = 0;
+            this.jumpsRemaining = Math.max(0, this.maxJumps - 1);
+            if (this.audioManager) {
+                const rate = 0.97 + Math.random() * 0.08;
+                this.audioManager.playSound('jump', { volume: 0.6, rate });
+            }
+            return;
+        }
 
         const canGroundJump = this.onGround || this.coyoteTimer > 0;
         const canAirJump = !canGroundJump && this.jumpsRemaining > 0;
@@ -238,7 +260,26 @@ class Player {
         }
     }
 
+    _startClimbing(climbable) {
+        if (!climbable) return;
+        this.isClimbing = true;
+        this._climbable = climbable;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.targetVelocityX = 0;
+        this.onGround = false;
+        this.coyoteTimer = 0;
+        this.jumpsRemaining = this.maxJumps;
+        this.x = climbable.x + (climbable.width - this.width) / 2;
+    }
+
+    _stopClimbing() {
+        this.isClimbing = false;
+        this._climbable = null;
+    }
+
     attack() {
+        if (this.isClimbing) return;
         if (this.attackCooldownTimer <= 0 && this.hitStunTimer <= 0) {
             this.isAttacking = true;
             this.isKicking = false;
@@ -273,6 +314,7 @@ class Player {
     }
 
     shootGolfProjectile() {
+        if (this.isClimbing) return;
         // Check if player has skunk ammo and cooldown is ready
         if (this.golfAmmo > 0 && this.golfCooldownTimer <= 0 && this.hitStunTimer <= 0) {
             this.golfAmmo--;
@@ -308,6 +350,7 @@ class Player {
     }
 
     specialAttack() {
+        if (this.isClimbing) return;
         if (this.attackCooldownTimer <= 0 && this.hitStunTimer <= 0) {
             this.isAttacking = true;
             this.isKicking = true;
@@ -382,9 +425,10 @@ class Player {
                     height: proj.height
                 };
                 const collision = level.checkPlatformCollision(projRect, prevRect, proj.velocityY);
-                
-                // If projectile hits a solid platform, create spray and remove projectile
-                if (collision && collision.platform && collision.platform.type === 'static') {
+                const hitWall = typeof level.getWallAt === 'function' ? level.getWallAt(projRect) : null;
+
+                // If projectile hits solid geometry, create spray and remove projectile
+                if (hitWall || (collision && collision.platform && collision.platform.type === 'static')) {
                     this.createGolfImpact(proj.x, proj.y);
                     this.golfProjectiles.splice(i, 1);
                     continue;
@@ -549,6 +593,7 @@ class Player {
 
         this.isDying = false;
         this.deathTimer = 0;
+        this._stopClimbing();
 
         // Reset power-up effects on respawn
         this.speedBoost = null;
@@ -747,28 +792,81 @@ class Player {
         }
 
         const wasOnGround = this.onGround;
+        const prevRect = { x: this.x, y: this.y, width: this.width, height: this.height };
+        const upPressed = !!(this.keys['arrowup'] || this.keys['w'] || this.keys['keyw']);
+        const downPressed = !!(this.keys['arrowdown'] || this.keys['s'] || this.keys['keys']);
+        const climbable = level && typeof level.getClimbableAt === 'function' ? level.getClimbableAt(prevRect) : null;
+        const wantsClimb = !!climbable && (upPressed || downPressed);
+
+        if (!this.isClimbing && wantsClimb && this.hitStunTimer <= 0 && !this.isDying) {
+            this._startClimbing(climbable);
+        }
+
+        if (this.isClimbing) {
+            const activeClimbable = climbable || this._climbable;
+            if (!activeClimbable || this.hitStunTimer > 0 || this.isDying) {
+                this._stopClimbing();
+            } else if (Math.abs(this.targetVelocityX) > 0 && !wantsClimb) {
+                this._stopClimbing();
+            } else {
+                const climbDirection = (upPressed ? -1 : 0) + (downPressed ? 1 : 0);
+                if (climbDirection !== 0) {
+                    this.y += climbDirection * this.climbSpeed * dt;
+                }
+                this.y = Utils.clamp(
+                    this.y,
+                    activeClimbable.y - this.height,
+                    activeClimbable.y + activeClimbable.height - this.height
+                );
+                this.x = activeClimbable.x + (activeClimbable.width - this.width) / 2;
+                this.velocityX = 0;
+                this.velocityY = 0;
+                this.targetVelocityX = 0;
+                this.onGround = false;
+                this.coyoteTimer = 0;
+                this.jumpsRemaining = this.maxJumps;
+            }
+        }
 
         // Apply gravity
-        this.velocityY += Config.GRAVITY * dt;
-        if (this.velocityY > Config.MAX_FALL_SPEED) {
-            this.velocityY = Config.MAX_FALL_SPEED;
+        if (!this.isClimbing) {
+            this.velocityY += Config.GRAVITY * dt;
+            if (this.velocityY > Config.MAX_FALL_SPEED) {
+                this.velocityY = Config.MAX_FALL_SPEED;
+            }
+        } else {
+            this.velocityY = 0;
         }
 
 
-        // Store previous rect before moving
-        const prevRect = { x: this.x, y: this.y, width: this.width, height: this.height };
-
         // Update horizontal position
-        if (Math.abs(this.velocityX) > 0) {
+        if (!this.isClimbing && Math.abs(this.velocityX) > 0) {
             this.x += this.velocityX * dt;
         }
 
         // Update vertical position
-        this.y += this.velocityY * dt;
+        if (!this.isClimbing) {
+            this.y += this.velocityY * dt;
+        }
+
+        // Preserve pre-resolution vertical velocity so hard landings still
+        // trigger feedback even if a solid wall resolves first.
+        const preCollisionVY = this.velocityY;
+
+        let groundedBySolid = false;
+        if (!this.isClimbing && level && typeof level.resolveSolidCollision === 'function') {
+            const solidResult = level.resolveSolidCollision(
+                { x: this.x, y: this.y, width: this.width, height: this.height },
+                prevRect
+            );
+            this.x = solidResult.x;
+            this.y = solidResult.y;
+            if (solidResult.collidedX) this.velocityX = 0;
+            if (solidResult.collidedY) this.velocityY = 0;
+            groundedBySolid = !!solidResult.landed;
+        }
 
         // Check platform collisions (pass prevRect)
-        // Preserve pre-collision vertical velocity so we can detect hard landings.
-        const preCollisionVY = this.velocityY;
         const rect = { x: this.x, y: this.y, width: this.width, height: this.height };
         const collision = level.checkPlatformCollision(rect, prevRect, this.velocityY);
 
@@ -776,6 +874,7 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            if (this.isClimbing) this._stopClimbing();
             this.jumpsRemaining = this.maxJumps;
             
             // Play landing sound if falling from significant height.
@@ -787,7 +886,14 @@ class Player {
                 }
             }
         } else {
-            this.onGround = false;
+            this.onGround = groundedBySolid;
+            if (groundedBySolid) {
+                this.jumpsRemaining = this.maxJumps;
+                if (!wasOnGround && preCollisionVY > 450 && this.audioManager) {
+                    const rate = 0.96 + Math.random() * 0.06;
+                    this.audioManager.playSound('land', { volume: 0.6, rate });
+                }
+            }
         }
 
         // Update coyote timer
@@ -864,6 +970,8 @@ class Player {
             newState = "death";
         } else if (this.hitStunTimer > 0) {
             newState = "hurt";
+        } else if (this.isClimbing) {
+            newState = "climb";
         } else if (this.isGolfShooting && this.golfShotTimer > 0) {
             newState = "golf_shot";
         } else if (this.isKicking) {

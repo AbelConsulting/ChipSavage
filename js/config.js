@@ -38,6 +38,7 @@ const Config = {
     // Player settings (Chip Savage)
     PLAYER_SPEED: 400,
     PLAYER_JUMP_FORCE: 700,
+    CLIMB_SPEED: 260,
     PLAYER_MAX_HEALTH: 100,
     PLAYER_ATTACK_DAMAGE: 15,
 

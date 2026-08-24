@@ -471,6 +471,10 @@ class Game {
                     this.player.handleInput('arrowleft', down);
                 } else if (action === 'right') {
                     this.player.handleInput('arrowright', down);
+                } else if (action === 'up') {
+                    this.player.handleInput('arrowup', down);
+                } else if (action === 'down') {
+                    this.player.handleInput('arrowdown', down);
                 } else if (action === 'jump') {
                     if (down) this.player.handleInput('space', true);
                     else this.player.handleInput('space', false);

@@ -57,10 +57,10 @@ class TutorialHints {
             move_jump: {
                 id: 'move_jump',
                 duration: 12,
-                kb:    ['← → to Move  •  SPACE to Jump',
-                        'Double-tap SPACE for a double jump!'],
-                touch: ['Use ⟸ ⟹ to Move  •  ⤒ to Jump',
-                        'Tap Jump twice for a double jump!']
+                kb:    ['← → to Move  •  SPACE to Jump  •  ↑↓ to Climb',
+                    'Double-tap SPACE for a double jump!'],
+                touch: ['Use ⟸ ⟹ to Move  •  ⤒ to Jump  •  ↑↓ to Climb',
+                    'Tap Jump twice for a double jump!']
             },
             attack: {
                 id: 'attack',
