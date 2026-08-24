@@ -1,0 +1,20 @@
+{
+  "name": "chip-savage",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Chip Savage web game and Android wrapper",
+  "scripts": {
+    "build:web": "node scripts/build-web.js",
+    "cap:add:android": "npm run build:web && npx cap add android",
+    "cap:sync:android": "npm run build:web && npx cap sync android",
+    "cap:open:android": "npx cap open android",
+    "cap:build:aab": "cd android && gradlew.bat bundleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
+  }
+}
