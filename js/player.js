@@ -148,6 +148,7 @@ class Player {
         const chip_idle = spriteLoader.getSprite('chip_idle');
         const chip_walk = spriteLoader.getSprite('chip_walk');
         const chip_jump = spriteLoader.getSprite('chip_jump');
+        const chip_climb = spriteLoader.getSprite('chip_climb');
         const chip_attack = spriteLoader.getSprite('chip_attack');
         const chip_golf_shot = spriteLoader.getSprite('chip_golf_shot');
         const chip_kick = spriteLoader.getSprite('chip_kick');
@@ -163,7 +164,7 @@ class Player {
                 idle: spriteLoader.createAnimation('chip_idle', 4, 0.15),
                 walk: spriteLoader.createAnimation('chip_walk', 4, 0.1),
                 jump: spriteLoader.createAnimation('chip_jump', 4, 0.12),
-                climb: spriteLoader.createAnimation('chip_jump', 4, 0.12),
+                climb: spriteLoader.createAnimation('chip_climb', 4, 0.12),
                 attack: spriteLoader.createAnimation('chip_attack', 4, 0.08),
                 golf_shot: spriteLoader.createAnimation('chip_golf_shot', 4, 0.08),
                 // Kick: 4 frames, snappy timing.
@@ -178,7 +179,7 @@ class Player {
                 idle: new Animation(chip_idle, 4, 0.15, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 walk: new Animation(chip_walk, 4, 0.1, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 jump: new Animation(chip_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
-                climb: new Animation(chip_jump, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
+                climb: new Animation(chip_climb, 4, 0.12, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 attack: new Animation(chip_attack, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 65 }),
                 golf_shot: new Animation(chip_golf_shot, 4, 0.08, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),
                 kick: new Animation(chip_kick, 4, 0.06, { frameWidth: 64, frameHeight: 64, frameStride: 64, frameOffset: 0 }),

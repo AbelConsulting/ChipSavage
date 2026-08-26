@@ -14,6 +14,7 @@ All player sheets are **horizontal strips** — frames laid out left-to-right, n
 | `chip_idle.png` | 4 | 64 × 64 | 256 × 64 | Standing idle loop |
 | `chip_walk.png` | 4 | 64 × 64 | 256 × 64 | Walk cycle |
 | `chip_jump.png` | 4 | 64 × 64 | 256 × 64 | Jump arc |
+| `chip_climb.png` | 4 | 64 × 64 | 256 × 64 | Ladder/rope climb loop |
 | `chip_attack.png` | 4 | 64 × 64 | 256 × 64 | Basic melee attack |
 | `chip_kick.png` | 4 | 64 × 64 | 256 × 64 | Kick dash move (invincible frames) |
 | `chip_golf_shot.png` | 4 | 64 × 64 | 256 × 64 | Golf Shot animation (ranged) |
@@ -42,7 +43,7 @@ Same horizontal strip format. Standard enemies use 64 × 64 frames; bosses use 9
 
 | Prefix | Frames each | Frame size | Animations needed |
 |---|---|---|---|
-| `boss_` | 4 | 96 × 96 | `boss_idle`, `boss_walk`, `boss_attack1`, `boss_hurt` |
+| `boss_` | 4 | 96 × 96 | `boss_idle`, `boss_walk`, `boss_attack1`i,  `boss_hurt` |
 | `boss2_` | 4 | 96 × 96 | `boss2_idle`, `boss2_walk`, `boss2_attack`, `boss2_hurt` |
 | `boss3_` | 4 | 96 × 96 | `boss3_idle`, `boss3_walk`, `boss3_attack`, `boss3_hurt` |
 | `boss4_` | 4 | 96 × 96 | `boss4_idle`, `boss4_walk`, `boss4_attack`, `boss4_hurt` |
