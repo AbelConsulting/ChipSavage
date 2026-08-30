@@ -246,6 +246,12 @@
         .shot-ability-btn[data-shot="bomb"] { --shot-color: #FF9B32; }
         .shot-ability-btn:hover { opacity: 1; border-color: var(--shot-color); }
         .shot-ability-btn:active { transform: scale(0.92); }
+        .shot-ability-btn:disabled {
+            opacity: 0.22;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+        .shot-ability-btn:disabled:hover { border-color: rgba(255,255,255,0.16); }
         .shot-ability-btn.is-selected {
             opacity: 1;
             border-color: var(--shot-color);
@@ -922,9 +928,11 @@
                 try { event && event.preventDefault(); event && event.stopPropagation(); } catch(_){}
                 const player = window.game && window.game.player;
                 if (player && typeof player.selectGolfShot === 'function') {
-                    player.selectGolfShot(button.dataset.shot);
-                    showContext(button.dataset.shot);
-                    try { if (navigator.vibrate) navigator.vibrate(8); } catch(_){}
+                    const selected = player.selectGolfShot(button.dataset.shot);
+                    if (selected) {
+                        showContext(button.dataset.shot);
+                        try { if (navigator.vibrate) navigator.vibrate(8); } catch(_){}
+                    }
                 }
             };
             button.addEventListener('pointerdown', select);
@@ -967,8 +975,11 @@
                 btn.setAttribute('aria-label', `Fire ${names[shot] || shot} shot. ${Math.max(0, player.golfAmmo || 0)} remaining`);
                 document.querySelectorAll('.shot-ability-btn').forEach((abilityButton) => {
                     const selected = abilityButton.dataset.shot === shot;
+                    const available = typeof player.isGolfShotAvailable !== 'function' || player.isGolfShotAvailable(abilityButton.dataset.shot);
                     abilityButton.classList.toggle('is-selected', selected);
                     abilityButton.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                    abilityButton.disabled = !available;
+                    abilityButton.setAttribute('aria-disabled', available ? 'false' : 'true');
                 });
                 const name = document.getElementById('shot-ability-name');
                 if (name) name.textContent = names[shot] || shot;

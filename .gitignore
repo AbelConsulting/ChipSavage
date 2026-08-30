@@ -1,0 +1,11 @@
+# Local secrets and release signing material
+*.jks
+*.keystore
+keystore.properties
+key.properties
+.env
+.env.*
+!.env.example
+
+# Installed dependencies
+node_modules/

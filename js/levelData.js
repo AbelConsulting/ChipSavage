@@ -1595,7 +1595,12 @@ const SURVIVAL_ARENA_CONFIG = {
         { x: 2000, y: 320, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
         // High platforms
         { x: 680,  y: 210, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
-        { x: 1620, y: 210, width: 180, height: 24, type: 'static', tile: 'platform5_tile' }
+        { x: 1620, y: 210, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
+        // Permanent grapple routes for Survival Hookshot play
+        { x: 500,  y: 145, width: 48, height: 48, type: 'anchor' },
+        { x: 1050, y: 105, width: 48, height: 48, type: 'anchor' },
+        { x: 1600, y: 145, width: 48, height: 48, type: 'anchor' },
+        { x: 2150, y: 105, width: 48, height: 48, type: 'anchor' }
     ],
     enemyConfig: {
         spawnInterval: 2.5,

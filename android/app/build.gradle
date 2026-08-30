@@ -1,5 +1,23 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+def releaseKeystoreFile = null
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+
+    def requiredProperties = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+    def missingProperties = requiredProperties.findAll { !keystoreProperties[it]?.trim() }
+    if (!missingProperties.isEmpty()) {
+        throw new GradleException("Missing release signing properties in ${keystorePropertiesFile}: ${missingProperties.join(', ')}")
+    }
+
+    releaseKeystoreFile = rootProject.file(keystoreProperties['storeFile'])
+    if (!releaseKeystoreFile.isFile()) {
+        throw new GradleException("Release keystore not found: ${releaseKeystoreFile}")
+    }
+}
+
 android {
     namespace = "com.mephitideus.chipsavage"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +34,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile releaseKeystoreFile
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

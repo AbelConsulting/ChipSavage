@@ -80,6 +80,7 @@ class Game {
         this.survivalWaveResting = false;
         this._survivalWaveBannerTimer = 0;
         this._survivalWaveBannerText = '';
+        this.survivalWaveDamageAtStart = 0;
 
         // Game Over lockout: timestamp (ms) when GAME_OVER was entered.
         // Input is blocked until GAME_OVER_LOCKOUT seconds have elapsed.
@@ -719,6 +720,7 @@ class Game {
             this.survivalWaveResting = false;
             this._survivalWaveBannerTimer = 0;
             this._survivalWaveBannerText = '';
+            this.survivalWaveDamageAtStart = 0;
             this._survivalAdReviveUsed = false; // one rewarded revive allowed per survival run
             
             // Set a game-level grace period timestamp - player cannot die before this time
@@ -1367,6 +1369,9 @@ class Game {
                 this.player.y = 596; // 660 - 64 (player height)
                 this.player.velocityX = 0;
                 this.player.velocityY = 0;
+                if (typeof this.player.setAvailableGolfShotTypes === 'function') {
+                    this.player.setAvailableGolfShotTypes(['gold']);
+                }
             }
 
             // Survival is single-life: die = game over (revive ad is the only
@@ -1395,6 +1400,7 @@ class Game {
         _startSurvivalWave() {
             this.survivalWave++;
             const wave = this.survivalWave;
+            this.survivalWaveDamageAtStart = this.gameStats.levelDamageTaken || 0;
 
             // Difficulty scaling
             const enemiesThisWave = Math.min(40, 4 + (wave - 1) * 3);        // 4, 7, 10 � capped at 40
@@ -1424,9 +1430,24 @@ class Game {
                 this.enemyManager.forceChase           = true; // enemies always seek player in survival
             }
 
-            // Milestone banner text for landmark waves
+            const shotUnlocks = [
+                { wave: 1, type: 'gold', label: 'STUN' },
+                { wave: 2, type: 'fireball', label: 'FIREBALL' },
+                { wave: 3, type: 'fishing', label: 'FISHING SHOT' },
+                { wave: 4, type: 'hookshot', label: 'HOOKSHOT' },
+                { wave: 5, type: 'bomb', label: 'BOMB' }
+            ];
+            const availableShots = shotUnlocks
+                .filter((unlock) => wave >= unlock.wave)
+                .map((unlock) => unlock.type);
+            const unlockedShot = shotUnlocks.find((unlock) => unlock.wave === wave && unlock.wave > 1);
+            if (this.player && typeof this.player.setAvailableGolfShotTypes === 'function') {
+                this.player.setAvailableGolfShotTypes(availableShots);
+            }
+
+            // Milestone banner text for landmark waves and shot unlocks
             let bannerText = `PAIRING ${wave}`;
-            if      (wave === 5)              bannerText = 'PAIRING 5: MAKING THE TURN!';
+            if      (unlockedShot)            bannerText = `PAIRING ${wave}: ${unlockedShot.label} UNLOCKED!`;
             else if (wave === 10)             bannerText = 'PAIRING 10: STILL UNDER PAR!';
             else if (wave === 15)             bannerText = 'PAIRING 15: TOUR PRO!';
             else if (wave >= 20 && wave % 5 === 0) bannerText = `PAIRING ${wave}: LEGENDARY!`;
@@ -1447,17 +1468,19 @@ class Game {
                 }
             } catch (e) { __err('game', e); }
 
-            // Grant 2 Golf Shots at the start of every wave
+            // Grant 2 Golf Shots at the start of every wave, capped to prevent hoarding.
             if (this.player) {
                 // Brief invulnerability window so the player isn't immediately
                 // swarmed the moment a wave kicks off.
                 this.player.invulnerableTimer = Math.max(this.player.invulnerableTimer, 1.5);
 
-                this.player.golfAmmo = (this.player.golfAmmo || 0) + 2;
+                const previousAmmo = this.player.golfAmmo || 0;
+                this.player.golfAmmo = Math.min(8, previousAmmo + 2);
+                const ammoGranted = this.player.golfAmmo - previousAmmo;
                 try {
                     this.damageNumbers.push(new FloatingText(
                         this.player.x + 32, this.player.y - 40,
-                        '+2 GOLF SHOTS',
+                        ammoGranted > 0 ? `+${ammoGranted} GOLF SHOTS` : 'GOLF AMMO FULL',
                         { color: '#A8FF78', lifetime: 1.4, velocityY: -70, font: 'bold 16px Arial' }
                     ));
                 } catch (e) { __err('game', e); }
@@ -1514,6 +1537,18 @@ class Game {
                     const clearedWave = this.survivalWave;
                     this._survivalWaveBannerText  = `PAIRING ${clearedWave} CLEARED!`;
                     this._survivalWaveBannerTimer = 4.0;
+
+                    const waveDamageTaken = (this.gameStats.levelDamageTaken || 0) - this.survivalWaveDamageAtStart;
+                    if (waveDamageTaken === 0 && this.player && this.player.golfAmmo < 8) {
+                        this.player.golfAmmo++;
+                        try {
+                            this.damageNumbers.push(new FloatingText(
+                                this.player.x + 32, this.player.y - 56,
+                                'CLEAN PAIRING  +1 GOLF SHOT',
+                                { color: '#7DE7FF', lifetime: 1.8, velocityY: -55, font: 'bold 16px Arial' }
+                            ));
+                        } catch (e) { __err('game', e); }
+                    }
 
                     // Wave-clear score bonus
                     const waveBonus = clearedWave * 500;

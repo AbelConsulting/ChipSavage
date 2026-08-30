@@ -123,6 +123,7 @@ class Player {
         this.golfCooldown = 0.5; // Cooldown between Golf Shots
         this.golfCooldownTimer = 0;
         this.golfShotTypes = ['gold', 'fireball', 'hookshot', 'fishing', 'bomb'];
+        this.availableGolfShotTypes = [...this.golfShotTypes];
         this.selectedGolfShotIndex = 0;
         this.hookshotPull = null;
         
@@ -227,18 +228,31 @@ class Player {
     }
 
     getSelectedGolfShot() {
-        return this.golfShotTypes[this.selectedGolfShotIndex] || 'gold';
+        return this.availableGolfShotTypes[this.selectedGolfShotIndex] || 'gold';
+    }
+
+    setAvailableGolfShotTypes(shotTypes) {
+        const currentShot = this.getSelectedGolfShot();
+        const availableTypes = this.golfShotTypes.filter((shotType) => shotTypes.includes(shotType));
+        this.availableGolfShotTypes = availableTypes.length > 0 ? availableTypes : ['gold'];
+        const currentIndex = this.availableGolfShotTypes.indexOf(currentShot);
+        this.selectedGolfShotIndex = currentIndex >= 0 ? currentIndex : 0;
+        return this.availableGolfShotTypes;
+    }
+
+    isGolfShotAvailable(shotType) {
+        return this.availableGolfShotTypes.includes(shotType);
     }
 
     selectGolfShot(shotType) {
-        const index = this.golfShotTypes.indexOf(shotType);
+        const index = this.availableGolfShotTypes.indexOf(shotType);
         if (index < 0) return false;
         this.selectedGolfShotIndex = index;
         return true;
     }
 
     cycleGolfShot(direction = 1) {
-        const count = this.golfShotTypes.length;
+        const count = this.availableGolfShotTypes.length;
         this.selectedGolfShotIndex = (this.selectedGolfShotIndex + direction + count) % count;
         return this.getSelectedGolfShot();
     }
@@ -686,6 +700,7 @@ class Player {
         // not on mid-run respawn, so collected ammo is not wiped between
         // life losses.)
         this.golfAmmo = 1;
+        this.setAvailableGolfShotTypes(this.golfShotTypes);
         this.golfCooldownTimer = 0;
         this.hookshotPull = null;
         try { this.hitEnemies && this.hitEnemies.clear && this.hitEnemies.clear(); } catch (e) { __err('player', e); }
