@@ -49,7 +49,7 @@ function titleOverlay(width, height, layout) {
       <g filter="url(#shadow)" font-family="Impact, Haettenschweiler, sans-serif" text-anchor="${anchor}">
         <text x="${titleX}" y="${titleY - savageSize * 0.6}" font-size="${chipSize}" fill="#f9e7ad" stroke="#251424" stroke-width="${Math.max(3, width * 0.005)}">CHIP</text>
         <text x="${titleX}" y="${titleY}" font-size="${savageSize}" fill="#f5b544" stroke="#251424" stroke-width="${Math.max(4, width * 0.006)}">SAVAGE</text>
-        <text x="${titleX}" y="${subtitleY}" font-family="Arial, sans-serif" font-size="${tourSize}" font-weight="900" letter-spacing="${tourSize * 0.12}" fill="#ffffff">A GOLF-POWERED METROIDVANIA</text>
+        <text x="${titleX}" y="${subtitleY}" font-family="Arial, sans-serif" font-size="${tourSize}" font-weight="900" letter-spacing="${tourSize * 0.12}" fill="#ffffff">A GOLF-BRAWLING METROIDVANIA</text>
       </g>
       <rect x="${ruleX}" y="${subtitleY + tourSize * 0.42}" width="${ruleWidth}" height="${Math.max(4, height * 0.009)}" fill="#78bd43"/>
     </svg>`);
