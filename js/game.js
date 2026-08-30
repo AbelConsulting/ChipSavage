@@ -2819,7 +2819,7 @@ class Game {
                 // If projectile hit an enemy, create spray cloud and remove projectile
                 if (hitAnyEnemy) {
                     this.gameStats.golfShotsHit = (this.gameStats.golfShotsHit || 0) + 1;
-                    this.player.createGolfImpact(proj.x, proj.y);
+                    this.player.createGolfImpact(proj.x, proj.y, proj.shotType);
                     this.player.golfProjectiles.splice(i, 1);
                 }
             }
@@ -2831,9 +2831,6 @@ class Game {
                 for (const enemy of this.enemyManager.getEnemies()) {
                     // Skip if already hit by this spray
                     if (spray.hitEnemies.has(enemy)) continue;
-                    
-                    // Skip if already golf-hit
-                    if (enemy.isGolfHit) continue;
                     
                     const enemyRect = enemy.getRect();
                     const enemyCenterX = enemyRect.x + enemyRect.width / 2;
@@ -2847,11 +2844,43 @@ class Game {
                         // Mark enemy as hit by this spray
                         spray.hitEnemies.add(enemy);
                         this.gameStats.enemiesHitByGolfShot = (this.gameStats.enemiesHitByGolfShot || 0) + 1;
-                        
-                        // Apply skunk effect
-                        enemy.isGolfHit = true;
-                        enemy.skunkTimer = enemy.skunkDuration;
-                        enemy.skunkParticles = [];
+
+                        const shotType = spray.shotType || 'gold';
+                        const directionFromPlayer = enemyCenterX >= this.player.x + this.player.width / 2 ? 1 : -1;
+                        let feedback = 'STUNNED!';
+                        let feedbackColor = '#FFD54A';
+
+                        if (shotType === 'gold') {
+                            enemy.isGolfHit = true;
+                            enemy.skunkTimer = enemy.skunkDuration;
+                            enemy.skunkParticles = [];
+                        } else if (shotType === 'fireball') {
+                            enemy.takeDamage(14, directionFromPlayer, { knockback: 180, hitStun: 0.25 });
+                            enemy.burnTimer = Math.max(enemy.burnTimer || 0, 3.2);
+                            enemy.burnTickTimer = 0.65;
+                            feedback = 'BURNING!';
+                            feedbackColor = '#FF5A1F';
+                        } else if (shotType === 'hookshot') {
+                            enemy.takeDamage(12, directionFromPlayer, { knockback: 80, hitStun: 0.45 });
+                            const dx = enemyCenterX - (this.player.x + this.player.width / 2);
+                            const dy = enemyCenterY - (this.player.y + this.player.height / 2);
+                            const distanceToEnemy = Math.sqrt(dx * dx + dy * dy) || 1;
+                            this.player.velocityX = (dx / distanceToEnemy) * 620;
+                            this.player.velocityY = (dy / distanceToEnemy) * 420;
+                            feedback = 'GRAPPLE!';
+                            feedbackColor = '#D9E1E8';
+                        } else if (shotType === 'fishing') {
+                            enemy.takeDamage(8, -directionFromPlayer, { knockback: 520, hitStun: 1.1 });
+                            feedback = 'REELED IN!';
+                            feedbackColor = '#38D5F2';
+                        } else if (shotType === 'bomb') {
+                            const falloff = Math.max(0.35, 1 - distance / spray.maxRadius);
+                            const damage = Math.round(42 * falloff);
+                            enemy.takeDamage(damage, directionFromPlayer, { knockback: 520 * falloff, hitStun: 0.55 });
+                            feedback = `BOOM! ${damage}`;
+                            feedbackColor = '#FF9B32';
+                            this.screenShake = new ScreenShake(0.22, 9);
+                        }
                         
                         // Visual feedback - green burst
                         try {
@@ -2860,9 +2889,8 @@ class Game {
                                 speedMin: 80,
                                 speedMax: 160
                             });
-                            // Override colors for green skunk effect
                             for (const particle of burst.particles) {
-                                particle.color = Math.random() > 0.5 ? '#40FF40' : '#80FF80';
+                                particle.color = Math.random() > 0.5 ? feedbackColor : '#FFFFFF';
                                 particle.size = Utils.randomFloat(2, 5);
                             }
                             this.hitSparks.push(burst);
@@ -2877,8 +2905,8 @@ class Game {
                         this.damageNumbers.push(new FloatingText(
                             enemy.x + enemy.width / 2,
                             enemy.y - 10,
-                            'GOLF HIT!',
-                            { color: '#40FF40', lifetime: 1.5, velocityY: -60, font: 'bold 18px Arial' }
+                            feedback,
+                            { color: feedbackColor, lifetime: 1.5, velocityY: -60, font: 'bold 18px Arial' }
                         ));
                     }
                 }

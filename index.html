@@ -178,10 +178,60 @@
         .touch-btn--special{ border-color: rgba(180,90,255,0.30); }
         .touch-btn--jump   { border-color: rgba(120,220,255,0.28); }
         .touch-btn--golf   { border-color: rgba(80,255,80,0.30); transition: opacity 0.3s ease, filter 0.3s ease; }
+        .touch-btn--shot-cycle { width: clamp(48px, 7vw, 64px); border-color: rgba(255,213,74,0.42); }
         .touch-btn--golf.disabled { opacity: 0.35; filter: grayscale(0.7) brightness(0.5); pointer-events: none; }
         .touch-btn--pause  { border-color: rgba(255,255,255,0.18); }
         .touch-btn--restart{ border-color: rgba(255,160,80,0.28); }
         .touch-btn:active  { filter: brightness(1.18); transform: scale(0.92); }
+
+        #shot-ability-tray {
+            position: absolute; left: 50%; bottom: 14px; z-index: 1900;
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px;
+            background: rgba(10,14,16,0.82);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.42);
+            opacity: 0; pointer-events: none;
+            transform: translate(-50%, 8px);
+            transition: opacity 160ms ease, transform 160ms ease;
+        }
+        #shot-ability-tray.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+        .shot-ability-buttons { display: flex; gap: 5px; }
+        .shot-ability-btn {
+            --shot-color: #fff;
+            width: 42px; height: 42px; padding: 0;
+            display: grid; place-items: center;
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            color: #fff; font-size: 22px; cursor: pointer;
+            opacity: 0.68;
+            transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease, transform 120ms ease;
+        }
+        .shot-ability-btn[data-shot="gold"] { --shot-color: #FFD54A; }
+        .shot-ability-btn[data-shot="fireball"] { --shot-color: #FF5A1F; }
+        .shot-ability-btn[data-shot="hookshot"] { --shot-color: #D9E1E8; }
+        .shot-ability-btn[data-shot="fishing"] { --shot-color: #38D5F2; }
+        .shot-ability-btn[data-shot="bomb"] { --shot-color: #FF9B32; }
+        .shot-ability-btn:hover { opacity: 1; border-color: var(--shot-color); }
+        .shot-ability-btn:active { transform: scale(0.92); }
+        .shot-ability-btn.is-selected {
+            opacity: 1;
+            border-color: var(--shot-color);
+            background: color-mix(in srgb, var(--shot-color) 24%, rgba(10,14,16,0.9));
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--shot-color) 35%, transparent);
+        }
+        #shot-ability-name {
+            min-width: 58px;
+            color: #fff; font: 700 12px 'Space Grotesk', sans-serif;
+            text-align: center; text-transform: uppercase;
+        }
+        @media (pointer: coarse), (max-width: 900px) {
+            #shot-ability-tray { bottom: 216px; padding: 5px 6px; }
+            .shot-ability-btn { width: 38px; height: 38px; font-size: 20px; }
+            #shot-ability-name { display: none; }
+        }
 
         /* ── Pause button ── */
         #pause-btn {
@@ -665,8 +715,20 @@
                     <button class="touch-btn touch-btn--attack"  id="btn-attack"  aria-label="Attack">🗡</button>
                     <button class="touch-btn touch-btn--jump"    id="btn-jump"    aria-label="Jump">⤴</button>
                     <button class="touch-btn touch-btn--special" id="btn-special" aria-label="Kick">💥</button>
+                    <button class="touch-btn touch-btn--shot-cycle" id="btn-shot-cycle" aria-label="Change golf shot">🟡</button>
                     <button class="touch-btn touch-btn--golf"    id="btn-skunk"   aria-label="Golf Shot">⛳</button>
                 </div>
+            </div>
+
+            <div id="shot-ability-tray" role="toolbar" aria-label="Golf shot abilities">
+                <div class="shot-ability-buttons">
+                    <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables enemies">⚡</button>
+                    <button class="shot-ability-btn" data-shot="fireball" aria-label="Fireball shot" title="Fireball: burns enemies and vine walls">🔥</button>
+                    <button class="shot-ability-btn" data-shot="hookshot" aria-label="Hookshot" title="Hookshot: grapple toward enemies">⚓</button>
+                    <button class="shot-ability-btn" data-shot="fishing" aria-label="Fishing shot" title="Fishing: reel enemies toward you">♓</button>
+                    <button class="shot-ability-btn" data-shot="bomb" aria-label="Bomb shot" title="Bomb: area damage and breaks rock walls">💣</button>
+                </div>
+                <span id="shot-ability-name" aria-live="polite">Stun</span>
             </div>
 
         </div><!-- /#content-wrapper -->
@@ -714,7 +776,7 @@
         return window.matchMedia && window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
     }
     function triggerKeyEvent(key, type) {
-        const map = { ' ': 'Space', 'enter': 'Enter', 'escape': 'Escape', 'esc': 'Escape', 'x': 'KeyX', 'z': 'KeyZ', 'c': 'KeyC' };
+        const map = { ' ': 'Space', 'enter': 'Enter', 'escape': 'Escape', 'esc': 'Escape', 'x': 'KeyX', 'z': 'KeyZ', 'c': 'KeyC', 'v': 'KeyV' };
         const k = key === ' ' ? ' ' : key;
         const code = map[k.toLowerCase()] || key;
         window.dispatchEvent(new KeyboardEvent(type, { key: k, code, bubbles: true, cancelable: true }));
@@ -743,7 +805,23 @@
         setupBtn('btn-jump',    ' ');
         setupBtn('btn-attack',  'x');
         setupBtn('btn-special', 'z');
+        setupBtn('btn-shot-cycle', 'v');
         setupBtn('btn-skunk',   'c');
+    }
+
+    function initShotAbilityTray() {
+        const tray = document.getElementById('shot-ability-tray');
+        if (!tray) return;
+        tray.querySelectorAll('.shot-ability-btn').forEach((button) => {
+            const select = (event) => {
+                try { event && event.preventDefault(); event && event.stopPropagation(); } catch(_){}
+                const player = window.game && window.game.player;
+                if (player && typeof player.selectGolfShot === 'function') {
+                    player.selectGolfShot(button.dataset.shot);
+                }
+            };
+            button.addEventListener('pointerdown', select);
+        });
     }
 
     window.showTouchControls = function(ms = 1000) {
@@ -760,14 +838,31 @@
         setTimeout(() => { if (!tc.classList.contains('visible')) tc.style.display = 'none'; }, 300);
     };
     initTouchControls();
+    initShotAbilityTray();
 
     // ── GOLF SHOT BUTTON AVAILABILITY ────────────────────────────────────────
     setInterval(() => {
         try {
             const btn = document.getElementById('btn-skunk');
+            const cycleBtn = document.getElementById('btn-shot-cycle');
             if (!btn) return;
-            const hasAmmo = window.game && window.game.player && window.game.player.golfAmmo > 0;
+            const player = window.game && window.game.player;
+            const hasAmmo = player && player.golfAmmo > 0;
             btn.classList.toggle('disabled', !hasAmmo);
+            if (cycleBtn && player && typeof player.getSelectedGolfShot === 'function') {
+                const shot = player.getSelectedGolfShot();
+                const icons = { gold: '⚡', fireball: '🔥', hookshot: '⚓', fishing: '♓', bomb: '💣' };
+                const names = { gold: 'Stun', fireball: 'Fireball', hookshot: 'Hookshot', fishing: 'Fishing', bomb: 'Bomb' };
+                cycleBtn.textContent = icons[shot] || '↻';
+                cycleBtn.setAttribute('aria-label', `Change golf shot. Selected: ${names[shot] || shot}`);
+                document.querySelectorAll('.shot-ability-btn').forEach((abilityButton) => {
+                    const selected = abilityButton.dataset.shot === shot;
+                    abilityButton.classList.toggle('is-selected', selected);
+                    abilityButton.setAttribute('aria-pressed', selected ? 'true' : 'false');
+                });
+                const name = document.getElementById('shot-ability-name');
+                if (name) name.textContent = names[shot] || shot;
+            }
         } catch(e){}
     }, 100);
 
@@ -1055,6 +1150,8 @@
 
     // ── MOBILE TOUCH CONTROL SHOW/HIDE ────────────────────────────────────────
     window.addEventListener('gameStateChange', (e) => {
+        const tray = document.getElementById('shot-ability-tray');
+        if (tray) tray.classList.toggle('visible', e && e.detail && e.detail.state === 'PLAYING');
         if (!isMobile()) return;
         const st = e && e.detail && e.detail.state;
         if (st === 'PLAYING') {

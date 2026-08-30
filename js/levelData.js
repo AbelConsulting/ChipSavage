@@ -39,7 +39,7 @@ const LEVEL_CONFIGS = [
             { x: 7850, y: 670, width: 2150, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
-            { x: 1180, y: 460, width: 80, height: 220, type: 'wall', tile: 'wall_tile' },
+            { x: 1180, y: 460, width: 80, height: 220, type: 'wall', material: 'vine' },
             { x: 1138, y: 460, width: 36, height: 220, type: 'climb', style: 'vine' },
             { x: 980, y: 460, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
 
@@ -48,7 +48,7 @@ const LEVEL_CONFIGS = [
             { x: 1710, y: 500, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
 
             // --- Section B: watchtower choke ---
-            { x: 2750, y: 430, width: 90, height: 250, type: 'wall', tile: 'wall_tile' },
+            { x: 2750, y: 430, width: 90, height: 250, type: 'wall', material: 'rock' },
             { x: 2708, y: 430, width: 36, height: 250, type: 'climb', style: 'ladder' },
             { x: 2490, y: 430, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 1960, y: 340, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
@@ -60,7 +60,7 @@ const LEVEL_CONFIGS = [
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---
-            { x: 4580, y: 390, width: 90, height: 270, type: 'wall', tile: 'wall_tile' },
+            { x: 4580, y: 390, width: 90, height: 270, type: 'wall', material: 'vine' },
             { x: 4538, y: 390, width: 36, height: 270, type: 'climb', style: 'vine' },
             { x: 4300, y: 390, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
@@ -70,7 +70,7 @@ const LEVEL_CONFIGS = [
             { x: 5650, y: 500, width: 120, height: 24, type: 'moving', axis: 'x', range: 70, speed: 2.0, tile: 'platform5_tile' },
 
             // --- Section D: split ladder ascent ---
-            { x: 6880, y: 420, width: 95, height: 260, type: 'wall', tile: 'wall_tile' },
+            { x: 6880, y: 420, width: 95, height: 260, type: 'wall', material: 'rock' },
             { x: 6836, y: 420, width: 36, height: 260, type: 'climb', style: 'ladder' },
             { x: 6620, y: 420, width: 430, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
@@ -80,7 +80,7 @@ const LEVEL_CONFIGS = [
             { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
 
             // --- Section E: final fortress wall run ---
-            { x: 8940, y: 350, width: 110, height: 320, type: 'wall', tile: 'wall_tile' },
+            { x: 8940, y: 350, width: 110, height: 320, type: 'wall', material: 'vine' },
             { x: 8896, y: 350, width: 36, height: 320, type: 'climb', style: 'vine' },
             { x: 8670, y: 350, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },

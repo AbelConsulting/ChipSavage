@@ -89,10 +89,10 @@ class TutorialHints {
             golf_shot: {
                 id: 'golf_shot',
                 duration: 10,
-                kb:    ['Press C to fire Golf Shot!',
-                        'Ranged spray that stuns enemies.'],
-                touch: ['Tap ⚪ for Golf Shot!',
-                        'Ranged spray that stuns enemies.']
+                kb:    ['Press C to fire • V changes shot!',
+                        'Fire burns vines • Bomb breaks rock.'],
+                touch: ['Tap ⛳ to fire • ability icon to change!',
+                        'Fire burns vines • Bomb breaks rock.']
             },
             golden_idol: {
                 id: 'golden_idol',

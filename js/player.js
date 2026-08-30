@@ -229,6 +229,13 @@ class Player {
         return this.golfShotTypes[this.selectedGolfShotIndex] || 'gold';
     }
 
+    selectGolfShot(shotType) {
+        const index = this.golfShotTypes.indexOf(shotType);
+        if (index < 0) return false;
+        this.selectedGolfShotIndex = index;
+        return true;
+    }
+
     cycleGolfShot(direction = 1) {
         const count = this.golfShotTypes.length;
         this.selectedGolfShotIndex = (this.selectedGolfShotIndex + direction + count) % count;
@@ -454,6 +461,9 @@ class Player {
 
                 // If projectile hits solid geometry, create spray and remove projectile
                 if (hitWall || (collision && collision.platform && collision.platform.type === 'static')) {
+                    if (hitWall && typeof level.hitWall === 'function') {
+                        level.hitWall(hitWall, proj.shotType);
+                    }
                     this.createGolfImpact(proj.x, proj.y, proj.shotType);
                     this.golfProjectiles.splice(i, 1);
                     continue;

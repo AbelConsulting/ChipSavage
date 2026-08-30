@@ -184,6 +184,8 @@ class Enemy {
         this.skunkTimer = 0;
         this.skunkDuration = 5.0; // 5 seconds of being disabled
         this.skunkParticles = [];
+        this.burnTimer = 0;
+        this.burnTickTimer = 0;
         // Third basic rush sparks (visual only)
         this.rushSparks = [];
         // Fourth basic jump sparks (green)
@@ -446,6 +448,15 @@ class Enemy {
                         this.skunkParticles.splice(i, 1);
                     }
                 }
+            }
+        }
+
+        if (this.burnTimer > 0) {
+            this.burnTimer -= dt;
+            this.burnTickTimer -= dt;
+            if (this.burnTickTimer <= 0) {
+                this.health -= 5;
+                this.burnTickTimer = 0.65;
             }
         }
 
@@ -1925,13 +1936,30 @@ class Enemy {
             ctx.font = '20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillStyle = '#40FF40';
+            ctx.fillStyle = '#FFD54A';
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 3;
             const textX = this.x + this.width / 2;
             const textY = this.y - 5;
             ctx.strokeText('💫', textX, textY);
             ctx.fillText('💫', textX, textY);
+            ctx.restore();
+        }
+
+        if (this.burnTimer > 0) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const flameX = this.x + this.width / 2;
+            const flameY = this.y + this.height * 0.35;
+            const flameSize = 12 + Math.sin(this.burnTimer * 18) * 3;
+            const flame = ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, flameSize);
+            flame.addColorStop(0, '#FFF4A0');
+            flame.addColorStop(0.45, '#FF7A18');
+            flame.addColorStop(1, 'rgba(255, 40, 0, 0)');
+            ctx.fillStyle = flame;
+            ctx.beginPath();
+            ctx.arc(flameX, flameY, flameSize, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         }
 

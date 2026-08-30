@@ -1392,15 +1392,19 @@ class UI {
                     const ammoIconSize = 18;
                     const ammoGap = 4;
                     const ammoX = idolX;
+                    const shotType = typeof player.getSelectedGolfShot === 'function' ? player.getSelectedGolfShot() : 'gold';
+                    const shotLabels = { gold: 'STUN', fireball: 'FIRE', hookshot: 'HOOK', fishing: 'FISH', bomb: 'BOMB' };
+                    const shotColors = { gold: '#FFD54A', fireball: '#FF5A1F', hookshot: '#D9E1E8', fishing: '#38D5F2', bomb: '#FF9B32' };
+                    const labelWidth = 48;
                     
                     ctx.save();
                     
                     // Draw background pill
-                    const ammoPillW = Math.min(player.golfAmmo, 9) * (ammoIconSize + ammoGap) + 8;
+                    const ammoPillW = labelWidth + Math.min(player.golfAmmo, 9) * (ammoIconSize + ammoGap) + 8;
                     const ammoPillH = ammoIconSize + 6;
                     
-                    ctx.fillStyle = 'rgba(40, 200, 40, 0.25)';
-                    ctx.strokeStyle = 'rgba(80, 255, 80, 0.6)';
+                    ctx.fillStyle = 'rgba(18, 22, 24, 0.72)';
+                    ctx.strokeStyle = shotColors[shotType] || '#FFFFFF';
                     ctx.lineWidth = 2;
                     
                     // Rounded rectangle
@@ -1417,13 +1421,19 @@ class UI {
                     ctx.arcTo(ammoX, ammoY, ammoX + radius, ammoY, radius);
                     ctx.fill();
                     ctx.stroke();
+
+                    ctx.font = 'bold 11px Arial';
+                    ctx.fillStyle = shotColors[shotType] || '#FFFFFF';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(shotLabels[shotType] || 'STUN', ammoX + labelWidth / 2, ammoY + ammoPillH / 2);
                     
                     // Draw ammo icons
                     const maxDisplay = 9;
                     const displayCount = Math.min(player.golfAmmo, maxDisplay);
                     
                     for (let i = 0; i < displayCount; i++) {
-                        const ix = ammoX + 4 + i * (ammoIconSize + ammoGap);
+                        const ix = ammoX + labelWidth + i * (ammoIconSize + ammoGap);
                         const iy = ammoY + 3;
                         
                         // Draw a tiny white golf ball icon

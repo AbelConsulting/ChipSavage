@@ -253,6 +253,31 @@ class Level {
         return null;
     }
 
+    hitWall(wall, shotType) {
+        if (!wall || wall.type !== 'wall') return { destroyed: false, material: null };
+        const material = wall.material || 'solid';
+        const destroysWall = (material === 'vine' && shotType === 'fireball') ||
+            (material === 'rock' && shotType === 'bomb');
+        if (!destroysWall) return { destroyed: false, material };
+
+        const wallIndex = this.platforms.indexOf(wall);
+        if (wallIndex < 0) return { destroyed: false, material };
+        this.platforms.splice(wallIndex, 1);
+
+        // Remove a climbable attached to the destroyed barrier so no visual remnant floats in place.
+        this.platforms = this.platforms.filter((platform) => {
+            if (platform.type !== 'climb') return true;
+            const verticalOverlap = platform.y < wall.y + wall.height && platform.y + platform.height > wall.y;
+            const horizontalGap = Math.max(0, wall.x - (platform.x + platform.width), platform.x - (wall.x + wall.width));
+            return !(verticalOverlap && horizontalGap <= 12);
+        });
+        this._staticNeedsUpdate = true;
+        if (typeof document !== 'undefined' && typeof this.renderStaticLayer === 'function') {
+            this.renderStaticLayer();
+        }
+        return { destroyed: true, material, x: wall.x + wall.width / 2, y: wall.y + wall.height / 2 };
+    }
+
     /**
      * Render the level: background layers, static layer, moving platforms.
      * @param {CanvasRenderingContext2D} ctx
@@ -480,6 +505,11 @@ class Level {
             return;
         }
 
+        if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock')) {
+            this.drawDestructibleWall(ctx, p);
+            return;
+        }
+
         // If tile mode is enabled and sprite exists, draw a tiled fill
         if (this.tileMode === 'tiles') {
             const tileName = p.tile || 'platform_tile';
@@ -529,6 +559,52 @@ class Level {
            ctx.fillStyle = fallbackHighlight;
            ctx.fillRect(p.x, p.y, p.width, 4);
            ctx.restore();
+    }
+
+    drawDestructibleWall(ctx, wall) {
+        ctx.save();
+        if (wall.material === 'vine') {
+            const wallGradient = ctx.createLinearGradient(wall.x, wall.y, wall.x + wall.width, wall.y);
+            wallGradient.addColorStop(0, '#123C20');
+            wallGradient.addColorStop(0.5, '#267A34');
+            wallGradient.addColorStop(1, '#0C2D18');
+            ctx.fillStyle = wallGradient;
+            ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            ctx.strokeStyle = '#62D66F';
+            ctx.lineWidth = 4;
+            for (let y = wall.y + 12; y < wall.y + wall.height; y += 28) {
+                ctx.beginPath();
+                ctx.moveTo(wall.x + 8, y);
+                ctx.bezierCurveTo(wall.x + wall.width * 0.8, y + 8, wall.x + wall.width * 0.2, y + 20, wall.x + wall.width - 8, y + 26);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#FFB11B';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔥', wall.x + wall.width / 2, wall.y + 26);
+        } else {
+            const stoneGradient = ctx.createLinearGradient(wall.x, wall.y, wall.x, wall.y + wall.height);
+            stoneGradient.addColorStop(0, '#747A80');
+            stoneGradient.addColorStop(1, '#30353A');
+            ctx.fillStyle = stoneGradient;
+            ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            ctx.strokeStyle = '#1D2023';
+            ctx.lineWidth = 3;
+            for (let y = wall.y + 32; y < wall.y + wall.height; y += 34) {
+                ctx.beginPath();
+                ctx.moveTo(wall.x, y);
+                ctx.lineTo(wall.x + wall.width, y);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#FF9B32';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('💣', wall.x + wall.width / 2, wall.y + 26);
+        }
+        ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(wall.x, wall.y, wall.width, wall.height);
+        ctx.restore();
     }
 
     drawClimbable(ctx, p) {
@@ -611,6 +687,11 @@ class Level {
 
                 if (p.type === 'climb') {
                     this.drawClimbable(c, scaled);
+                    continue;
+                }
+
+                if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock')) {
+                    this.drawDestructibleWall(c, scaled);
                     continue;
                 }
 
