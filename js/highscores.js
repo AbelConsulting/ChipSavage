@@ -54,102 +54,102 @@ try {
   }
   const ACHIEVEMENT_DEFINITIONS = Object.freeze([
     // ── Combat Basics ──
-    { id: 'first_kill', name: 'First Blood', desc: 'Defeat your first enemy', icon: '🩸', check: (stats) => statNumber(stats.enemiesDefeated) >= 1 },
-    { id: 'enemy_slayer', name: 'Enemy Slayer', desc: 'Defeat 50 enemies in a run', icon: '⚔️', check: (stats) => statNumber(stats.enemiesDefeated) >= 50 },
-    { id: 'exterminator', name: 'Exterminator', desc: 'Defeat 150 enemies in a run', icon: '☠️', check: (stats) => statNumber(stats.enemiesDefeated) >= 150 },
-    { id: 'genocide', name: 'Unstoppable', desc: 'Defeat 300 enemies in a run', icon: '💀', check: (stats) => statNumber(stats.enemiesDefeated) >= 300 },
+    { id: 'first_kill', name: 'First Hole Won', desc: 'Defeat your first course rival', icon: '⛳', check: (stats) => statNumber(stats.enemiesDefeated) >= 1 },
+    { id: 'enemy_slayer', name: 'Front Nine Finisher', desc: 'Defeat 50 rivals in one round', icon: '🏌️', check: (stats) => statNumber(stats.enemiesDefeated) >= 50 },
+    { id: 'exterminator', name: 'Back Nine Bruiser', desc: 'Defeat 150 rivals in one round', icon: '🏌️', check: (stats) => statNumber(stats.enemiesDefeated) >= 150 },
+    { id: 'genocide', name: 'Course Conqueror', desc: 'Defeat 300 rivals in one round', icon: '🏆', check: (stats) => statNumber(stats.enemiesDefeated) >= 300 },
 
     // ── Combo Mastery ──
-    { id: 'combo_master', name: 'Combo Starter', desc: 'Reach a 5-hit combo', icon: '🔥', check: (stats) => statNumber(stats.maxCombo) >= 5 },
-    { id: 'combo_adept', name: 'Combo Adept', desc: 'Reach a 10-hit combo', icon: '🔥', check: (stats) => statNumber(stats.maxCombo) >= 10 },
-    { id: 'combo_legend', name: 'Combo Legend', desc: 'Reach a 20-hit combo', icon: '🌪️', check: (stats) => statNumber(stats.maxCombo) >= 20 },
-    { id: 'combo_god', name: 'Combo God', desc: 'Reach a 50-hit combo', icon: '💫', check: (stats) => statNumber(stats.maxCombo) >= 50 },
-    { id: 'multi_hit_master', name: 'Cleave Master', desc: 'Land 10 multi-hit attacks in a run', icon: '🗡️', check: (stats) => statNumber(stats.multiKills) >= 10 },
+    { id: 'combo_master', name: 'Birdie String', desc: 'Reach a 5-hit combo', icon: '🐦', check: (stats) => statNumber(stats.maxCombo) >= 5 },
+    { id: 'combo_adept', name: 'Eagle String', desc: 'Reach a 10-hit combo', icon: '🦅', check: (stats) => statNumber(stats.maxCombo) >= 10 },
+    { id: 'combo_legend', name: 'Albatross String', desc: 'Reach a 20-hit combo', icon: '🏌️', check: (stats) => statNumber(stats.maxCombo) >= 20 },
+    { id: 'combo_god', name: 'Condor String', desc: 'Reach a 50-hit combo', icon: '🏆', check: (stats) => statNumber(stats.maxCombo) >= 50 },
+    { id: 'multi_hit_master', name: 'Scramble Specialist', desc: 'Land 10 multi-hit attacks in one round', icon: '⛳', check: (stats) => statNumber(stats.multiKills) >= 10 },
 
     // ── Score ──
-    { id: 'high_scorer', name: 'High Scorer', desc: 'Score over 50,000 points', icon: '💎', check: (stats) => statNumber(stats.score) >= 50000 },
-    { id: 'score_attack', name: 'Score Attack', desc: 'Score over 150,000 points', icon: '👑', check: (stats) => statNumber(stats.score) >= 150000 },
-    { id: 'score_legend', name: 'Score Legend', desc: 'Score over 500,000 points', icon: '🏆', check: (stats) => statNumber(stats.score) >= 500000 },
+    { id: 'high_scorer', name: 'Clubhouse Contender', desc: 'Card over 50,000 points', icon: '🏌️', check: (stats) => statNumber(stats.score) >= 50000 },
+    { id: 'score_attack', name: 'Money List Climber', desc: 'Card over 150,000 points', icon: '💰', check: (stats) => statNumber(stats.score) >= 150000 },
+    { id: 'score_legend', name: 'Tour Leader', desc: 'Card over 500,000 points', icon: '🏆', check: (stats) => statNumber(stats.score) >= 500000 },
 
     // ── Kick ──
-    { id: 'kick_initiate', name: 'Kick Initiate', desc: 'Use Kick 10 times in a run', icon: '🦵', check: (stats) => statNumber(stats.kicksUsed) >= 10 },
-    { id: 'kick_master', name: 'Kick Master', desc: 'Kill 25 enemies with Kick', icon: '⚡', check: (stats) => statNumber(stats.kickKills) >= 25 },
-    { id: 'kick_legend', name: 'Kick Legend', desc: 'Kill 75 enemies with Kick', icon: '💫', check: (stats) => statNumber(stats.kickKills) >= 75 },
+    { id: 'kick_initiate', name: 'Foot Wedge Rookie', desc: 'Use Kick 10 times in one round', icon: '🦵', check: (stats) => statNumber(stats.kicksUsed) >= 10 },
+    { id: 'kick_master', name: 'Foot Wedge Pro', desc: 'Defeat 25 rivals with Kick', icon: '⚡', check: (stats) => statNumber(stats.kickKills) >= 25 },
+    { id: 'kick_legend', name: 'Foot Wedge Legend', desc: 'Defeat 75 rivals with Kick', icon: '🏆', check: (stats) => statNumber(stats.kickKills) >= 75 },
 
     // ── Golf Shot ──
-    { id: 'golf_shot_novice', name: 'Golf Shot Novice', desc: 'Fire 5 Golf Shots in a run', icon: '⛳', check: (stats) => statNumber(stats.golfShotsFired) >= 5 },
-    { id: 'golf_shooter', name: 'Golf Shooter', desc: 'Hit 20 enemies with Golf Shot in a run', icon: '🏌️', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 20 },
-    { id: 'golf_ace', name: 'Golf Ace', desc: 'Hit 50 enemies with Golf Shot in a run', icon: '🏆', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 50 },
+    { id: 'golf_shot_novice', name: 'Range Rookie', desc: 'Fire 5 Golf Shots in one round', icon: '⛳', check: (stats) => statNumber(stats.golfShotsFired) >= 5 },
+    { id: 'golf_shooter', name: 'Shot Shaper', desc: 'Hit 20 rivals with Golf Shots in one round', icon: '🏌️', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 20 },
+    { id: 'golf_ace', name: 'Pin Seeker', desc: 'Hit 50 rivals with Golf Shots in one round', icon: '🏆', check: (stats) => statNumber(stats.enemiesHitByGolfShot) >= 50 },
 
     // ── Aerial Combat ──
-    { id: 'air_juggler', name: 'Air Juggler', desc: 'Defeat 5 enemies while airborne', icon: '🦅', check: (stats) => statNumber(stats.airKills) >= 5 },
-    { id: 'sky_warrior', name: 'Sky Warrior', desc: 'Defeat 25 enemies while airborne', icon: '✈️', check: (stats) => statNumber(stats.airKills) >= 25 },
+    { id: 'air_juggler', name: 'High Tee', desc: 'Defeat 5 rivals while airborne', icon: '🦅', check: (stats) => statNumber(stats.airKills) >= 5 },
+    { id: 'sky_warrior', name: 'Moon Ball', desc: 'Defeat 25 rivals while airborne', icon: '🌙', check: (stats) => statNumber(stats.airKills) >= 25 },
 
     // ── Accuracy & Precision ──
-    { id: 'precision_striker', name: 'Precision Striker', desc: '75% accuracy after 20+ attacks', icon: '🎯', check: (stats) => statNumber(stats.attacksAttempted) >= 20 && statNumber(stats.accuracy) >= 0.75 },
-    { id: 'sharpshooter', name: 'Sharpshooter', desc: '90% accuracy after 50+ attacks', icon: '🎯', check: (stats) => statNumber(stats.attacksAttempted) >= 50 && statNumber(stats.accuracy) >= 0.90 },
-    { id: 'never_miss', name: 'Never Miss', desc: '100% accuracy after 30+ attacks', icon: '💯', check: (stats) => statNumber(stats.attacksAttempted) >= 30 && statNumber(stats.accuracy) >= 1.0 },
+    { id: 'precision_striker', name: 'Fairway Finder', desc: '75% accuracy after 20+ attacks', icon: '🎯', check: (stats) => statNumber(stats.attacksAttempted) >= 20 && statNumber(stats.accuracy) >= 0.75 },
+    { id: 'sharpshooter', name: 'Green in Regulation', desc: '90% accuracy after 50+ attacks', icon: '⛳', check: (stats) => statNumber(stats.attacksAttempted) >= 50 && statNumber(stats.accuracy) >= 0.90 },
+    { id: 'never_miss', name: 'Dead Center', desc: '100% accuracy after 30+ attacks', icon: '🏌️', check: (stats) => statNumber(stats.attacksAttempted) >= 30 && statNumber(stats.accuracy) >= 1.0 },
 
     // ── Boss Hunting ──
-    { id: 'boss_slayer', name: 'Boss Slayer', desc: 'Defeat your first boss', icon: '🐲', check: (stats) => statNumber(stats.bossesDefeated) >= 1 },
-    { id: 'boss_crusher', name: 'Boss Crusher', desc: 'Defeat 3 bosses in a run', icon: '⚒️', check: (stats) => statNumber(stats.bossesDefeated) >= 3 },
-    { id: 'boss_hunter', name: 'Boss Hunter', desc: 'Defeat all 6 bosses in a run', icon: '🏹', check: (stats) => statNumber(stats.bossesDefeated) >= 6 },
-    { id: 'veteran_hunter', name: 'Veteran Hunter', desc: 'Defeat 20 bosses across all runs', icon: '🗡️', check: (stats) => statNumber(stats.totalBossesDefeated) >= 20 },
+    { id: 'boss_slayer', name: 'Match Play Rookie', desc: 'Defeat your first course champion', icon: '⛳', check: (stats) => statNumber(stats.bossesDefeated) >= 1 },
+    { id: 'boss_crusher', name: 'Bracket Buster', desc: 'Defeat 3 course champions in one round', icon: '🏌️', check: (stats) => statNumber(stats.bossesDefeated) >= 3 },
+    { id: 'boss_hunter', name: 'Tour Finalist', desc: 'Defeat 6 course champions in one round', icon: '🏆', check: (stats) => statNumber(stats.bossesDefeated) >= 6 },
+    { id: 'veteran_hunter', name: 'Clubhouse Legend', desc: 'Defeat 20 course champions across all rounds', icon: '🏆', check: (stats) => statNumber(stats.totalBossesDefeated) >= 20 },
 
     // ── Survival & Grit ──
-    { id: 'perfect_level', name: 'Untouchable', desc: 'Complete a level without taking damage', icon: '🛡️', check: (stats) => statNumber(stats.perfectLevels) >= 1 },
-    { id: 'iron_fur', name: 'Iron Fur', desc: 'Finish 3 perfect levels in one run', icon: '🦾', check: (stats) => statNumber(stats.perfectLevels) >= 3 },
-    { id: 'flawless_run', name: 'Flawless Run', desc: 'Complete the game with 0 damage taken', icon: '✨', check: (stats) => !!stats.gameCompleted && statNumber(stats.damageTaken) === 0 },
-    { id: 'close_call', name: 'Close Call', desc: 'Survive a hit at under 15% health', icon: '💔', check: (stats) => statNumber(stats.closeCalls) >= 1 },
-    { id: 'cheating_death', name: 'Cheating Death', desc: 'Survive 5 close calls in a run', icon: '😰', check: (stats) => statNumber(stats.closeCalls) >= 5 },
-    { id: 'survivor', name: 'Survivor', desc: 'Survive for 10 minutes in one run', icon: '⏰', check: (stats) => statNumber(stats.timeSurvived) >= 600 },
-    { id: 'endurance', name: 'Endurance', desc: 'Survive for 20 minutes in one run', icon: '⌛', check: (stats) => statNumber(stats.timeSurvived) >= 1200 },
-    { id: 'no_lives_lost', name: 'No Lives Lost', desc: 'Complete a level without losing a life', icon: '💚', check: (stats) => statNumber(stats.levelsCompleted) >= 1 && statNumber(stats.deathsThisRun) === 0 },
+    { id: 'perfect_level', name: 'Clean Card', desc: 'Complete a hole without taking damage', icon: '📋', check: (stats) => statNumber(stats.perfectLevels) >= 1 },
+    { id: 'iron_fur', name: 'Bogey-Free', desc: 'Finish 3 perfect holes in one round', icon: '⛳', check: (stats) => statNumber(stats.perfectLevels) >= 3 },
+    { id: 'flawless_run', name: 'Perfect Card', desc: 'Complete the tour with 0 damage taken', icon: '✨', check: (stats) => !!stats.gameCompleted && statNumber(stats.damageTaken) === 0 },
+    { id: 'close_call', name: 'Lip Out', desc: 'Survive a hit at under 15% health', icon: '🕳️', check: (stats) => statNumber(stats.closeCalls) >= 1 },
+    { id: 'cheating_death', name: 'Mulligan Master', desc: 'Survive 5 close calls in one round', icon: '🏌️', check: (stats) => statNumber(stats.closeCalls) >= 5 },
+    { id: 'survivor', name: 'Long Round', desc: 'Stay on the course for 10 minutes', icon: '⏰', check: (stats) => statNumber(stats.timeSurvived) >= 600 },
+    { id: 'endurance', name: 'Marathon Round', desc: 'Stay on the course for 20 minutes', icon: '⌛', check: (stats) => statNumber(stats.timeSurvived) >= 1200 },
+    { id: 'no_lives_lost', name: 'One-Ball Round', desc: 'Complete a hole without losing a life', icon: '🏐', check: (stats) => statNumber(stats.levelsCompleted) >= 1 && statNumber(stats.deathsThisRun) === 0 },
 
     // ── Collection & Exploration ──
-    { id: 'relic_hunter', name: 'Trophy Hunter', desc: 'Collect 10 Golden Trophies across all runs', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 10 },
-    { id: 'idol_hoarder', name: 'Trophy Hoarder', desc: 'Collect 50 Golden Trophies across all runs', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 50 },
-    { id: 'master_collector', name: 'Master Collector', desc: 'Complete 3 trophy sets in one run', icon: '🏅', check: (stats) => statNumber(stats.idolSetsCompleted) >= 3 },
-    { id: 'completionist', name: 'Completionist', desc: 'Collect all 18 trophies in a single run', icon: '🌈', check: (stats) => statNumber(stats.idolsCollected) >= 18 },
-    { id: 'power_hungry', name: 'Power Hungry', desc: 'Collect 15 power-ups in a run', icon: '⚡', check: (stats) => statNumber(stats.powerUpsCollected) >= 15 },
+    { id: 'relic_hunter', name: 'Trophy Cabinet', desc: 'Collect 10 Golden Cups across all rounds', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 10 },
+    { id: 'idol_hoarder', name: 'Full Trophy Case', desc: 'Collect 50 Golden Cups across all rounds', icon: '🏆', check: (stats) => statNumber(stats.totalIdolsCollected) >= 50 },
+    { id: 'master_collector', name: 'Triple Crown', desc: 'Complete 3 cup sets in one round', icon: '🏅', check: (stats) => statNumber(stats.idolSetsCompleted) >= 3 },
+    { id: 'completionist', name: 'Grand Slam', desc: 'Collect all 18 cups in a single round', icon: '🏆', check: (stats) => statNumber(stats.idolsCollected) >= 18 },
+    { id: 'power_hungry', name: 'Bag Fully Loaded', desc: 'Collect 15 course boosts in one round', icon: '🎒', check: (stats) => statNumber(stats.powerUpsCollected) >= 15 },
 
     // ── Chain Reactions ──
-    { id: 'chain_reaction', name: 'Chain Reaction', desc: 'Trigger an exploder chain kill', icon: '💥', check: (stats) => statNumber(stats.exploderChainKills) >= 1 },
-    { id: 'demolition_expert', name: 'Demolition Expert', desc: 'Trigger 5 exploder chain kills in a run', icon: '🧨', check: (stats) => statNumber(stats.exploderChainKills) >= 5 },
+    { id: 'chain_reaction', name: 'Bank Shot', desc: 'Trigger an exploder chain knockout', icon: '💥', check: (stats) => statNumber(stats.exploderChainKills) >= 1 },
+    { id: 'demolition_expert', name: 'Course Management', desc: 'Trigger 5 exploder chains in one round', icon: '📋', check: (stats) => statNumber(stats.exploderChainKills) >= 5 },
 
     // ── Speedrunning ──
-    { id: 'speed_demon', name: 'Speed Demon', desc: 'Beat the game in under 15 minutes', icon: '⚡', check: (stats) => !!stats.gameCompleted && statNumber(stats.completionTime) > 0 && statNumber(stats.completionTime) <= 900 },
-    { id: 'speed_god', name: 'Speed God', desc: 'Beat the game in under 10 minutes', icon: '🚀', check: (stats) => !!stats.gameCompleted && statNumber(stats.completionTime) > 0 && statNumber(stats.completionTime) <= 600 },
+    { id: 'speed_demon', name: 'Pace of Play', desc: 'Complete the tour in under 15 minutes', icon: '⚡', check: (stats) => !!stats.gameCompleted && statNumber(stats.completionTime) > 0 && statNumber(stats.completionTime) <= 900 },
+    { id: 'speed_god', name: 'Speed Golf Champion', desc: 'Complete the tour in under 10 minutes', icon: '🏌️', check: (stats) => !!stats.gameCompleted && statNumber(stats.completionTime) > 0 && statNumber(stats.completionTime) <= 600 },
 
     // ── Campaign & Progression ──
-    { id: 'world_saver', name: 'World Saver', desc: 'Complete the campaign', icon: '🌟', check: (stats) => !!stats.gameCompleted },
-    { id: 'halfway_there', name: 'Halfway There', desc: 'Complete 3 levels in a run', icon: '🏔️', check: (stats) => statNumber(stats.levelsCompleted) >= 3 },
+    { id: 'world_saver', name: 'Major Champion', desc: 'Complete the Championship Tour', icon: '🏆', check: (stats) => !!stats.gameCompleted },
+    { id: 'halfway_there', name: 'At the Turn', desc: 'Complete 3 holes in one round', icon: '🏌️', check: (stats) => statNumber(stats.levelsCompleted) >= 3 },
 
     // ── Cross-Run Dedication ──
-    { id: 'dedicated', name: 'Dedicated', desc: 'Play 10 runs', icon: '🎮', check: (stats) => statNumber(stats.totalRuns) >= 10 },
-    { id: 'addicted', name: 'Addicted', desc: 'Play 50 runs', icon: '🕹️', check: (stats) => statNumber(stats.totalRuns) >= 50 },
-    { id: 'veteran', name: 'Veteran', desc: 'Play 100 runs', icon: '🎖️', check: (stats) => statNumber(stats.totalRuns) >= 100 },
-    { id: 'mass_extinction', name: 'Mass Extinction', desc: 'Defeat 1,000 enemies across all runs', icon: '🪦', check: (stats) => statNumber(stats.totalEnemiesDefeated) >= 1000 },
-    { id: 'armageddon', name: 'Armageddon', desc: 'Defeat 5,000 enemies across all runs', icon: '🔱', check: (stats) => statNumber(stats.totalEnemiesDefeated) >= 5000 },
-    { id: 'time_invested', name: 'Time Invested', desc: 'Play for 1 hour total', icon: '⏳', check: (stats) => statNumber(stats.totalPlayTime) >= 3600 },
+    { id: 'dedicated', name: 'Weekend Golfer', desc: 'Play 10 rounds', icon: '⛳', check: (stats) => statNumber(stats.totalRuns) >= 10 },
+    { id: 'addicted', name: 'Club Regular', desc: 'Play 50 rounds', icon: '🏌️', check: (stats) => statNumber(stats.totalRuns) >= 50 },
+    { id: 'veteran', name: 'Course Veteran', desc: 'Play 100 rounds', icon: '🎖️', check: (stats) => statNumber(stats.totalRuns) >= 100 },
+    { id: 'mass_extinction', name: 'Thousand-Stroke Club', desc: 'Defeat 1,000 rivals across all rounds', icon: '🏌️', check: (stats) => statNumber(stats.totalEnemiesDefeated) >= 1000 },
+    { id: 'armageddon', name: 'Five-Thousand-Stroke Club', desc: 'Defeat 5,000 rivals across all rounds', icon: '🏆', check: (stats) => statNumber(stats.totalEnemiesDefeated) >= 5000 },
+    { id: 'time_invested', name: 'Range Hours', desc: 'Play for 1 hour total', icon: '⏳', check: (stats) => statNumber(stats.totalPlayTime) >= 3600 },
 
     // ── Founder / Early Access ──
     // Granted automatically the first time a Founder finishes a run —
     // gating it on `world_saver_or_run_count >= 1` so it doesn't pop in the
     // tutorial. The actual entitlement check lives in FounderManager.
-    { id: 'day_one_skunk', name: 'Day-One Skunk', desc: 'Supported the game during early access', icon: '🌟', check: (stats) => {
+    { id: 'day_one_skunk', name: 'Founding Foursome', desc: 'Joined the club during early access', icon: '🌟', check: (stats) => {
         try { return !!(window.FounderManager && FounderManager.isFounder()); }
         catch (e) { return false; }
     } },
-    { id: 'no_lifer', name: 'No-Lifer', desc: 'Play for 5 hours total', icon: '🌙', check: (stats) => statNumber(stats.totalPlayTime) >= 18000 },
+    { id: 'no_lifer', name: 'Dawn-to-Dusk Golfer', desc: 'Play for 5 hours total', icon: '🌙', check: (stats) => statNumber(stats.totalPlayTime) >= 18000 },
 
     // ── Damage & Efficiency ──
-    { id: 'glass_cannon', name: 'Glass Cannon', desc: 'Deal 5,000+ damage while taking under 50', icon: '🔮', check: (stats) => statNumber(stats.totalDamage) >= 5000 && statNumber(stats.damageTaken) < 50 },
-    { id: 'berserker', name: 'Berserker', desc: 'Deal 10,000 damage in a single run', icon: '🪓', check: (stats) => statNumber(stats.totalDamage) >= 10000 },
+    { id: 'glass_cannon', name: 'Risky Lie', desc: 'Deal 5,000+ damage while taking under 50', icon: '⛳', check: (stats) => statNumber(stats.totalDamage) >= 5000 && statNumber(stats.damageTaken) < 50 },
+    { id: 'berserker', name: 'Power Hitter', desc: 'Deal 10,000 damage in a single round', icon: '🏌️', check: (stats) => statNumber(stats.totalDamage) >= 10000 },
 
     // ── Secret / Fun ──
-    { id: 'multiplier_max', name: 'Multiplier Maniac', desc: 'Reach a 3.0x combo multiplier', icon: '✖️', check: (stats) => statNumber(stats.bestMultiplier) >= 3.0 },
-    { id: 'pacifist_start', name: 'Pacifist Start', desc: 'Survive 60 seconds without attacking', icon: '🕊️', check: (stats) => statNumber(stats.timeSurvived) >= 60 && statNumber(stats.attacksAttempted) === 0 },
+    { id: 'multiplier_max', name: 'Handicap Hacker', desc: 'Reach a 3.0x combo multiplier', icon: '✖️', check: (stats) => statNumber(stats.bestMultiplier) >= 3.0 },
+    { id: 'pacifist_start', name: 'Practice Swing', desc: 'Stay on course for 60 seconds without attacking', icon: '🏌️', check: (stats) => statNumber(stats.timeSurvived) >= 60 && statNumber(stats.attacksAttempted) === 0 },
   ]);
 
   function statNumber(value, fallback = 0) {
@@ -164,14 +164,14 @@ try {
   // ── Achievement-Based Titles ──
   // Earned by total achievement count; displayed on leaderboard next to player name.
   const TITLE_TIERS = Object.freeze([
-    { min:  0, title: 'Newcomer',     color: '#aaaaaa' },
-    { min:  5, title: 'Recruit',      color: '#66bb6a' },
-    { min: 10, title: 'Fighter',      color: '#42a5f5' },
-    { min: 15, title: 'Warrior',      color: '#ab47bc' },
-    { min: 25, title: 'Champion',     color: '#ffa726' },
-    { min: 35, title: 'Legend',       color: '#ffd700' },
-    { min: 45, title: 'Grandmaster',  color: '#ff5252' },
-    { min: 55, title: 'Mythic',       color: '#e040fb' },
+    { min:  0, title: 'Rookie',          color: '#aaaaaa' },
+    { min:  5, title: 'Caddie',          color: '#66bb6a' },
+    { min: 10, title: 'Amateur',         color: '#42a5f5' },
+    { min: 15, title: 'Club Pro',        color: '#ab47bc' },
+    { min: 25, title: 'Tour Pro',        color: '#ffa726' },
+    { min: 35, title: 'Major Champion',  color: '#ffd700' },
+    { min: 45, title: 'Hall of Famer',   color: '#ff5252' },
+    { min: 55, title: 'Golf Immortal',   color: '#e040fb' },
   ]);
 
   function getTitleForCount(count) {
@@ -1049,7 +1049,7 @@ try {
     if (scores.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'scoreboard-state scoreboard-state--empty';
-      empty.textContent = 'No survival runs yet — launch Survival Mode to set the bar!';
+      empty.textContent = 'No Back Nine rounds yet — tee off to set the clubhouse mark!';
       target.appendChild(empty);
       return;
     }
@@ -1060,7 +1060,7 @@ try {
     pbBar.className = 'survival-pb-bar';
     pbBar.innerHTML = `
       <span class="survival-pb-label">Personal Best</span>
-      <span class="survival-pb-wave">Wave ${best.wave}</span>
+      <span class="survival-pb-wave">Pairing ${best.wave}</span>
       <span class="survival-pb-score">${best.score.toLocaleString()} pts</span>
     `;
     target.appendChild(pbBar);
@@ -1082,11 +1082,11 @@ try {
 
       const nameLine = document.createElement('div');
       nameLine.className = 'scoreboard-name';
-      nameLine.textContent = `Wave ${entry.wave}`;
+      nameLine.textContent = `Pairing ${entry.wave}`;
 
       const detailLine = document.createElement('div');
       detailLine.className = 'scoreboard-score';
-      detailLine.textContent = `${entry.score.toLocaleString()} pts  ·  ${entry.enemies} kills`;
+      detailLine.textContent = `${entry.score.toLocaleString()} pts  ·  ${entry.enemies} rivals`;
 
       info.appendChild(nameLine);
       info.appendChild(detailLine);

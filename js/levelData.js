@@ -14,7 +14,7 @@ const LEVEL_CONFIGS = [
     // STAGE 1-1: FOREST OUTSKIRTS — THE RUN
     // =========================================================
     {
-        name: "Forest Outskirts",
+        name: "Pine Valley Front Nine",
         id: "level_1",
         width: 10000,
         completion: { exitX: 9900 },
@@ -114,7 +114,7 @@ const LEVEL_CONFIGS = [
     // STAGE 1-2: FOREST SHOWDOWN
     // =========================================================
     {
-        name: "Forest Showdown",
+        name: "Pine Valley Playoff",
         id: "level_1_boss",
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
@@ -158,7 +158,7 @@ const LEVEL_CONFIGS = [
     // STAGE 2-1: SKUNK CITY — THE RUN
     // =========================================================
     {
-        name: "Skunk City",
+        name: "Municipal Links",
         id: "level_2",
         width: 12000,
         completion: { exitX: 11900 },
@@ -184,52 +184,57 @@ const LEVEL_CONFIGS = [
             { x: 8360, y: 650, width: 1840, height: 40, type: 'static', tile: 'ground3_tile' },
             { x: 10480, y: 660, width: 1520, height: 40, type: 'static', tile: 'ground3_tile' },
 
-            // District A: underpass wall choke
-            { x: 1220, y: 430, width: 96, height: 230, type: 'wall', tile: 'wall_tile' },
+            // District A: rock gate with a ladder bypass
+            { x: 1220, y: 430, width: 96, height: 230, type: 'wall', material: 'rock' },
             { x: 1178, y: 430, width: 34, height: 230, type: 'climb', style: 'ladder' },
             { x: 980, y: 430, width: 420, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 1420, y: 390, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Gap A transition
             { x: 1690, y: 550, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 1840, y: 490, width: 120, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.9, tile: 'platform4_tile' },
 
-            // District B: billboard tower
-            { x: 2930, y: 380, width: 100, height: 270, type: 'wall', tile: 'wall_tile' },
+            // District B: vine billboard with a climb-around route
+            { x: 2930, y: 380, width: 100, height: 270, type: 'wall', material: 'vine' },
             { x: 2888, y: 380, width: 34, height: 270, type: 'climb', style: 'vine' },
             { x: 2620, y: 380, width: 500, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 2230, y: 300, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3260, y: 300, width: 250, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 3140, y: 470, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap B transition
             { x: 3780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3960, y: 470, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
 
-            // District C: construction shaft
-            { x: 5170, y: 400, width: 108, height: 270, type: 'wall', tile: 'wall_tile' },
+            // District C: reinforced rock shaft
+            { x: 5170, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
             { x: 5128, y: 400, width: 34, height: 270, type: 'climb', style: 'ladder' },
             { x: 4860, y: 400, width: 520, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5530, y: 320, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 5400, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Gap C transition
             { x: 5960, y: 540, width: 120, height: 24, type: 'moving', axis: 'x', range: 90, speed: 2.0, tile: 'platform4_tile' },
             { x: 6140, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
 
-            // District D: alley split-rise
-            { x: 7330, y: 360, width: 108, height: 300, type: 'wall', tile: 'wall_tile' },
+            // District D: overgrown alley split-rise
+            { x: 7330, y: 360, width: 108, height: 300, type: 'wall', material: 'vine' },
             { x: 7288, y: 360, width: 34, height: 300, type: 'climb', style: 'vine' },
             { x: 7010, y: 360, width: 520, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6580, y: 300, width: 250, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 7600, y: 290, width: 260, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 7460, y: 470, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap D transition
             { x: 8080, y: 540, width: 120, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 8230, y: 480, width: 120, height: 24, type: 'moving', axis: 'y', range: 80, speed: 2.2, tile: 'platform5_tile' },
 
-            // District E: neon wall gauntlet
-            { x: 9380, y: 340, width: 116, height: 320, type: 'wall', tile: 'wall_tile' },
+            // District E: final rock gate and upper reward route
+            { x: 9380, y: 340, width: 116, height: 320, type: 'wall', material: 'rock' },
             { x: 9338, y: 340, width: 34, height: 320, type: 'climb', style: 'ladder' },
             { x: 9050, y: 340, width: 540, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 9800, y: 300, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 9620, y: 470, width: 190, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Final approach to city boss gate
             { x: 10820, y: 500, width: 720, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -249,7 +254,9 @@ const LEVEL_CONFIGS = [
             { x: 10940, y: 470 }
         ],
         skunkPowerups: [
+            { x: 850, y: 600 },
             { x: 1870, y: 450 },
+            { x: 4900, y: 360 },
             { x: 7680, y: 250 }
         ],
         enemyConfig: {
@@ -264,7 +271,7 @@ const LEVEL_CONFIGS = [
     // STAGE 2-2: CITY SHOWDOWN
     // =========================================================
     {
-        name: "City Showdown",
+        name: "Municipal Match Play",
         id: "level_2_boss",
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
@@ -327,7 +334,7 @@ const LEVEL_CONFIGS = [
     // STAGE 3-1: MOUNTAIN DOJO — THE RUN
     // =========================================================
     {
-        name: "Mountain Dojo",
+        name: "Summit Driving Range",
         id: "level_3",
         width: 15000,
         completion: { exitX: 14900 },
@@ -374,6 +381,10 @@ const LEVEL_CONFIGS = [
 
             // Upper Walkway
             { x: 5300, y: 350, width: 1000, height: 24, type: 'static', tile: 'platform3_tile' },
+            // Choice Gate 1: burn through or climb over
+            { x: 5750, y: 350, width: 92, height: 300, type: 'wall', material: 'vine' },
+            { x: 5708, y: 350, width: 34, height: 300, type: 'climb', style: 'vine' },
+            { x: 5860, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
             
             // Final Steps
             { x: 6600, y: 450, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -385,6 +396,10 @@ const LEVEL_CONFIGS = [
             { x: 8350, y: 460, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 8750, y: 360, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 9150, y: 460, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
+            // Choice Gate 2: bomb shortcut through the temple foundation
+            { x: 9280, y: 410, width: 96, height: 230, type: 'wall', material: 'rock' },
+            { x: 9238, y: 410, width: 34, height: 230, type: 'climb', style: 'ladder' },
+            { x: 9400, y: 520, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // Hanging lanterns (moving)
             { x: 9800, y: 520, width: 120, height: 24, type: 'moving', axis: 'y', range: 160, speed: 2.8, tile: 'platform6_tile' },
@@ -393,6 +408,10 @@ const LEVEL_CONFIGS = [
 
             // Upper ridge
             { x: 11200, y: 360, width: 1000, height: 24, type: 'static', tile: 'platform3_tile' },
+            // Choice Gate 3: final mixed-route exam
+            { x: 11700, y: 360, width: 100, height: 290, type: 'wall', material: 'vine' },
+            { x: 11658, y: 360, width: 34, height: 290, type: 'climb', style: 'vine' },
+            { x: 11820, y: 500, width: 190, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 12550, y: 460, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 12950, y: 560, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
 
@@ -413,7 +432,9 @@ const LEVEL_CONFIGS = [
             { x: 14400, y: 420 }    // Just before boss
         ],
         skunkPowerups: [
-            { x: 8400, y: 330 }    // Mountain path skunk ammo
+            { x: 5200, y: 310 },   // Before first choice gate
+            { x: 8400, y: 330 },   // Mountain path skunk ammo
+            { x: 11100, y: 320 }   // Before final choice gate
         ],
         enemyConfig: {
             spawnInterval: 1.4,
@@ -427,7 +448,7 @@ const LEVEL_CONFIGS = [
     // STAGE 3-2: DOJO SHOWDOWN
     // =========================================================
     {
-        name: "Dojo Showdown",
+        name: "Range Championship",
         id: "level_3_boss",
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
@@ -472,7 +493,7 @@ const LEVEL_CONFIGS = [
     // STAGE 4-1: CRYSTAL CAVERNS — THE RUN
     // =========================================================
     {
-        name: "Crystal Caverns",
+        name: "Crystal Back Nine",
         id: "level_4",
         width: 16000,
         completion: { exitX: 15900 },
@@ -576,7 +597,7 @@ const LEVEL_CONFIGS = [
     // STAGE 4-2: CRYSTAL SHOWDOWN
     // =========================================================
     {
-        name: "Crystal Showdown",
+        name: "Gemstone Playoff",
         id: "level_4_boss",
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
@@ -621,7 +642,7 @@ const LEVEL_CONFIGS = [
     // STAGE 5-1: CRYSTAL CAVERNS DEPTHS — THE RUN
     // =========================================================
     {
-        name: "Crystal Caverns Depths",
+        name: "The Deep Rough",
         id: "level_5",
         width: 16000,
         completion: { exitX: 15900 },
@@ -729,7 +750,7 @@ const LEVEL_CONFIGS = [
     // STAGE 5-2: DEPTHS SHOWDOWN
     // =========================================================
     {
-        name: "Depths Showdown",
+        name: "Deep Rough Playoff",
         id: "level_5_boss",
         width: 4500,
         completion: { bossTriggerX: 3700, exitX: 4400 },
@@ -774,7 +795,7 @@ const LEVEL_CONFIGS = [
     // STAGE 6-1: NEON CROSSROADS — THE RUN
     // =========================================================
     {
-        name: "Neon Crossroads",
+        name: "Night Links",
         id: "level_6",
         width: 12000,
         completion: { exitX: 11900 },
@@ -871,7 +892,7 @@ const LEVEL_CONFIGS = [
     // STAGE 6-2: NEON SHOWDOWN
     // =========================================================
     {
-        name: "Neon Showdown",
+        name: "Floodlight Playoff",
         id: "level_6_boss",
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
@@ -916,7 +937,7 @@ const LEVEL_CONFIGS = [
     // STAGE 7-1: CRYSTAL RIDGE — THE RUN
     // =========================================================
     {
-        name: "Crystal Ridge",
+        name: "Eagle Ridge",
         id: "level_7",
         width: 16000,
         completion: { exitX: 15900 },
@@ -1022,7 +1043,7 @@ const LEVEL_CONFIGS = [
     // STAGE 7-2: RIDGE SHOWDOWN
     // =========================================================
     {
-        name: "Ridge Showdown",
+        name: "Eagle Ridge Playoff",
         id: "level_7_boss",
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
@@ -1068,7 +1089,7 @@ const LEVEL_CONFIGS = [
     // STAGE 8-1: ABYSSAL CAVERNS — THE RUN
     // =========================================================
     {
-        name: "Abyssal Caverns",
+        name: "Devil's Dogleg",
         id: "level_8",
         width: 16000,
         completion: { exitX: 15900 },
@@ -1177,7 +1198,7 @@ const LEVEL_CONFIGS = [
     // STAGE 8-2: ABYSS SHOWDOWN
     // =========================================================
     {
-        name: "Abyss Showdown",
+        name: "Dogleg Playoff",
         id: "level_8_boss",
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
@@ -1223,7 +1244,7 @@ const LEVEL_CONFIGS = [
     // STAGE 9-1: NEON NEXUS — THE RUN
     // =========================================================
     {
-        name: "Neon Nexus",
+        name: "Midnight Fairway",
         id: "level_9",
         width: 12000,
         completion: { exitX: 11900 },
@@ -1326,7 +1347,7 @@ const LEVEL_CONFIGS = [
     // STAGE 9-2: NEXUS SHOWDOWN
     // =========================================================
     {
-        name: "Nexus Showdown",
+        name: "Midnight Playoff",
         id: "level_9_boss",
         width: 4000,
         completion: { bossTriggerX: 3200, exitX: 3900 },
@@ -1371,7 +1392,7 @@ const LEVEL_CONFIGS = [
     // STAGE 10-1: FINAL SHOWDOWN — THE RUN
     // =========================================================
     {
-        name: "Final Showdown",
+        name: "Championship Course",
         id: "level_10",
         width: 12000,
         completion: { exitX: 11900 },
@@ -1474,7 +1495,7 @@ const LEVEL_CONFIGS = [
     // STAGE 10-2: FINAL CONFRONTATION
     // =========================================================
     {
-        name: "Final Confrontation",
+        name: "The Final Putt",
         id: "level_10_boss",
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
@@ -1521,7 +1542,7 @@ const LEVEL_CONFIGS = [
 // Compact fighting arena used exclusively for Survival Mode.
 // No boss, no exit — enemies come in escalating waves until the player falls.
 const SURVIVAL_ARENA_CONFIG = {
-    name: "Survival Arena",
+    name: "Endless Back Nine",
     id: "survival_arena",
     width: 2800,
     height: 780,

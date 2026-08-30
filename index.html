@@ -12,9 +12,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <title>chip savage golf brawler demo</title>
+    <title>Chip Savage Golf: Underground Tour</title>
 
-    <meta name="description" content="Chip Savage — the most savage golf brawler ever. Punch, kick, and drive your way through enemy hordes. Free in browser.">
+    <meta name="description" content="Chip Savage Golf: battle through outlaw courses, collect Golden Cups, and conquer the Underground Tour.">
     <meta name="keywords" content="chip savage, golf brawler, beat em up, 2D action, arcade fighter, combo brawler, free browser game">
     <meta name="author" content="Mephitideus Interactive">
     <meta name="robots" content="index, follow">
@@ -24,8 +24,8 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Chip Savage">
-    <meta property="og:title" content="chip savage golf brawler demo">
-    <meta property="og:description" content="The most savage golf brawler ever. Punch, kick, and drive your way through enemy hordes.">
+    <meta property="og:title" content="Chip Savage Golf: Underground Tour">
+    <meta property="og:description" content="Battle through outlaw courses, collect Golden Cups, and conquer the Underground Tour.">
     <meta property="og:locale" content="en_US">
 
     <!-- Fonts -->
@@ -152,8 +152,20 @@
             background: radial-gradient(ellipse at center, rgba(0,0,0,0.32) 0%, transparent 75%);
             border-radius: 20px; padding: 10px 8px 4px;
         }
-        #d-pad { left: 12px; }
-        #actions { right: 12px; }
+        #d-pad {
+            left: max(12px, var(--safe-left));
+            display: grid;
+            grid-template-columns: repeat(2, var(--touch-action-size, 68px));
+            grid-template-rows: repeat(2, var(--touch-action-size, 68px));
+            gap: 8px;
+        }
+        #actions {
+            right: max(12px, var(--safe-right));
+            display: grid;
+            grid-template-columns: repeat(2, var(--touch-action-size, 68px));
+            grid-template-rows: repeat(2, var(--touch-action-size, 68px));
+            gap: 8px;
+        }
         #game-over-controls { display: none !important; }
 
         .touch-btn {
@@ -172,17 +184,35 @@
             box-shadow: 0 12px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
             transition: transform 90ms ease, filter 160ms ease, box-shadow 160ms ease;
         }
-        #btn-left, #btn-right { width: clamp(64px, 11vw, 96px); }
+        #d-pad .touch-btn { width: 100%; height: 100%; margin: 0; }
         .touch-btn--move   { border-color: rgba(80,255,244,0.26); }
         .touch-btn--attack { border-color: rgba(255,80,80,0.30); }
         .touch-btn--special{ border-color: rgba(180,90,255,0.30); }
         .touch-btn--jump   { border-color: rgba(120,220,255,0.28); }
         .touch-btn--golf   { border-color: rgba(80,255,80,0.30); transition: opacity 0.3s ease, filter 0.3s ease; }
-        .touch-btn--shot-cycle { width: clamp(48px, 7vw, 64px); border-color: rgba(255,213,74,0.42); }
+        .touch-btn--shot-cycle { display: none; }
+        #actions .touch-btn { width: 100%; height: 100%; margin: 0; }
+        #btn-skunk { position: relative; border-color: rgba(255,213,74,0.52); }
+        #btn-skunk::after {
+            content: attr(data-ammo);
+            position: absolute; right: -5px; top: -7px;
+            min-width: 20px; height: 20px; padding: 0 3px;
+            display: grid; place-items: center;
+            border-radius: 10px;
+            background: #F4F7FA; color: #101416;
+            border: 2px solid #101416;
+            font: 800 11px 'Space Grotesk', sans-serif;
+            line-height: 1;
+        }
+        #btn-skunk[data-ammo="0"]::after { background: #62686D; color: #E4E7E9; }
         .touch-btn--golf.disabled { opacity: 0.35; filter: grayscale(0.7) brightness(0.5); pointer-events: none; }
         .touch-btn--pause  { border-color: rgba(255,255,255,0.18); }
         .touch-btn--restart{ border-color: rgba(255,160,80,0.28); }
-        .touch-btn:active  { filter: brightness(1.18); transform: scale(0.92); }
+        .touch-btn:active, .touch-btn.is-pressed { filter: brightness(1.18); transform: scale(0.92); }
+        .touch-btn:focus-visible, .shot-ability-btn:focus-visible {
+            outline-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.72), 0 0 0 5px rgba(255,255,255,0.76);
+        }
 
         #shot-ability-tray {
             position: absolute; left: 50%; bottom: 14px; z-index: 1900;
@@ -200,7 +230,7 @@
         .shot-ability-buttons { display: flex; gap: 5px; }
         .shot-ability-btn {
             --shot-color: #fff;
-            width: 42px; height: 42px; padding: 0;
+            width: 44px; height: 44px; padding: 0;
             display: grid; place-items: center;
             border: 1px solid rgba(255,255,255,0.16);
             border-radius: 6px;
@@ -227,10 +257,48 @@
             color: #fff; font: 700 12px 'Space Grotesk', sans-serif;
             text-align: center; text-transform: uppercase;
         }
-        @media (pointer: coarse), (max-width: 900px) {
-            #shot-ability-tray { bottom: 216px; padding: 5px 6px; }
-            .shot-ability-btn { width: 38px; height: 38px; font-size: 20px; }
+        #shot-context {
+            position: absolute; left: 50%; bottom: 70px; z-index: 1890;
+            max-width: min(320px, calc(100vw - 24px));
+            padding: 7px 10px;
+            border: 1px solid var(--shot-context-color, rgba(255,255,255,0.35));
+            border-radius: 6px;
+            background: rgba(8,12,14,0.88);
+            color: #FFFFFF;
+            font: 700 12px 'Space Grotesk', sans-serif;
+            text-align: center;
+            opacity: 0; pointer-events: none;
+            transform: translate(-50%, 6px);
+            transition: opacity 140ms ease, transform 140ms ease;
+        }
+        #shot-context.visible { opacity: 1; transform: translate(-50%, 0); }
+        @media (pointer: coarse), (max-width: 1100px) {
+            :root { --touch-action-size: clamp(56px, 8.5vw, 68px); }
+            #touch-controls { bottom: var(--safe-bottom); height: 180px; }
+            .control-group { bottom: 8px; padding: 6px; }
+            #shot-ability-tray {
+                left: auto; right: max(12px, var(--safe-right));
+                bottom: calc(var(--safe-bottom) + (var(--touch-action-size) * 2) + 36px);
+                padding: 5px 6px;
+                transform: translateY(8px);
+            }
+            #shot-ability-tray.visible { transform: translateY(0); }
+            .shot-ability-btn { width: 44px; height: 44px; font-size: 20px; }
             #shot-ability-name { display: none; }
+            #shot-context {
+                left: auto; right: max(12px, var(--safe-right));
+                bottom: calc(var(--safe-bottom) + (var(--touch-action-size) * 2) + 98px);
+                transform: translateY(6px);
+            }
+            #shot-context.visible { transform: translateY(0); }
+        }
+        @media (max-height: 430px) and (pointer: coarse), (max-height: 430px) and (max-width: 1100px) {
+            :root { --touch-action-size: 56px; }
+            #touch-controls { height: 148px; }
+            .touch-btn { border-radius: 12px; }
+            #shot-ability-tray { bottom: calc(var(--safe-bottom) + 148px); }
+            .shot-ability-btn { width: 44px; height: 44px; font-size: 19px; }
+            #shot-context { bottom: calc(var(--safe-bottom) + 204px); }
         }
 
         /* ── Pause button ── */
@@ -559,12 +627,12 @@
                     <div class="loading-content">
                         <div class="loading-logo">⛳</div>
                         <h1>CHIP SAVAGE GOLF</h1>
-                        <p class="loading-subtitle">BRAWLER DEMO</p>
+                        <p class="loading-subtitle">UNDERGROUND GOLF TOUR</p>
                         <div class="loading-divider"></div>
                         <div class="loading-bar">
                             <div id="loading-progress" class="loading-progress"></div>
                         </div>
-                        <p id="loading-text">Loading assets...</p>
+                        <p id="loading-text">Preparing the course...</p>
                         <p class="loading-tip" id="loading-tip"></p>
                         <p class="loading-footer">&copy; 2026 Mephitideus Interactive</p>
                     </div>
@@ -590,7 +658,7 @@
                 </div>
 
                 <div id="mobile-start-overlay" hidden>
-                    <button id="mobile-start-btn">Tap to Start</button>
+                    <button id="mobile-start-btn">Tap to Tee Off</button>
                 </div>
 
                 <!-- Error overlay -->
@@ -620,27 +688,27 @@
             <div id="start-menu-overlay">
                 <div class="start-menu-panel">
                     <h1 class="start-menu-title">CHIP</h1>
-                    <h2 class="start-menu-subtitle">SAVAGE</h2>
-                    <p class="start-menu-copy">Punch, kick, and drive your way through enemy hordes. Chain combos, master the Kick dash, and blast with Golf Shots. The fairway just got a lot more dangerous.</p>
+                    <h2 class="start-menu-subtitle">SAVAGE GOLF</h2>
+                    <p class="start-menu-copy">Chip's invitation to the underground tour has arrived. Fight through outlaw courses, collect every Golden Cup, and defeat the champions standing between Chip and the final green.</p>
                     <div class="start-menu-actions" role="navigation" aria-label="Main menu">
                         <button id="menu-play-btn" class="menu-btn menu-btn--play">
-                            <span class="menu-btn-label">▶ Launch Run</span>
-                            <span class="menu-btn-meta">Drop into Stage 1 and keep momentum.</span>
+                            <span class="menu-btn-label">▶ Championship Tour</span>
+                            <span class="menu-btn-meta">Tee off at Pine Valley and chase the final green.</span>
                         </button>
                         <button id="menu-survival-btn" class="menu-btn menu-btn--survival">
-                            <span class="menu-btn-label">🔥 Survival Mode</span>
-                            <span class="menu-btn-meta">Endless waves — fight until you fall.</span>
+                            <span class="menu-btn-label">🔥 Endless Back Nine</span>
+                            <span class="menu-btn-meta">Outlast an endless field of course rivals.</span>
                         </button>
                         <button id="menu-scores-btn" class="menu-btn">
-                            <span class="menu-btn-label">🏆 High Scores</span>
-                            <span class="menu-btn-meta">Check the board and chase the next target.</span>
+                            <span class="menu-btn-label">🏆 Leaderboard</span>
+                            <span class="menu-btn-meta">Check the clubhouse standings.</span>
                         </button>
                         <button id="menu-settings-btn" class="menu-btn">
-                            <span class="menu-btn-label">⚙ Settings</span>
-                            <span class="menu-btn-meta">Tune SFX and music.</span>
+                            <span class="menu-btn-label">⚙ Clubhouse</span>
+                            <span class="menu-btn-meta">Tune audio and replay caddie tips.</span>
                         </button>
                     </div>
-                    <p class="start-menu-enter-hint">PRESS ENTER TO PLAY</p>
+                    <p class="start-menu-enter-hint">PRESS ENTER TO TEE OFF</p>
                     <p class="start-menu-footer">&copy; 2026 Mephitideus Interactive</p>
                 </div>
             </div>
@@ -648,7 +716,7 @@
             <!-- ── HIGH SCORES OVERLAY ── -->
             <div id="menu-scores-overlay" hidden>
                 <div class="menu-sub-panel">
-                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">🏆 High Scores</h2>
+                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">🏆 Clubhouse Leaderboard</h2>
                     <div id="menu-scores-board"></div>
                     <button id="menu-scores-back" class="menu-btn menu-btn--primary">← BACK</button>
                 </div>
@@ -657,7 +725,7 @@
             <!-- ── SETTINGS OVERLAY ── -->
             <div id="menu-settings-overlay" hidden>
                 <div class="menu-sub-panel">
-                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">⚙ Settings</h2>
+                    <h2 style="margin:0;color:#fff;font:700 28px 'Space Grotesk',sans-serif">⚙ Clubhouse</h2>
                     <div class="volume-row">
                         <label for="menu-sfx-volume">🔊 SFX</label>
                         <input type="range" id="menu-sfx-volume" min="0" max="100" value="70">
@@ -668,7 +736,7 @@
                         <input type="range" id="menu-music-volume" min="0" max="100" value="50">
                         <span class="volume-value" id="menu-music-volume-value">50%</span>
                     </div>
-                    <button id="reset-tutorial-btn" class="menu-btn">💡 Reset Tutorial Hints</button>
+                    <button id="reset-tutorial-btn" class="menu-btn">💡 Replay Caddie Tips</button>
                     <button id="menu-settings-back" class="menu-btn menu-btn--primary">← BACK</button>
                 </div>
             </div>
@@ -677,7 +745,7 @@
             <div id="pause-overlay" hidden>
                 <div class="pause-panel">
                     <h1 class="pause-title">PAUSED</h1>
-                    <div class="pause-level-info" id="pause-level-info">Stage 1 — Score: 0</div>
+                    <div class="pause-level-info" id="pause-level-info">Hole 1 — Score: 0</div>
                     <hr class="pause-divider">
                     <div class="volume-row">
                         <label for="sfx-volume">🔊 SFX</label>
@@ -693,7 +761,7 @@
                     <div class="pause-actions">
                         <button id="resume-btn" class="menu-btn menu-btn--primary">▶ Resume</button>
                         <div class="pause-secondary-actions">
-                            <button id="pause-restart-btn" class="menu-btn menu-btn--pause-secondary" type="button">↺ Restart Stage</button>
+                            <button id="pause-restart-btn" class="menu-btn menu-btn--pause-secondary" type="button">↺ Replay Hole</button>
                             <button id="pause-quit-btn"    class="menu-btn menu-btn--pause-secondary" type="button">↩ Main Menu</button>
                         </div>
                     </div>
@@ -703,7 +771,9 @@
 
             <!-- ── TOUCH CONTROLS ── -->
             <div id="touch-controls">
-                <div id="d-pad" class="control-group" style="pointer-events:auto;display:flex;gap:8px;">
+                <div id="d-pad" class="control-group">
+                    <button class="touch-btn touch-btn--jump" id="btn-up" aria-label="Climb up">⇡</button>
+                    <button class="touch-btn touch-btn--jump" id="btn-down" aria-label="Climb down">⇣</button>
                     <button class="touch-btn touch-btn--move" id="btn-left"  aria-label="Move left">⟸</button>
                     <button class="touch-btn touch-btn--move" id="btn-right" aria-label="Move right">⟹</button>
                 </div>
@@ -711,25 +781,26 @@
                     <button class="touch-btn touch-btn--menu"    id="btn-menu"    style="display:none;font-size:18px;opacity:0.7;" aria-label="Menu">☰</button>
                     <button class="touch-btn touch-btn--restart" id="btn-restart" style="display:none;" aria-label="Restart">↺</button>
                 </div>
-                <div id="actions" class="control-group" style="pointer-events:auto;display:flex;gap:8px;">
+                <div id="actions" class="control-group">
                     <button class="touch-btn touch-btn--attack"  id="btn-attack"  aria-label="Attack">🗡</button>
                     <button class="touch-btn touch-btn--jump"    id="btn-jump"    aria-label="Jump">⤴</button>
                     <button class="touch-btn touch-btn--special" id="btn-special" aria-label="Kick">💥</button>
                     <button class="touch-btn touch-btn--shot-cycle" id="btn-shot-cycle" aria-label="Change golf shot">🟡</button>
-                    <button class="touch-btn touch-btn--golf"    id="btn-skunk"   aria-label="Golf Shot">⛳</button>
+                    <button class="touch-btn touch-btn--golf" id="btn-skunk" data-ammo="0" aria-label="Fire Stun shot">⚡</button>
                 </div>
             </div>
 
             <div id="shot-ability-tray" role="toolbar" aria-label="Golf shot abilities">
                 <div class="shot-ability-buttons">
-                    <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables enemies">⚡</button>
-                    <button class="shot-ability-btn" data-shot="fireball" aria-label="Fireball shot" title="Fireball: burns enemies and vine walls">🔥</button>
-                    <button class="shot-ability-btn" data-shot="hookshot" aria-label="Hookshot" title="Hookshot: grapple toward enemies">⚓</button>
-                    <button class="shot-ability-btn" data-shot="fishing" aria-label="Fishing shot" title="Fishing: reel enemies toward you">♓</button>
+                    <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables rivals">⚡</button>
+                    <button class="shot-ability-btn" data-shot="fireball" aria-label="Fireball shot" title="Fireball: burns rivals and vine walls">🔥</button>
+                    <button class="shot-ability-btn" data-shot="hookshot" aria-label="Hookshot" title="Hookshot: grapple toward rivals">⚓</button>
+                    <button class="shot-ability-btn" data-shot="fishing" aria-label="Fishing shot" title="Fishing: reel rivals toward you">♓</button>
                     <button class="shot-ability-btn" data-shot="bomb" aria-label="Bomb shot" title="Bomb: area damage and breaks rock walls">💣</button>
                 </div>
                 <span id="shot-ability-name" aria-live="polite">Stun</span>
             </div>
+            <div id="shot-context" role="status" aria-live="polite"></div>
 
         </div><!-- /#content-wrapper -->
     </div><!-- /#main-wrapper -->
@@ -793,15 +864,31 @@
             const btn = document.getElementById(id);
             if (!btn) return;
             btn.oncontextmenu = (e) => { e.preventDefault(); return false; };
-            const down = (e) => { try { e && e.preventDefault(); } catch(_){} triggerKeyEvent(key, 'keydown'); };
-            const up   = (e) => { try { e && e.preventDefault(); } catch(_){} triggerKeyEvent(key, 'keyup'); };
+            let lastDown = 0;
+            const down = (e) => {
+                try { e && e.preventDefault(); } catch(_){}
+                const now = performance.now();
+                if (now - lastDown < 40) return;
+                lastDown = now;
+                btn.classList.add('is-pressed');
+                try { if (navigator.vibrate) navigator.vibrate(10); } catch(_){}
+                triggerKeyEvent(key, 'keydown');
+            };
+            const up = (e) => {
+                try { e && e.preventDefault(); } catch(_){}
+                btn.classList.remove('is-pressed');
+                triggerKeyEvent(key, 'keyup');
+            };
             btn.addEventListener('touchstart', down, { passive: false });
             btn.addEventListener('touchend',   up,   { passive: false });
             btn.addEventListener('pointerdown', down);
             btn.addEventListener('pointerup',   up);
+            btn.addEventListener('pointercancel', up);
         };
         setupBtn('btn-left',    'ArrowLeft');
         setupBtn('btn-right',   'ArrowRight');
+        setupBtn('btn-up',      'ArrowUp');
+        setupBtn('btn-down',    'ArrowDown');
         setupBtn('btn-jump',    ' ');
         setupBtn('btn-attack',  'x');
         setupBtn('btn-special', 'z');
@@ -812,12 +899,32 @@
     function initShotAbilityTray() {
         const tray = document.getElementById('shot-ability-tray');
         if (!tray) return;
+        let contextTimer = null;
+        const showContext = (shotType) => {
+            const context = document.getElementById('shot-context');
+            if (!context) return;
+            const messages = {
+                gold: ['Stun • disables rivals', '#FFD54A'],
+                fireball: ['Fireball • burns vines', '#FF5A1F'],
+                hookshot: ['Hookshot • grapple forward', '#D9E1E8'],
+                fishing: ['Fishing • reel rivals in', '#38D5F2'],
+                bomb: ['Bomb • breaks rock walls', '#FF9B32']
+            };
+            const detail = messages[shotType] || messages.gold;
+            context.textContent = detail[0];
+            context.style.setProperty('--shot-context-color', detail[1]);
+            context.classList.add('visible');
+            if (contextTimer) clearTimeout(contextTimer);
+            contextTimer = setTimeout(() => context.classList.remove('visible'), 1600);
+        };
         tray.querySelectorAll('.shot-ability-btn').forEach((button) => {
             const select = (event) => {
                 try { event && event.preventDefault(); event && event.stopPropagation(); } catch(_){}
                 const player = window.game && window.game.player;
                 if (player && typeof player.selectGolfShot === 'function') {
                     player.selectGolfShot(button.dataset.shot);
+                    showContext(button.dataset.shot);
+                    try { if (navigator.vibrate) navigator.vibrate(8); } catch(_){}
                 }
             };
             button.addEventListener('pointerdown', select);
@@ -855,6 +962,9 @@
                 const names = { gold: 'Stun', fireball: 'Fireball', hookshot: 'Hookshot', fishing: 'Fishing', bomb: 'Bomb' };
                 cycleBtn.textContent = icons[shot] || '↻';
                 cycleBtn.setAttribute('aria-label', `Change golf shot. Selected: ${names[shot] || shot}`);
+                btn.textContent = icons[shot] || '⛳';
+                btn.dataset.ammo = String(Math.max(0, player.golfAmmo || 0));
+                btn.setAttribute('aria-label', `Fire ${names[shot] || shot} shot. ${Math.max(0, player.golfAmmo || 0)} remaining`);
                 document.querySelectorAll('.shot-ability-btn').forEach((abilityButton) => {
                     const selected = abilityButton.dataset.shot === shot;
                     abilityButton.classList.toggle('is-selected', selected);
@@ -972,7 +1082,7 @@
                     if (btn) { btn.disabled = true; btn.textContent = '⏳ LOADING…'; }
                     window.addEventListener('gameReady', function once() {
                         window.removeEventListener('gameReady', once);
-                        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="menu-btn-label">▶ Launch Run</span>'; }
+                        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="menu-btn-label">▶ Championship Tour</span>'; }
                         startGame();
                     });
                     return;

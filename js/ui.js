@@ -133,7 +133,7 @@ class UI {
     showLevelTitle(levelName, levelNumber) {
         try {
             this._levelTitleUntil = Date.now() + 3000;
-            this._levelTitleText = `STAGE ${levelNumber}`;
+            this._levelTitleText = `HOLE ${levelNumber}`;
             this._levelNameText = String(levelName || '');
         } catch (e) {
             // no-op
@@ -301,10 +301,10 @@ class UI {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 let levelText;
-                if (levelName === 'Survival Mode') {
-                    levelText = levelReached > 0 ? `SURVIVAL \u2022 WAVE ${levelReached}` : 'SURVIVAL MODE';
+                if (levelName === 'Endless Back Nine') {
+                    levelText = levelReached > 0 ? `BACK NINE \u2022 PAIRING ${levelReached}` : 'ENDLESS BACK NINE';
                 } else {
-                    levelText = levelName ? `STAGE ${levelReached} \u2022 ${levelName.toUpperCase()}` : `STAGE ${levelReached}`;
+                    levelText = levelName ? `HOLE ${levelReached} \u2022 ${levelName.toUpperCase()}` : `HOLE ${levelReached}`;
                 }
                 ctx.fillText(levelText, cx, titleY + 40);
                 ctx.restore();
@@ -377,19 +377,19 @@ class UI {
         const isSurvival = !!(extra.isSurvival);
         const stats = isSurvival
             ? [
-                { label: '\uD83C\uDF0A Wave Reached',    value: extra.levelReached || 0,                                     color: '#4ECDC4' },
-                { label: '\u2694\uFE0F  Enemies Defeated', value: gameStats.enemiesDefeated || 0,                            color: '#FF6B6B' },
-                { label: '\u23F1\uFE0F  Time Survived',   value: this.formatTime(gameStats.timeSurvived || 0),               color: '#95E1D3' },
+                { label: '\uD83C\uDF0A Pairing Reached',   value: extra.levelReached || 0,                                     color: '#4ECDC4' },
+                { label: '\u2694\uFE0F  Rivals Defeated',  value: gameStats.enemiesDefeated || 0,                            color: '#FF6B6B' },
+                { label: '\u23F1\uFE0F  Time on Course',   value: this.formatTime(gameStats.timeSurvived || 0),               color: '#95E1D3' },
                 { label: '\uD83D\uDD25 Max Combo',        value: `x${gameStats.maxCombo || 0}`,                              color: '#FFD93D' },
                 { label: '\uD83D\uDCA5 Best Multiplier',  value: `${(gameStats.bestMultiplier || 1.0).toFixed(1)}x`,         color: '#FF9500' },
             ]
             : [
-                { label: '\u2694\uFE0F  Enemies Defeated', value: gameStats.enemiesDefeated || 0,                            color: '#FF6B6B' },
-                { label: '\u23F1\uFE0F  Time Survived',   value: this.formatTime(gameStats.timeSurvived || 0),               color: '#4ECDC4' },
+                { label: '\u2694\uFE0F  Rivals Defeated', value: gameStats.enemiesDefeated || 0,                            color: '#FF6B6B' },
+                { label: '\u23F1\uFE0F  Time on Course',  value: this.formatTime(gameStats.timeSurvived || 0),               color: '#4ECDC4' },
                 { label: '\uD83D\uDD25 Max Combo',        value: `x${gameStats.maxCombo || 0}`,                              color: '#FFD93D' },
                 { label: '\uD83D\uDCA5 Best Multiplier',  value: `${(gameStats.bestMultiplier || 1.0).toFixed(1)}x`,         color: '#FF9500' },
                 { label: '\uD83C\uDFAF Accuracy',         value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`,          color: '#95E1D3' },
-                { label: '\uD83C\uDFC6 Trophies Collected',  value: gameStats.idolsCollected || 0,                              color: '#F38181' }
+                { label: '\uD83C\uDFC6 Golden Cups',  value: gameStats.idolsCollected || 0,                              color: '#F38181' }
             ];
 
         const lineHeight = 30;
@@ -430,7 +430,7 @@ class UI {
         ctx.fillStyle = 'rgba(255,255,255,0.7)';
         ctx.textAlign = 'center';
         ctx.letterSpacing = '0.08em';
-        ctx.fillText(isSurvival ? 'SURVIVAL STATS' : 'PERFORMANCE', cx, boxY + 24);
+        ctx.fillText(isSurvival ? 'BACK NINE CARD' : 'SCORECARD', cx, boxY + 24);
         ctx.restore();
 
         // Thin separator under header
@@ -795,23 +795,23 @@ class UI {
 
         if (isSurvival) {
             // Survival-specific tips keyed off wave reached
-            if (levelReached >= 15) return '\uD83D\uDD25 LEGENDARY! Wave ' + levelReached + ' — you\'re a survivor!';
-            if (levelReached >= 10) return '\uD83C\uDFC6 Wave ' + levelReached + ' reached — incredible run!';
-            if (levelReached >= 5)  return '\uD83D\uDCAA Wave ' + levelReached + ' — keep the pressure on!';
-            if (combo >= 5)         return '\uD83D\uDD25 Great combos! Chain kills before the next wave hits!';
-            if (enemies < 5)        return '\uD83D\uDCA1 TIP: Stay aggressive — enemies chase you in survival!';
-            if (time < 30)          return '\u26A1 Stay mobile between waves to collect ammo drops!';
-            return '\uD83C\uDF0A Each wave gets harder — use your spray wisely!';
+            if (levelReached >= 15) return '\uD83D\uDD25 LEGENDARY! Pairing ' + levelReached + ' — the course is yours!';
+            if (levelReached >= 10) return '\uD83C\uDFC6 Pairing ' + levelReached + ' reached — incredible round!';
+            if (levelReached >= 5)  return '\uD83D\uDCAA Pairing ' + levelReached + ' — keep the pressure on!';
+            if (combo >= 5)         return '\uD83D\uDD25 Great combos! Chain knockouts before the next pairing!';
+            if (enemies < 5)        return '\uD83D\uDCA1 CADDIE TIP: Stay aggressive — rivals chase you here!';
+            if (time < 30)          return '\u26A1 Stay mobile between pairings to collect ammo drops!';
+            return '\uD83C\uDF0A Each pairing gets harder — shape your shots wisely!';
         }
 
         // Arcade tips
-        if (levelReached <= 1 && enemies < 5) return '\uD83D\uDCA1 TIP: Time your attacks to build combos!';
-        if (combo < 3 && enemies > 0) return '\uD83D\uDD25 Chain attacks on enemies for big combo bonuses!';
+        if (levelReached <= 1 && enemies < 5) return '\uD83D\uDCA1 CADDIE TIP: Time your attacks to build combos!';
+        if (combo < 3 && enemies > 0) return '\uD83D\uDD25 Chain attacks on rivals for big combo bonuses!';
         if (accuracy < 0.3 && enemies > 3) return '\uD83C\uDFAF Land more hits to boost your accuracy score!';
         if (time < 30) return '\u26A1 Stay mobile! Jump and dodge to survive longer.';
-        if (levelReached >= 3) return '\uD83C\uDFC6 Great run! You made it to Stage ' + levelReached + '!';
+        if (levelReached >= 3) return '\uD83C\uDFC6 Great round! You made it to Hole ' + levelReached + '!';
         if (combo >= 5) return '\uD83D\uDD25 Nice combos! Keep that momentum going!';
-        return '\uD83D\uDCAA Keep going \u2014 every run makes you stronger!';
+        return '\uD83D\uDCAA Keep going \u2014 every round sharpens your game!';
     }
 
     formatTime(seconds) {
@@ -840,7 +840,7 @@ class UI {
         ctx.shadowColor = isFinalLevel ? '#FFD700' : '#00FF77';
         ctx.shadowBlur = glow;
         ctx.letterSpacing = '0.04em';
-        ctx.fillText(isFinalLevel ? 'FINAL BOSS DOWN!' : 'STAGE CLEAR!', cx, cy - 32);
+        ctx.fillText(isFinalLevel ? 'TOUR CHAMPION!' : 'HOLE CLEARED!', cx, cy - 32);
         ctx.restore();
 
         // Decorative divider
@@ -861,8 +861,8 @@ class UI {
         ctx.textBaseline = 'middle';
         ctx.letterSpacing = '0.03em';
         const subtitle = isFinalLevel
-            ? 'Roll credits\u2026'
-            : `Proceeding to Stage ${levelNum + 1}...`;
+            ? 'The final putt drops!'
+            : `Proceeding to Hole ${levelNum + 1}...`;
         ctx.fillText(subtitle, cx, cy + 40);
         ctx.restore();
     }
@@ -1094,31 +1094,31 @@ class UI {
 
         // Left column
         const leftStats = [
-            { label: '\u2694\uFE0F  Enemies', value: (gameStats.enemiesDefeated || 0).toLocaleString(), color: '#FF6B6B' },
+            { label: '\u2694\uFE0F  Rivals', value: (gameStats.enemiesDefeated || 0).toLocaleString(), color: '#FF6B6B' },
             { label: '\uD83D\uDCA5 Damage Dealt', value: (gameStats.totalDamage || 0).toLocaleString(), color: '#FF4500' },
             { label: '\uD83D\uDD25 Best Combo', value: `x${gameStats.maxCombo || 0}`, color: '#FFD93D' },
             { label: '\u26A1 Multiplier', value: `${(gameStats.bestMultiplier || 1.0).toFixed(1)}x`, color: '#FF9500' },
             { label: '\uD83D\uDC80 Dmg Taken', value: damageTaken === 0 ? 'NONE!' : damageTaken, color: damageTaken === 0 ? '#00FFFF' : '#FF6B6B' },
-            { label: '\uD83C\uDFC1 Levels', value: `${gameStats.levelsCompleted || 0}/20`, color: '#A8E6CF' }
+            { label: '\uD83C\uDFC1 Holes', value: `${gameStats.levelsCompleted || 0}/20`, color: '#A8E6CF' }
         ];
         drawStatCol(leftStats, col1X, halfW - 10);
 
         // Right column
         const rightStats = [
             { label: '\uD83C\uDFAF Accuracy', value: `${Math.floor((gameStats.accuracy || 0) * 100)}%`, color: '#95E1D3' },
-            { label: '\uD83C\uDFC6 Trophies', value: `${gameStats.idolsCollected || 0}/30`, color: '#F38181' },
-            { label: '\uD83D\uDC8E Sets', value: `${gameStats.idolSetsCompleted || 0}/10`, color: '#A8E6CF' },
-            { label: '\u2728 Perfect Lvls', value: perfectLevels, color: perfectLevels > 0 ? '#FFD700' : '#808080' },
-            { label: '\uD83C\uDFB2 Multi-Kills', value: gameStats.multiKills || 0, color: '#FF6B9D' }
+            { label: '\uD83C\uDFC6 Golden Cups', value: `${gameStats.idolsCollected || 0}/30`, color: '#F38181' },
+            { label: '\uD83D\uDC8E Cup Sets', value: `${gameStats.idolSetsCompleted || 0}/10`, color: '#A8E6CF' },
+            { label: '\u2728 Clean Holes', value: perfectLevels, color: perfectLevels > 0 ? '#FFD700' : '#808080' },
+            { label: '\uD83C\uDFB2 Multi-KOs', value: gameStats.multiKills || 0, color: '#FF6B9D' }
         ];
         drawStatCol(rightStats, col2X, halfW - 20);
 
         // ── Flavor text ──
-        let flavorText = 'The Skunk Squad is safe... for now.';
-        if (damageTaken === 0 && completionTime <= 900) flavorText = 'A LEGENDARY performance! You are truly The One!';
-        else if (damageTaken === 0) flavorText = 'FLAWLESS! A shadow master walks among us!';
-        else if (completionTime <= 600) flavorText = 'INCREDIBLE SPEED! A true speedrunner!';
-        else if ((gameStats.idolSetsCompleted || 0) >= 10) flavorText = 'Every trophy recovered! A true collector!';
+        let flavorText = 'Chip owns the underground tour.';
+        if (damageTaken === 0 && completionTime <= 900) flavorText = 'A legendary scorecard. Welcome to the Hall of Fame!';
+        else if (damageTaken === 0) flavorText = 'Bogey-free and battle-tested. A perfect card!';
+        else if (completionTime <= 600) flavorText = 'Incredible pace. A true speed golf champion!';
+        else if ((gameStats.idolSetsCompleted || 0) >= 10) flavorText = 'Every Golden Cup claimed. The Grand Slam is complete!';
 
         ctx.save();
         ctx.font = "italic 18px 'Bangers', 'Arial Black', sans-serif";
@@ -1675,13 +1675,13 @@ class UI {
                     const restPct   = Math.max(0, 1 - (survivalInfo.restTimer / restTotal));
                     const secs      = survivalInfo.restTimer > 0 ? Math.ceil(survivalInfo.restTimer) : 0;
 
-                    // "NEXT WAVE" label
+                    // Next pairing label
                     ctx.save();
                     ctx.font         = "700 7px 'Press Start 2P', monospace";
                     ctx.fillStyle    = 'rgba(0,255,136,0.75)';
                     ctx.textAlign    = 'left';
                     ctx.textBaseline = 'alphabetic';
-                    ctx.fillText('NEXT WAVE', innerX, barY + 1);
+                    ctx.fillText('NEXT PAIRING', innerX, barY + 1);
                     // Countdown seconds badge
                     ctx.font         = "900 14px 'Bangers', Impact, sans-serif";
                     ctx.fillStyle    = '#00FF88';
@@ -1794,7 +1794,7 @@ class UI {
                         ctx.textBaseline = 'middle';
                         ctx.shadowColor = 'rgba(0,255,136,0.6)';
                         ctx.shadowBlur  = 10;
-                        ctx.fillText('NEXT WAVE IN ' + (survivalInfo.restTimer > 0 ? Math.ceil(survivalInfo.restTimer) + 's' : '…'), cx, cy + 46);
+                        ctx.fillText('NEXT PAIRING IN ' + (survivalInfo.restTimer > 0 ? Math.ceil(survivalInfo.restTimer) + 's' : '…'), cx, cy + 46);
                         ctx.restore();
                     }
                 }
@@ -1935,9 +1935,9 @@ class UI {
             ctx.fillText('WARNING', this.width / 2, this.height / 2 - 20);
             
             ctx.fillStyle = '#FFDD00';
-            ctx.font = 'bold 40px Arial';
+            ctx.font = `bold ${Math.min(40, Math.max(20, this.width / 25))}px Arial`;
             ctx.shadowBlur = 0;
-            ctx.fillText('BOSS APPROACHING', this.width / 2, this.height / 2 + 50);
+            ctx.fillText('COURSE CHAMPION APPROACHING', this.width / 2, this.height / 2 + 50, this.width - 40);
 
             // Show boss name if available
             if (this._bossWarningName) {
@@ -1960,7 +1960,7 @@ class UI {
         if (this._bossDefeatedUntil && this._bossDefeatedUntil > Date.now()) {
             const remaining = this._bossDefeatedUntil - Date.now();
             const fadeAlpha = remaining < 500 ? remaining / 500 : 1.0;
-            const bossName = this._bossDefeatedName || 'BOSS';
+            const bossName = this._bossDefeatedName || 'COURSE CHAMPION';
 
             ctx.save();
             ctx.globalAlpha = fadeAlpha;
@@ -1985,21 +1985,22 @@ class UI {
             ctx.shadowColor = '#FFD700';
             ctx.shadowBlur = 20;
             ctx.fillStyle = '#FFD700';
-            ctx.font = 'bold 56px Arial';
-            ctx.fillText('BOSS DEFEATED', this.width / 2, this.height / 2 - 20);
+            const championBannerSize = Math.min(56, Math.max(30, this.width / 16));
+            ctx.font = `bold ${championBannerSize}px Arial`;
+            ctx.fillText('CHAMPION DEFEATED', this.width / 2, this.height / 2 - 20, this.width - 40);
 
             // Boss name
             ctx.shadowBlur = 10;
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 28px Arial';
-            ctx.fillText(bossName + ' ELIMINATED', this.width / 2, this.height / 2 + 30);
+            ctx.font = `bold ${Math.min(28, Math.max(18, this.width / 30))}px Arial`;
+            ctx.fillText(bossName + ' CONCEDES', this.width / 2, this.height / 2 + 30, this.width - 40);
 
             // Pulsing glow on the text
             const pulse = 0.6 + Math.sin(Date.now() * 0.005) * 0.4;
             ctx.globalAlpha = fadeAlpha * pulse * 0.3;
             ctx.fillStyle = '#FFD700';
-            ctx.font = 'bold 60px Arial';
-            ctx.fillText('BOSS DEFEATED', this.width / 2, this.height / 2 - 20);
+            ctx.font = `bold ${championBannerSize + 4}px Arial`;
+            ctx.fillText('CHAMPION DEFEATED', this.width / 2, this.height / 2 - 20, this.width - 40);
 
             ctx.restore();
         }

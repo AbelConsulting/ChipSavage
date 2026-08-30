@@ -992,7 +992,7 @@ class Game {
                     if (infoEl) {
                         const stageNum = (this.currentLevelIndex || 0) + 1;
                         const score = this.score || 0;
-                        infoEl.textContent = 'Stage ' + stageNum + ' \u2014 Score: ' + score.toLocaleString();
+                        infoEl.textContent = 'Hole ' + stageNum + ' \u2014 Score: ' + score.toLocaleString();
                     }
                 } catch (e) { __err('game', e); }
                 // Sync volume sliders with current values
@@ -1425,11 +1425,11 @@ class Game {
             }
 
             // Milestone banner text for landmark waves
-            let bannerText = `WAVE ${wave}`;
-            if      (wave === 5)              bannerText = 'WAVE 5 � HALFWAY?!';
-            else if (wave === 10)             bannerText = 'WAVE 10 � STILL STANDING?!';
-            else if (wave === 15)             bannerText = 'WAVE 15 � UNSTOPPABLE!';
-            else if (wave >= 20 && wave % 5 === 0) bannerText = `WAVE ${wave} � LEGENDARY!`;
+            let bannerText = `PAIRING ${wave}`;
+            if      (wave === 5)              bannerText = 'PAIRING 5: MAKING THE TURN!';
+            else if (wave === 10)             bannerText = 'PAIRING 10: STILL UNDER PAR!';
+            else if (wave === 15)             bannerText = 'PAIRING 15: TOUR PRO!';
+            else if (wave >= 20 && wave % 5 === 0) bannerText = `PAIRING ${wave}: LEGENDARY!`;
             this._survivalWaveBannerText  = bannerText;
             this._survivalWaveBannerTimer = 2.5;
 
@@ -1457,7 +1457,7 @@ class Game {
                 try {
                     this.damageNumbers.push(new FloatingText(
                         this.player.x + 32, this.player.y - 40,
-                        '+2 SPRAY',
+                        '+2 GOLF SHOTS',
                         { color: '#A8FF78', lifetime: 1.4, velocityY: -70, font: 'bold 16px Arial' }
                     ));
                 } catch (e) { __err('game', e); }
@@ -1512,7 +1512,7 @@ class Game {
                     this._survivalWaveRestTotal = 4.0;
 
                     const clearedWave = this.survivalWave;
-                    this._survivalWaveBannerText  = `WAVE ${clearedWave} CLEARED!`;
+                    this._survivalWaveBannerText  = `PAIRING ${clearedWave} CLEARED!`;
                     this._survivalWaveBannerTimer = 4.0;
 
                     // Wave-clear score bonus
@@ -1529,7 +1529,7 @@ class Game {
                         const cx = (this.viewWidth || this.width) / 2;
                         this.damageNumbers.push(new FloatingText(
                             cx - (this.camera ? this.camera.x : 0), 120,
-                            `WAVE ${clearedWave} BONUS  +${waveBonus.toLocaleString()}`,
+                            `PAIRING ${clearedWave} BONUS  +${waveBonus.toLocaleString()}`,
                             { color: '#FFD700', lifetime: 2.2, velocityY: -45, font: 'bold 20px Arial' }
                         ));
                     } catch (e) { __err('game', e); }
@@ -2384,7 +2384,7 @@ class Game {
                         this.damageNumbers.push(new FloatingText(
                             item.x,
                             item.y - 50,
-                            `IDOL ${idolNum}/3`,
+                            `GOLDEN CUP ${idolNum}/3`,
                             { color: '#FFFFFF', lifetime: 1.5, velocityY: -60, font: 'bold 20px Arial' }
                         ));
 
@@ -2433,7 +2433,7 @@ class Game {
                             this.damageNumbers.push(new FloatingText(
                                 item.x,
                                 item.y - 90,
-                                this.gameMode === 'survival' ? 'FULL SET! +POWER!' : 'FULL SET! +1 LIFE!',
+                                this.gameMode === 'survival' ? 'CUP SET! +POWER!' : 'CUP SET! +1 LIFE!',
                                 { color: '#FF00FF', lifetime: 2.5, velocityY: -100, font: 'bold 22px Arial' }
                             ));
                         }
@@ -3192,7 +3192,7 @@ class Game {
             // Capture level / wave reached
             if (this.gameMode === 'survival') {
                 this._gameOverLevelReached = this.survivalWave;
-                this._gameOverLevelName    = 'Survival Mode';
+                this._gameOverLevelName    = 'Endless Back Nine';
                 // Save to local survival leaderboard
                 try {
                     if (window.Highscores && typeof Highscores.addSurvivalScore === 'function') {
@@ -3490,7 +3490,7 @@ class Game {
                 try {
                     this.damageNumbers.push(new FloatingText(
                         this.player.x + 32, this.player.y - 40,
-                        '+2 SPRAY',
+                        '+2 GOLF SHOTS',
                         { color: '#A8FF78', lifetime: 1.6, velocityY: -70, font: 'bold 16px Arial' }
                     ));
                 } catch (e) { __err('game', e); }
@@ -3500,7 +3500,7 @@ class Game {
             this.survivalWaveResting  = true;
             this.survivalWaveRestTimer = 4.0;
             this._survivalWaveRestTotal = 4.0;
-            this._survivalWaveBannerText  = `WAVE ${this.survivalWave} � ONE MORE CHANCE!`;
+            this._survivalWaveBannerText  = `PAIRING ${this.survivalWave}: MULLIGAN!`;
             this._survivalWaveBannerTimer = 4.0;
 
             // Resume survival arena music

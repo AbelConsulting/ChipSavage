@@ -65,17 +65,17 @@ class TutorialHints {
             attack: {
                 id: 'attack',
                 duration: 10,
-                kb:    ['Press X to Attack enemies!',
+                kb:    ['Press X to Attack rivals!',
                         'Chain hits within 2s for combos!'],
-                touch: ['Tap 🗡 to Attack enemies!',
+                touch: ['Tap 🗡 to Attack rivals!',
                         'Chain hits within 2s for combos!']
             },
             attack_pity: {
                 id: 'attack_pity',
                 duration: 14,
-                kb:    ['You can ATTACK enemies!',
+                kb:    ['You can ATTACK rivals!',
                         'Press X — they can\'t hurt you if they\'re down.'],
-                touch: ['You can ATTACK enemies!',
+                touch: ['You can ATTACK rivals!',
                         'Tap 🗡 — they can\'t hurt you if they\'re down.']
             },
             kick: {
@@ -97,36 +97,36 @@ class TutorialHints {
             golden_idol: {
                 id: 'golden_idol',
                 duration: 10,
-                kb:    ['✦ Golden Trophy spotted!',
-                        'Collect all 3 per stage for boosts!'],
-                touch: ['✦ Golden Trophy spotted!',
-                        'Collect all 3 per stage for boosts!']
+                kb:    ['✦ Golden Cup spotted!',
+                    'Collect all 3 per hole for course boosts!'],
+                touch: ['✦ Golden Cup spotted!',
+                    'Collect all 3 per hole for course boosts!']
             },
             boss_encounter: {
                 id: 'boss_encounter',
                 duration: 12,
-                kb:    ['⚔ Boss Incoming!',
+                kb:    ['⚔ Course Champion Incoming!',
                         'Attack after they strike.',
                         'At 50% HP they enrage — stay alert!'],
-                touch: ['⚔ Boss Incoming!',
+                touch: ['⚔ Course Champion Incoming!',
                         'Attack after they strike.',
                         'At 50% HP they enrage — stay alert!']
             },
             exit_portal: {
                 id: 'exit_portal',
                 duration: 9,
-                kb:    ['🌀 Exit Portal opened!',
-                        'Head right to complete the stage.'],
-                touch: ['🌀 Exit Portal opened!',
-                        'Head right to complete the stage.']
+                kb:    ['🌀 Next Tee opened!',
+                    'Head right to complete the hole.'],
+                touch: ['🌀 Next Tee opened!',
+                    'Head right to complete the hole.']
             },
             objective: {
                 id: 'objective',
                 duration: 12,
-                kb:    ['OBJECTIVE: Defeat enemies & boss,',
-                        'then reach the Exit Portal!'],
-                touch: ['OBJECTIVE: Defeat enemies & boss,',
-                        'then reach the Exit Portal!']
+                kb:    ['OBJECTIVE: Defeat rivals & champion,',
+                    'then reach the Next Tee!'],
+                touch: ['OBJECTIVE: Defeat rivals & champion,',
+                    'then reach the Next Tee!']
             }
         };
     }
