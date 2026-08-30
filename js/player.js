@@ -122,6 +122,8 @@ class Player {
         this.golfSprays = []; // Active spray clouds (AoE on impact)
         this.golfCooldown = 0.5; // Cooldown between Golf Shots
         this.golfCooldownTimer = 0;
+        this.golfShotTypes = ['gold', 'fireball', 'hookshot', 'fishing', 'bomb'];
+        this.selectedGolfShotIndex = 0;
         
         // Idol collection bonuses (tiered, per-level)
         // { speed: 0.05, damage: 0.05, count: 1 } - tiers by collected count
@@ -217,8 +219,20 @@ class Player {
                 this.specialAttack();
             } else if (k === 'keyc' || k === 'c') {
                 this.shootGolfProjectile();
+            } else if (k === 'keyv' || k === 'v') {
+                this.cycleGolfShot();
             }
         }
+    }
+
+    getSelectedGolfShot() {
+        return this.golfShotTypes[this.selectedGolfShotIndex] || 'gold';
+    }
+
+    cycleGolfShot(direction = 1) {
+        const count = this.golfShotTypes.length;
+        this.selectedGolfShotIndex = (this.selectedGolfShotIndex + direction + count) % count;
+        return this.getSelectedGolfShot();
     }
 
     jump() {
@@ -318,6 +332,14 @@ class Player {
         if (this.isClimbing) return;
         // Check if player has skunk ammo and cooldown is ready
         if (this.golfAmmo > 0 && this.golfCooldownTimer <= 0 && this.hitStunTimer <= 0) {
+            const shotType = this.getSelectedGolfShot();
+            const shotConfig = {
+                gold: { speed: 600, lift: -50, gravityScale: 0.15, size: 24, lifetime: 2.0 },
+                fireball: { speed: 720, lift: -20, gravityScale: 0.04, size: 28, lifetime: 1.8 },
+                hookshot: { speed: 850, lift: 0, gravityScale: 0, size: 20, lifetime: 1.3 },
+                fishing: { speed: 560, lift: -140, gravityScale: 0.3, size: 20, lifetime: 2.3 },
+                bomb: { speed: 470, lift: -250, gravityScale: 0.55, size: 30, lifetime: 2.5 }
+            }[shotType];
             this.golfAmmo--;
             this.golfCooldownTimer = this.golfCooldown;
             this._golfShotJustFired = true; // Flag for gameStats tracking
@@ -332,12 +354,14 @@ class Player {
             const projectile = {
                 x: this.x + (this.facingRight ? this.width : 0),
                 y: this.y + this.height / 2,
-                width: 24,
-                height: 24,
-                velocityX: (this.facingRight ? 600 : -600),
-                velocityY: -50,
+                width: shotConfig.size,
+                height: shotConfig.size,
+                velocityX: (this.facingRight ? shotConfig.speed : -shotConfig.speed),
+                velocityY: shotConfig.lift,
                 facingRight: this.facingRight,
-                lifetime: 2.0, // 2 seconds before despawn
+                shotType,
+                gravityScale: shotConfig.gravityScale,
+                lifetime: shotConfig.lifetime,
                 age: 0
             };
             
@@ -391,8 +415,8 @@ class Player {
             proj.x += proj.velocityX * dt;
             proj.y += proj.velocityY * dt;
             
-            // Apply slight gravity to projectile for arc trajectory
-            proj.velocityY += Config.GRAVITY * 0.15 * dt;
+            // Apply per-shot gravity for straight hooks and arcing bombs.
+            proj.velocityY += Config.GRAVITY * (proj.gravityScale ?? 0.15) * dt;
             
             // Update lifetime
             proj.age += dt;
@@ -430,7 +454,7 @@ class Player {
 
                 // If projectile hits solid geometry, create spray and remove projectile
                 if (hitWall || (collision && collision.platform && collision.platform.type === 'static')) {
-                    this.createGolfImpact(proj.x, proj.y);
+                    this.createGolfImpact(proj.x, proj.y, proj.shotType);
                     this.golfProjectiles.splice(i, 1);
                     continue;
                 }
@@ -465,14 +489,22 @@ class Player {
         }
     }
     
-    createGolfImpact(x, y) {
+    createGolfImpact(x, y, shotType = 'gold') {
+        const impactConfig = {
+            gold: { radius: 100, duration: 0.8, colors: ['#FFD54A', '#FFF4B0'] },
+            fireball: { radius: 90, duration: 0.65, colors: ['#FF3B18', '#FFB11B'] },
+            hookshot: { radius: 45, duration: 0.45, colors: ['#B8C4CE', '#F4F7FA'] },
+            fishing: { radius: 55, duration: 0.65, colors: ['#18B7D8', '#B8F4FF'] },
+            bomb: { radius: 145, duration: 0.75, colors: ['#FF7A18', '#3A3131'] }
+        }[shotType] || { radius: 100, duration: 0.8, colors: ['#FFFFFF', '#E0E0E0'] };
         const spray = {
             x: x,
             y: y,
             age: 0,
-            duration: 0.8, // Spray lasts 0.8 seconds
+            shotType,
+            duration: impactConfig.duration,
             startRadius: 30,
-            maxRadius: 100, // AoE radius
+            maxRadius: impactConfig.radius,
             radius: 30,
             hitEnemies: new Set(), // Track which enemies have been hit
             particles: []
@@ -491,7 +523,7 @@ class Player {
                 age: 0,
                 lifetime: 0.6 + Math.random() * 0.4,
                 size: 3 + Math.random() * 5,
-                color: Math.random() > 0.5 ? '#FFFFFF' : '#E0E0E0'
+                color: impactConfig.colors[Math.random() > 0.5 ? 0 : 1]
             });
         }
         
@@ -1221,10 +1253,16 @@ class Player {
             
             // Draw expanding spray cloud area
             const alpha = 1 - (spray.age / spray.duration);
+            const cloudColors = {
+                gold: [`rgba(255, 213, 74, ${alpha * 0.35})`, 'rgba(255, 213, 74, 0)'],
+                fireball: [`rgba(255, 70, 20, ${alpha * 0.42})`, 'rgba(255, 40, 0, 0)'],
+                hookshot: [`rgba(190, 205, 215, ${alpha * 0.3})`, 'rgba(190, 205, 215, 0)'],
+                fishing: [`rgba(30, 190, 220, ${alpha * 0.32})`, 'rgba(30, 190, 220, 0)'],
+                bomb: [`rgba(255, 130, 20, ${alpha * 0.48})`, 'rgba(40, 30, 30, 0)']
+            }[spray.shotType] || [`rgba(255, 255, 255, ${alpha * 0.3})`, 'rgba(230, 230, 230, 0)'];
             const cloudGrad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, spray.radius);
-            cloudGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.3})`);
-            cloudGrad.addColorStop(0.5, `rgba(230, 230, 230, ${alpha * 0.2})`);
-            cloudGrad.addColorStop(1, 'rgba(230, 230, 230, 0)');
+            cloudGrad.addColorStop(0, cloudColors[0]);
+            cloudGrad.addColorStop(1, cloudColors[1]);
             ctx.fillStyle = cloudGrad;
             ctx.beginPath();
             ctx.arc(screenX, screenY, spray.radius, 0, Math.PI * 2);
@@ -1260,6 +1298,13 @@ class Player {
             
             ctx.save();
             ctx.translate(screenX, screenY);
+            const shotColors = {
+                gold: ['#FFF8C6', '#E4A900'],
+                fireball: ['#FFF2A0', '#F02B12'],
+                hookshot: ['#F4F7FA', '#788691'],
+                fishing: ['#D8FAFF', '#0796B5'],
+                bomb: ['#656565', '#171717']
+            }[proj.shotType] || ['#FFFFFF', '#D8D8D8'];
             
             // Draw motion trail
             const trailLength = 3;
@@ -1273,17 +1318,19 @@ class Player {
                 const trailY = -normalizedVelY * j * 8;
                 const trailSize = proj.width * (1 - j / trailLength * 0.5);
                 
-                ctx.fillStyle = `rgba(255, 255, 255, ${trailAlpha})`;
+                ctx.globalAlpha = trailAlpha;
+                ctx.fillStyle = shotColors[0];
                 ctx.beginPath();
                 ctx.arc(trailX, trailY, trailSize / 2, 0, Math.PI * 2);
                 ctx.fill();
             }
+            ctx.globalAlpha = 1;
             
             // Draw soft white glow
             const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, proj.width * 1.2);
-            glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-            glowGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
-            glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            glowGrad.addColorStop(0, shotColors[0]);
+            glowGrad.addColorStop(0.55, shotColors[1]);
+            glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = glowGrad;
             ctx.beginPath();
             ctx.arc(0, 0, proj.width * 1.2, 0, Math.PI * 2);
@@ -1292,9 +1339,8 @@ class Player {
             // Draw a white golf ball projectile with a couple of dimples
             const ballR = proj.width / 2;
             const ballShade = ctx.createRadialGradient(-ballR * 0.35, -ballR * 0.35, ballR * 0.1, 0, 0, ballR);
-            ballShade.addColorStop(0, '#FFFFFF');
-            ballShade.addColorStop(0.7, '#F0F0F0');
-            ballShade.addColorStop(1, '#D8D8D8');
+            ballShade.addColorStop(0, shotColors[0]);
+            ballShade.addColorStop(1, shotColors[1]);
             ctx.fillStyle = ballShade;
             ctx.strokeStyle = 'rgba(160, 160, 160, 0.8)';
             ctx.lineWidth = 1.5;
