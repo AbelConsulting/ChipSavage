@@ -1,0 +1,1102 @@
+/*!
+ * Chip Savage
+ * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
+ * Proprietary and confidential — unauthorized copying, distribution, or use
+ * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
+ */
+/**
+ * Visual effects - damage numbers, hit sparks, etc.
+ */
+
+class DamageNumber {
+    constructor(x, y, damage, critical = false, opts = null) {
+        this.x = x;
+        this.y = y;
+        this.damage = damage;
+        this.critical = critical;
+        this.lifetime = critical ? 1.25 : 1.0;
+        this.age = 0;
+        // Arc: launch up & slightly sideways, then fall under gravity for
+        // that classic “pop” feeling.
+        this.velocity_y = critical ? -240 : -180;
+        this.velocity_x = (Math.random() - 0.5) * (critical ? 90 : 60);
+        this.gravity = 520;
+        this.alpha = 1.0;
+        // Pop-in scale animation (overshoots to ~1.25, settles to 1.0)
+        this.scale = 0;
+        this.popDuration = 0.09;
+        // Combo-tier color tint (passed in via opts), overrides the default.
+        this.colorOverride = (opts && typeof opts.color === 'string') ? opts.color : null;
+        this.sizeBoost = (opts && typeof opts.sizeBoost === 'number') ? opts.sizeBoost : 1;
+    }
+
+    update(dt) {
+        this.age += dt;
+        this.x += this.velocity_x * dt;
+        this.y += this.velocity_y * dt;
+        this.velocity_y += this.gravity * dt;
+        this.velocity_x *= 0.96; // air drag
+        // Scale: pop up to 1.25 by popDuration, then ease back toward 1.0
+        if (this.age < this.popDuration) {
+            const t = this.age / this.popDuration;
+            this.scale = t * 1.25;
+        } else {
+            const settled = (this.age - this.popDuration) / 0.12;
+            this.scale = 1.25 + (1.0 - 1.25) * Math.min(settled, 1);
+        }
+        // Hold full alpha for first 60% of lifetime, then fade.
+        const fadeStart = this.lifetime * 0.6;
+        this.alpha = this.age < fadeStart ? 1.0 : Math.max(0, 1 - (this.age - fadeStart) / (this.lifetime - fadeStart));
+    }
+
+    isAlive() {
+        return this.age < this.lifetime;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        const baseSize = this.critical ? 40 : 28;
+        const fontSize = Math.max(12, Math.floor(baseSize * this.scale * this.sizeBoost));
+        ctx.font = `bold ${fontSize}px Arial`;
+        const fillColor = this.colorOverride || (this.critical ? '#FFD700' : '#FF4444');
+        ctx.fillStyle = fillColor;
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 4;
+        // shadowBlur is expensive on low-end GPUs — skip it when the flag is set
+        const disableShadow = (typeof Config !== 'undefined' && Config.MOBILE_DISABLE_SHADOW_BLUR);
+        if (!disableShadow) {
+            ctx.shadowColor = fillColor;
+            ctx.shadowBlur = this.critical ? 18 : 10;
+        }
+
+        const text = this.damage.toString();
+        const metrics = ctx.measureText(text);
+        const textX = this.x - metrics.width / 2;
+
+        ctx.strokeText(text, textX, this.y);
+        ctx.fillText(text, textX, this.y);
+        ctx.restore();
+    }
+}
+
+class FloatingText {
+    constructor(x, y, text, opts = null) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = '#FFFFFF';
+        this.lifetime = 1.2;
+        this.age = 0;
+        this.velocityY = -60;
+        this.alpha = 1.0;
+        this.font = 'bold 20px Arial';
+        this.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+        this.lineWidth = 3;
+        this.shadowColor = null;
+        this.shadowBlur = 0;
+
+        if (opts && typeof opts === 'object') {
+            if (typeof opts.color === 'string') this.color = opts.color;
+            if (typeof opts.lifetime === 'number') this.lifetime = opts.lifetime;
+            if (typeof opts.velocityY === 'number') this.velocityY = opts.velocityY;
+            if (typeof opts.font === 'string') this.font = opts.font;
+            if (typeof opts.strokeStyle === 'string') this.strokeStyle = opts.strokeStyle;
+            if (typeof opts.lineWidth === 'number') this.lineWidth = opts.lineWidth;
+            if (typeof opts.shadowColor === 'string') this.shadowColor = opts.shadowColor;
+            if (typeof opts.shadowBlur === 'number') this.shadowBlur = opts.shadowBlur;
+        }
+    }
+
+    update(dt) {
+        this.age += dt;
+        this.y += this.velocityY * dt;
+        this.alpha = 1.0 - (this.age / this.lifetime);
+    }
+
+    isAlive() {
+        return this.age < this.lifetime;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.font = this.font;
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = this.strokeStyle;
+        ctx.lineWidth = this.lineWidth;
+
+        const text = this.text.toString();
+        const metrics = ctx.measureText(text);
+        const textX = this.x - metrics.width / 2;
+
+        ctx.strokeText(text, textX, this.y);
+        if (this.shadowColor && this.shadowBlur > 0) {
+            ctx.shadowColor = this.shadowColor;
+            ctx.shadowBlur = this.shadowBlur;
+        }
+        ctx.fillText(text, textX, this.y);
+        ctx.restore();
+    }
+}
+
+class HitSpark {
+    constructor(x, y, opts = null) {
+        this.x = x;
+        this.y = y;
+        this.particles = [];
+        this.lifetime = 0.45;
+        this.age = 0;
+
+        // Create particles — default count/speed bumped for more punch.
+        let particleCount = 14;
+        let speedMin = 130;
+        let speedMax = 280;
+        if (opts && typeof opts === 'object') {
+            if (typeof opts.particleCount === 'number') particleCount = opts.particleCount;
+            if (typeof opts.speedMin === 'number') speedMin = opts.speedMin;
+            if (typeof opts.speedMax === 'number') speedMax = opts.speedMax;
+            if (typeof opts.lifetime === 'number') this.lifetime = opts.lifetime;
+        }
+        for (let i = 0; i < particleCount; i++) {
+            // Slight randomness in angle so it doesn't look mechanical.
+            const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.4;
+            const speed = Utils.randomFloat(speedMin, speedMax);
+            this.particles.push({
+                x: 0,
+                y: 0,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: Utils.randomFloat(3, 6)
+            });
+        }
+    }
+
+    update(dt) {
+        this.age += dt;
+        for (const particle of this.particles) {
+            particle.x += particle.vx * dt;
+            particle.y += particle.vy * dt;
+            particle.vx *= 0.94; // Friction
+            particle.vy *= 0.94;
+            particle.vy += 380 * dt; // light gravity for arc
+        }
+    }
+
+    isAlive() {
+        return this.age < this.lifetime;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        const alpha = 1.0 - (this.age / this.lifetime);
+        ctx.globalAlpha = alpha;
+        // On low/mid perf devices, skip createRadialGradient (expensive per-particle)
+        // and use a flat fill colour instead — much cheaper on fill-rate limited GPUs.
+        const flatMode = (typeof Config !== 'undefined' && Config.MOBILE_FLAT_PARTICLES);
+
+        for (const particle of this.particles) {
+            if (flatMode) {
+                ctx.fillStyle = particle.color || '#FFAA00';
+            } else if (particle.color) {
+                const gradient = ctx.createRadialGradient(
+                    this.x + particle.x, this.y + particle.y, 0,
+                    this.x + particle.x, this.y + particle.y, particle.size
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.6, particle.color);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = gradient;
+            } else {
+                const gradient = ctx.createRadialGradient(
+                    this.x + particle.x, this.y + particle.y, 0,
+                    this.x + particle.x, this.y + particle.y, particle.size
+                );
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.5, '#FFAA00');
+                gradient.addColorStop(1, '#FF4444');
+                ctx.fillStyle = gradient;
+            }
+
+            ctx.beginPath();
+            ctx.arc(this.x + particle.x, this.y + particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+}
+
+function drawAttackWispTelegraph(ctx, hb, opts = {}) {
+    if (!ctx || !hb) return;
+
+    const fxX = hb.x || 0;
+    const fxY = hb.y || 0;
+    const fxW = hb.width || 0;
+    const fxH = hb.height || 0;
+    if (fxW <= 0 || fxH <= 0) return;
+
+    const facingRight = opts.facingRight !== false;
+    const leadDir = facingRight ? 1 : -1;
+    const centerY = fxY + fxH / 2;
+    const now = Date.now();
+    const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : 0.5;
+    const intensity = (typeof opts.intensity === 'number') ? Math.max(0.2, opts.intensity) : 1;
+    const baseAlpha = (typeof opts.alpha === 'number') ? Math.max(0, Math.min(1, opts.alpha)) : (0.38 + progress * 0.18);
+    const coreColor = opts.coreColor || 'rgba(255, 255, 255, 0.95)';
+    const tintA = opts.tintA || 'rgba(255, 190, 120, 0.60)';
+    const tintB = opts.tintB || 'rgba(255, 120, 80, 0.24)';
+    const tintC = opts.tintC || 'rgba(255, 90, 60, 0)';
+    const cloudCount = Math.max(3, Math.round((opts.wispCount || 6) * intensity));
+    const padX = Math.max(2, Math.min(8, fxW * 0.08));
+    const padY = Math.max(2, Math.min(7, fxH * 0.14));
+    const minX = fxX + padX;
+    const maxX = fxX + fxW - padX;
+    const minY = fxY + padY;
+    const maxY = fxY + fxH - padY;
+    const usableW = Math.max(1, maxX - minX);
+    const usableH = Math.max(1, maxY - minY);
+
+    ctx.save();
+    // Keep all cloud pixels inside the real hit field.
+    ctx.beginPath();
+    ctx.rect(fxX, fxY, fxW, fxH);
+    ctx.clip();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = baseAlpha;
+
+    const laneGrad = ctx.createLinearGradient(
+        facingRight ? fxX : (fxX + fxW),
+        centerY,
+        facingRight ? (fxX + fxW) : fxX,
+        centerY
+    );
+    laneGrad.addColorStop(0, tintC);
+    laneGrad.addColorStop(0.12, tintB);
+    laneGrad.addColorStop(0.5, tintA);
+    laneGrad.addColorStop(1, tintC);
+    ctx.fillStyle = laneGrad;
+    ctx.beginPath();
+    const laneRadius = Math.max(3, Math.min(fxH * 0.42, 14));
+    ctx.roundRect(fxX, fxY, fxW, fxH, laneRadius);
+    ctx.fill();
+
+    for (let i = 0; i < cloudCount; i++) {
+        const t = i / Math.max(1, cloudCount - 1);
+        const pulse = Math.sin(now * 0.0055 + i * 1.9);
+        const sway = Math.cos(now * 0.004 + i * 1.3);
+        const baseX = facingRight
+            ? (minX + usableW * t)
+            : (maxX - usableW * t);
+        const anchorX = Utils.clamp(baseX + leadDir * sway * Math.max(1.5, usableW * 0.02), minX, maxX);
+        const anchorY = Utils.clamp(centerY + pulse * Math.max(1.5, usableH * 0.16), minY, maxY);
+        const widthBias = Math.max(8, usableW * (0.16 + (1 - Math.abs(0.5 - t) * 1.15) * 0.2));
+        const heightBias = Math.max(6, usableH * (0.34 + Math.sin(now * 0.0045 + i) * 0.06));
+
+        const grad = ctx.createRadialGradient(anchorX, anchorY, 0, anchorX, anchorY, Math.max(widthBias, heightBias) * 1.05);
+        grad.addColorStop(0, coreColor);
+        grad.addColorStop(0.2, tintA);
+        grad.addColorStop(0.55, tintB);
+        grad.addColorStop(1, tintC);
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        const lobeY = heightBias * 0.3;
+        const lobeOffset = leadDir * Math.max(1.5, widthBias * 0.08);
+
+        ctx.ellipse(
+            anchorX,
+            anchorY,
+            widthBias,
+            heightBias,
+            leadDir * 0.04 + pulse * 0.02,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(anchorX - lobeOffset * 1.4, anchorY - lobeY, heightBias * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + lobeOffset * 0.2, anchorY - lobeY * 1.1, heightBias * 0.86, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + lobeOffset * 1.2, anchorY - lobeY * 0.88, heightBias * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(anchorX + lobeOffset * 1.9, anchorY + lobeY * 0.1, heightBias * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Defined contour so it reads like a cloud field, not just glow.
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = Math.max(0.2, baseAlpha * 0.72);
+    ctx.strokeStyle = opts.strokeColor || 'rgba(255, 255, 255, 0.36)';
+    ctx.lineWidth = Math.max(1, Math.min(2.4, fxH * 0.09));
+    ctx.beginPath();
+    ctx.roundRect(fxX + 0.5, fxY + 0.5, Math.max(0, fxW - 1), Math.max(0, fxH - 1), laneRadius);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+/**
+ * ScreenFlash — full-screen color wash that fades out quickly.
+ * Used to punctuate big combo milestones and special hits.
+ */
+class ScreenFlash {
+    constructor(color = 'rgba(255, 255, 255, 0.5)', duration = 0.22) {
+        this.color = color;
+        this.duration = duration;
+        this.age = 0;
+    }
+    update(dt) { this.age += dt; }
+    isActive() { return this.age < this.duration; }
+    draw(ctx, w, h) {
+        if (!this.isActive()) return;
+        const t = 1 - (this.age / this.duration);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, t);
+        ctx.fillStyle = this.color;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+    }
+}
+
+class ScreenShake {
+    constructor(duration, intensity) {
+        // Cap intensity to avoid disorienting the player on extreme combos.
+        this.duration = duration;
+        this.intensity = Math.min(intensity, 28);
+        this.timer = duration;
+        this.offsetX = 0;
+        this.offsetY = 0;
+    }
+
+    update(dt) {
+        if (this.timer > 0) {
+            this.timer -= dt;
+            this.offsetX = (Math.random() - 0.5) * this.intensity;
+            this.offsetY = (Math.random() - 0.5) * this.intensity;
+        } else {
+            this.offsetX = 0;
+            this.offsetY = 0;
+        }
+    }
+
+    isActive() {
+        return this.timer > 0;
+    }
+}
+
+/**
+ * MovementFX: lightweight environmental particles tied to player movement.
+ * Emits dust puffs, leaves, or sparks depending on level theme.
+ */
+class MovementFX {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.stepTimer = 0;
+        this.stepInterval = (typeof opts.stepInterval === 'number') ? opts.stepInterval : 0.12;
+        // On mobile the config caps movement particles to save CPU; fall back to 180 on desktop.
+        const configCap = (typeof Config !== 'undefined' && typeof Config.MOBILE_MAX_MOVEMENT_PARTICLES === 'number' && Config.MOBILE_MAX_MOVEMENT_PARTICLES >= 0)
+            ? Config.MOBILE_MAX_MOVEMENT_PARTICLES
+            : 180;
+        this.maxParticles = (typeof opts.maxParticles === 'number') ? opts.maxParticles : configCap;
+    }
+
+    _themeForLevel(level) {
+        const bg = (level && level.backgroundName) ? String(level.backgroundName) : '';
+        if (bg.includes('forest')) return { mode: 'leaf', color: '#7fd26b', alt: '#5fb956' };
+        if (bg.includes('city')) return { mode: 'spark', color: '#ffd65c', alt: '#ff9a2b' };
+        if (bg.includes('mountain')) return { mode: 'dust', color: '#c9c9c9', alt: '#9a9a9a' };
+        if (bg.includes('cave')) return { mode: 'dust', color: '#b09adf', alt: '#7e6ab7' };
+        return { mode: 'dust', color: '#cfcfcf', alt: '#a8a8a8' };
+    }
+
+    _emitParticle(x, y, opts) {
+        if (this.particles.length >= this.maxParticles) this.particles.shift();
+        this.particles.push({
+            x,
+            y,
+            vx: opts.vx || 0,
+            vy: opts.vy || 0,
+            size: opts.size || 3,
+            life: opts.life || 0.4,
+            age: 0,
+            color: opts.color || '#cfcfcf',
+            alpha: 1,
+            gravity: (typeof opts.gravity === 'number') ? opts.gravity : 120,
+            mode: opts.mode || 'dust'
+        });
+    }
+
+    emitRun(x, y, dir, level, intensity = 1) {
+        const theme = this._themeForLevel(level);
+        const count = Math.max(2, Math.floor(4 * intensity));
+        for (let i = 0; i < count; i++) {
+            const spread = Utils.randomFloat(-20, 20);
+            const speed = Utils.randomFloat(30, 90) * (dir || 1);
+            this._emitParticle(x + spread, y + Utils.randomFloat(-4, 2), {
+                vx: speed * 0.35,
+                vy: Utils.randomFloat(-40, -10),
+                size: Utils.randomFloat(2, 4),
+                life: Utils.randomFloat(0.25, 0.5),
+                color: Math.random() > 0.5 ? theme.color : theme.alt,
+                gravity: 180,
+                mode: theme.mode
+            });
+        }
+    }
+
+    emitLand(x, y, level, force = 1) {
+        const theme = this._themeForLevel(level);
+        const count = Math.max(4, Math.floor(8 * force));
+        for (let i = 0; i < count; i++) {
+            const angle = Utils.randomFloat(Math.PI, Math.PI * 2);
+            const speed = Utils.randomFloat(60, 200) * force;
+            this._emitParticle(x, y, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed * 0.6,
+                size: Utils.randomFloat(2, 5),
+                life: Utils.randomFloat(0.35, 0.6),
+                color: Math.random() > 0.5 ? theme.color : theme.alt,
+                gravity: 260,
+                mode: theme.mode
+            });
+        }
+    }
+
+    emitFromPlayer(player, level, dt, meta = {}) {
+        if (!player) return;
+        const speed = Math.abs(player.velocityX || 0);
+        const grounded = !!player.onGround;
+        const dir = player.facingRight ? 1 : -1;
+        const baseY = player.y + (player.height || 64) - 4;
+        const baseX = player.x + (player.width || 64) * 0.5;
+
+        if (grounded && speed > 80) {
+            this.stepTimer -= dt;
+            if (this.stepTimer <= 0) {
+                const intensity = Utils.clamp(speed / 300, 0.6, 1.6);
+                this.emitRun(baseX - dir * 12, baseY, dir, level, intensity);
+                this.stepTimer = this.stepInterval;
+            }
+        }
+
+        // Landing burst
+        if (meta && meta.prevOnGround === false && grounded) {
+            const fallSpeed = Math.abs(meta.prevVY || 0);
+            if (fallSpeed > 220) {
+                const force = Utils.clamp(fallSpeed / 700, 0.6, 1.8);
+                this.emitLand(baseX, baseY, level, force);
+            }
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.vy += (p.gravity || 0) * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.96;
+            p.vy *= 0.96;
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            if (p.age >= p.life) this.particles.splice(i, 1);
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            if (p.mode === 'spark') {
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = Math.max(1, p.size * 0.5);
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.vx * 0.03, p.y - p.vy * 0.03);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+    }
+}
+
+/**
+ * Game over animation: overlay fade, centered "GAME OVER" text, shake and falling particles.
+ * Usage: const go = new GameOverAnimation(canvas.width, canvas.height); go.start();
+ * Call go.update(dt) and go.draw(ctx) each frame while go.isActive() is true.
+ */
+class GameOverAnimation {
+    constructor(width, height, opts = {}) {
+        this.width = width || 800;
+        this.height = height || 600;
+        this.duration = opts.duration || 4.0; // total life in seconds
+        this.fadeDuration = opts.fadeDuration || 1.4; // seconds to reach full overlay
+        this.particleCount = opts.particleCount || 110;
+        this.gravity = opts.gravity || 900;
+        this.elapsed = 0;
+        this.particles = [];
+        this.shake = null;
+        this.active = false;
+        this.finished = false;
+        this.colors = opts.colors || ['#FF2D55', '#FFAA00', '#FFD700', '#FFFFFF', '#FF6B00'];
+        // Initial bright flash that fades out fast
+        this.flashAlpha = 0.85;
+    }
+
+    start() {
+        this.elapsed = 0;
+        this.active = true;
+        this.finished = false;
+        this.particles.length = 0;
+        this.flashAlpha = 0.85;
+
+        const cx = this.width / 2;
+        const cy = this.height / 2 - 40;
+
+        const rand = (a, b) => (typeof Utils !== 'undefined' && Utils.randomFloat) ? Utils.randomFloat(a, b) : (Math.random() * (b - a) + a);
+
+        for (let i = 0; i < this.particleCount; i++) {
+            // Full 360° burst (was -π to 0). Wider speed range too.
+            const angle = rand(0, Math.PI * 2);
+            const speed = rand(180, 720);
+            this.particles.push({
+                x: cx + rand(-30, 30),
+                y: cy + rand(-20, 20),
+                vx: Math.cos(angle) * speed + rand(-40, 40),
+                vy: Math.sin(angle) * speed + rand(-220, -80),
+                size: rand(2, 7),
+                color: this.colors[Math.floor(rand(0, this.colors.length))],
+                alpha: 1
+            });
+        }
+
+        // Heavier initial screen shake
+        this.shake = new ScreenShake(this.duration * 0.55, 26);
+    }
+
+    update(dt) {
+        if (!this.active) return;
+        this.elapsed += dt;
+        // Flash fades over ~0.35s
+        this.flashAlpha = Math.max(0, this.flashAlpha - dt * 2.4);
+
+        // Update particles
+        for (const p of this.particles) {
+            p.vy += this.gravity * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.995;
+            p.vy *= 0.995;
+            p.alpha = Math.max(0, 1 - (this.elapsed / this.duration));
+        }
+
+        // Update shake
+        if (this.shake) this.shake.update(dt);
+
+        if (this.elapsed >= this.duration) {
+            this.active = false;
+            this.finished = true;
+            this.shake = null;
+        }
+    }
+
+    draw(ctx) {
+        if (!this.active && !this.finished) return;
+
+        ctx.save();
+
+        // Apply screen shake offset while active
+        if (this.shake && this.shake.isActive()) {
+            ctx.translate(this.shake.offsetX, this.shake.offsetY);
+        }
+
+        // Initial white flash burst
+        if (this.flashAlpha > 0.01) {
+            ctx.fillStyle = `rgba(255, 235, 200, ${this.flashAlpha})`;
+            ctx.fillRect(0, 0, this.width, this.height);
+        }
+
+        // Draw particles (above flash so they're vivid)
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.5);
+            grad.addColorStop(0, '#FFFFFF');
+            grad.addColorStop(0.5, p.color);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // GAME OVER text is rendered by ui.drawGameOver() which has a
+        // better animated version (slide-in + pulsing glow).
+        ctx.restore();
+    }
+
+    isActive() {
+        return this.active;
+    }
+
+    isFinished() {
+        return this.finished;
+    }
+}
+
+/**
+ * SpeedTrailEffect: Creates a visual trail effect when the player has speed boost active.
+ * Emits colorful speed lines and particles that trail behind the player.
+ */
+class SpeedTrailEffect {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.maxParticles = opts.maxParticles || 120;
+        this.emitTimer = 0;
+        this.emitInterval = opts.emitInterval || 0.02; // Emit frequently for dense trail
+    }
+
+    emitSpeedParticle(x, y, velocityX, facingRight) {
+        if (this.particles.length >= this.maxParticles) {
+            this.particles.shift();
+        }
+
+        // Create speed lines behind the player
+        const colors = ['#00D9FF', '#00F5FF', '#5CFFFF', '#FFFFFF', '#FFD700'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Speed lines trail backwards relative to movement direction
+        const direction = facingRight ? -1 : 1;
+        const speedMagnitude = Math.abs(velocityX) * 0.3;
+        
+        this.particles.push({
+            x: x + Utils.randomFloat(-10, 10),
+            y: y + Utils.randomFloat(-5, 5),
+            vx: direction * Utils.randomFloat(speedMagnitude * 0.5, speedMagnitude) + Utils.randomFloat(-20, 20),
+            vy: Utils.randomFloat(-30, 30),
+            length: Utils.randomFloat(15, 35),
+            width: Utils.randomFloat(2, 4),
+            life: Utils.randomFloat(0.2, 0.4),
+            age: 0,
+            color: randomColor,
+            alpha: 1
+        });
+    }
+
+    emitFromPlayer(player, dt) {
+        if (!player || !player.speedBoost) return;
+        
+        const speed = Math.abs(player.velocityX || 0);
+        if (speed < 50) return; // Only emit when actually moving
+
+        this.emitTimer -= dt;
+        if (this.emitTimer <= 0) {
+            const baseY = player.y + (player.height || 64) * 0.5;
+            const baseX = player.x + (player.width || 64) * 0.5;
+            
+            // Emit 2-3 particles per interval for a dense trail
+            const emitCount = Math.floor(Utils.randomFloat(2, 4));
+            for (let i = 0; i < emitCount; i++) {
+                this.emitSpeedParticle(baseX, baseY, player.velocityX, player.facingRight);
+            }
+            
+            this.emitTimer = this.emitInterval;
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.92; // Friction
+            p.vy *= 0.92;
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            
+            if (p.age >= p.life) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha * 0.8;
+            ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow effect
+            
+            // Draw speed line
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = p.width;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - p.vx * 0.08, p.y - p.vy * 0.08);
+            ctx.stroke();
+            
+            // Add a glow dot at the front
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.width * 2);
+            gradient.addColorStop(0, p.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.width * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    }
+
+    clear() {
+        this.particles = [];
+    }
+}
+
+/**
+ * HealthRegenEffect: Creates a visual healing effect when the player has health regen active.
+ * Emits green healing particles that float upward around the player.
+ */
+class HealthRegenEffect {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.maxParticles = opts.maxParticles || 80;
+        this.emitTimer = 0;
+        this.emitInterval = opts.emitInterval || 0.08; // Emit healing particles periodically
+    }
+
+    emitHealingParticle(x, y) {
+        if (this.particles.length >= this.maxParticles) {
+            this.particles.shift();
+        }
+
+        // Create healing particles - green/white sparkles that float upward
+        const colors = ['#00FF88', '#00FFAA', '#88FFAA', '#AAFFCC', '#FFFFFF'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        this.particles.push({
+            x: x + Utils.randomFloat(-20, 20),
+            y: y + Utils.randomFloat(-10, 10),
+            vx: Utils.randomFloat(-30, 30),
+            vy: Utils.randomFloat(-80, -40), // Float upward
+            size: Utils.randomFloat(3, 8),
+            life: Utils.randomFloat(0.8, 1.4),
+            age: 0,
+            color: randomColor,
+            alpha: 1,
+            pulseSpeed: Utils.randomFloat(4, 8)
+        });
+    }
+
+    emitFromPlayer(player, dt) {
+        if (!player || !player.healthRegen) return;
+
+        this.emitTimer -= dt;
+        if (this.emitTimer <= 0) {
+            const baseY = player.y + (player.height || 64) * 0.5;
+            const baseX = player.x + (player.width || 64) * 0.5;
+            
+            // Emit 2-3 healing particles per interval
+            const emitCount = Math.floor(Utils.randomFloat(2, 4));
+            for (let i = 0; i < emitCount; i++) {
+                this.emitHealingParticle(baseX, baseY);
+            }
+            
+            this.emitTimer = this.emitInterval;
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.95; // Light friction
+            p.vy *= 0.98; // Slight upward deceleration
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            
+            if (p.age >= p.life) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            
+            // Pulsing alpha for sparkle effect
+            const pulse = 0.7 + Math.sin(p.age * p.pulseSpeed) * 0.3;
+            ctx.globalAlpha = p.alpha * pulse;
+            ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow
+            
+            // Draw sparkle with gradient
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            gradient.addColorStop(0, '#FFFFFF');
+            gradient.addColorStop(0.5, p.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add cross sparkle
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            const sparkleSize = p.size * 0.8;
+            ctx.beginPath();
+            ctx.moveTo(p.x - sparkleSize, p.y);
+            ctx.lineTo(p.x + sparkleSize, p.y);
+            ctx.moveTo(p.x, p.y - sparkleSize);
+            ctx.lineTo(p.x, p.y + sparkleSize);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+    }
+
+    clear() {
+        this.particles = [];
+    }
+}
+
+/**
+ * DamageBoostEffect: Creates a visual effect when the player has damage boost active.
+ * Emits red/orange energy particles and adds impact to attacks.
+ */
+class DamageBoostEffect {
+    constructor(opts = {}) {
+        this.particles = [];
+        this.maxParticles = opts.maxParticles || 100;
+        this.emitTimer = 0;
+        this.emitInterval = opts.emitInterval || 0.06;
+    }
+
+    emitDamageParticle(x, y) {
+        if (this.particles.length >= this.maxParticles) {
+            this.particles.shift();
+        }
+
+        // Create aggressive red/orange energy particles
+        const colors = ['#FF2222', '#FF4444', '#FF6600', '#FF8800', '#FFAA00'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Utils.randomFloat(40, 100);
+        
+        this.particles.push({
+            x: x + Utils.randomFloat(-15, 15),
+            y: y + Utils.randomFloat(-15, 15),
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 20,
+            size: Utils.randomFloat(3, 7),
+            life: Utils.randomFloat(0.4, 0.8),
+            age: 0,
+            color: randomColor,
+            alpha: 1
+        });
+    }
+
+    emitFromPlayer(player, dt) {
+        if (!player || !player.damageBoost) return;
+
+        this.emitTimer -= dt;
+        if (this.emitTimer <= 0) {
+            const baseY = player.y + (player.height || 64) * 0.3;
+            const baseX = player.x + (player.width || 64) * 0.5;
+            
+            // Emit 2-3 particles per interval
+            const emitCount = Math.floor(Utils.randomFloat(2, 4));
+            for (let i = 0; i < emitCount; i++) {
+                this.emitDamageParticle(baseX, baseY);
+            }
+            
+            this.emitTimer = this.emitInterval;
+        }
+    }
+
+    update(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.age += dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.vx *= 0.94;
+            p.vy *= 0.94;
+            p.alpha = Math.max(0, 1 - (p.age / p.life));
+            
+            if (p.age >= p.life) {
+                this.particles.splice(i, 1);
+            }
+        }
+    }
+
+    draw(ctx) {
+        for (const p of this.particles) {
+            ctx.save();
+            ctx.globalAlpha = p.alpha * 0.9;
+            ctx.globalCompositeOperation = 'lighter';
+            
+            // Draw energy particle with glow
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            gradient.addColorStop(0, '#FFFFFF');
+            gradient.addColorStop(0.4, p.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    }
+
+    clear() {
+        this.particles = [];
+    }
+}
+
+/**
+ * ExitPortal: A swirling vortex that appears at the exit position after boss defeat.
+ * Draws a glowing, rotating portal with orbiting particles the player walks into
+ * to complete the level.
+ */
+class ExitPortal {
+    constructor(x, y, opts = {}) {
+        this.x = x;
+        this.y = y;
+        this.radius = opts.radius || 50;
+        this.age = 0;
+        this.spawnDuration = 0.8; // seconds to grow from 0 to full size
+        this.active = true;
+
+        // Swirl particles orbiting the vortex
+        this.orbiters = [];
+        const count = opts.orbiterCount || 18;
+        const colors = ['#00FFCC', '#44FFDD', '#88EEFF', '#FFFFFF', '#00FF88', '#AAFFEE'];
+        for (let i = 0; i < count; i++) {
+            this.orbiters.push({
+                angle: (Math.PI * 2 * i) / count,
+                dist: 0.4 + Math.random() * 0.6,   // fraction of radius
+                speed: 1.8 + Math.random() * 1.5,   // radians/sec
+                size:  2 + Math.random() * 3,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    update(dt) {
+        this.age += dt;
+        for (const o of this.orbiters) {
+            o.angle += o.speed * dt;
+        }
+    }
+
+    /** Returns the current visual scale (0→1 during spawn, then 1). */
+    _scale() {
+        return Math.min(1, this.age / this.spawnDuration);
+    }
+
+    /** Check if a rect (player) overlaps the portal circle. */
+    overlaps(px, py, pw, ph) {
+        const cx = px + pw / 2;
+        const cy = py + ph / 2;
+        const dx = cx - this.x;
+        const dy = cy - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.radius * 0.7;
+    }
+
+    draw(ctx, cameraX, cameraY) {
+        const sx = this.x - cameraX;
+        const sy = this.y - cameraY;
+        const scale = this._scale();
+        const r = this.radius * scale;
+        if (r < 2) return;
+
+        const now = Date.now() / 1000;
+
+        ctx.save();
+
+        // Outer glow
+        ctx.globalCompositeOperation = 'lighter';
+        const glowPulse = 0.6 + 0.4 * Math.sin(now * 3);
+        const outerGlow = ctx.createRadialGradient(sx, sy, r * 0.2, sx, sy, r * 1.5);
+        outerGlow.addColorStop(0, `rgba(0, 255, 200, ${0.25 * glowPulse})`);
+        outerGlow.addColorStop(0.5, `rgba(0, 200, 180, ${0.12 * glowPulse})`);
+        outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = outerGlow;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rotating swirl rings
+        ctx.globalCompositeOperation = 'source-over';
+        for (let ring = 0; ring < 3; ring++) {
+            const ringAngle = now * (1.5 + ring * 0.7) + ring * 1.2;
+            const ringR = r * (0.35 + ring * 0.25);
+            const alpha = 0.35 - ring * 0.08;
+            ctx.save();
+            ctx.translate(sx, sy);
+            ctx.rotate(ringAngle * (ring % 2 === 0 ? 1 : -1));
+            ctx.beginPath();
+            ctx.ellipse(0, 0, ringR, ringR * 0.55, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(0, 255, 210, ${alpha})`;
+            ctx.lineWidth = 2 - ring * 0.4;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Dark vortex center
+        const coreGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 0.45);
+        coreGrad.addColorStop(0, 'rgba(0, 10, 20, 0.85)');
+        coreGrad.addColorStop(0.6, 'rgba(0, 40, 50, 0.5)');
+        coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(sx, sy, r * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orbiting particles
+        ctx.globalCompositeOperation = 'lighter';
+        for (const o of this.orbiters) {
+            const dist = r * o.dist;
+            const px = sx + Math.cos(o.angle) * dist;
+            const py = sy + Math.sin(o.angle) * dist * 0.6; // elliptical
+            const particleAlpha = 0.5 + 0.5 * Math.sin(now * 4 + o.phase);
+            const s = o.size * scale;
+            const grad = ctx.createRadialGradient(px, py, 0, px, py, s * 1.5);
+            grad.addColorStop(0, o.color);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.globalAlpha = particleAlpha;
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(px, py, s * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // "EXIT" prompt text (pulsing)
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 0.6 + 0.3 * Math.sin(now * 2.5);
+        ctx.fillStyle = '#AAFFDD';
+        ctx.font = `bold ${Math.floor(12 * scale)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('EXIT', sx, sy + r + 8);
+
+        ctx.restore();
+    }
+}

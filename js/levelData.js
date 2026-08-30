@@ -46,6 +46,7 @@ const LEVEL_CONFIGS = [
             // Gap 1 bridge
             { x: 1540, y: 560, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1710, y: 500, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1770, y: 260, width: 48, height: 48, type: 'anchor' },
 
             // --- Section B: watchtower choke ---
             { x: 2750, y: 430, width: 90, height: 250, type: 'wall', material: 'rock' },
@@ -58,6 +59,7 @@ const LEVEL_CONFIGS = [
             // Gap 2 bridge
             { x: 3340, y: 520, width: 130, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.8, tile: 'platform4_tile' },
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3575, y: 220, width: 48, height: 48, type: 'anchor' },
 
             // --- Section C: ravine wall and upper branch ---
             { x: 4580, y: 390, width: 90, height: 270, type: 'wall', material: 'vine' },
@@ -193,6 +195,7 @@ const LEVEL_CONFIGS = [
             // Gap A transition
             { x: 1690, y: 550, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 1840, y: 490, width: 120, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.9, tile: 'platform4_tile' },
+            { x: 1910, y: 250, width: 48, height: 48, type: 'anchor' },
 
             // District B: vine billboard with a climb-around route
             { x: 2930, y: 380, width: 100, height: 270, type: 'wall', material: 'vine' },
@@ -205,6 +208,7 @@ const LEVEL_CONFIGS = [
             // Gap B transition
             { x: 3780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3960, y: 470, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 4020, y: 210, width: 48, height: 48, type: 'anchor' },
 
             // District C: reinforced rock shaft
             { x: 5170, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
@@ -216,6 +220,7 @@ const LEVEL_CONFIGS = [
             // Gap C transition
             { x: 5960, y: 540, width: 120, height: 24, type: 'moving', axis: 'x', range: 90, speed: 2.0, tile: 'platform4_tile' },
             { x: 6140, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 6200, y: 240, width: 48, height: 48, type: 'anchor' },
 
             // District D: overgrown alley split-rise
             { x: 7330, y: 360, width: 108, height: 300, type: 'wall', material: 'vine' },
@@ -374,6 +379,7 @@ const LEVEL_CONFIGS = [
             
             // The Gauntlet
             { x: 3500, y: 500, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 3620, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 3800, y: 400, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 4100, y: 300, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 4400, y: 400, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
@@ -390,6 +396,7 @@ const LEVEL_CONFIGS = [
             { x: 6600, y: 450, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 6900, y: 550, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 7200, y: 450, width: 200, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 7480, y: 200, width: 48, height: 48, type: 'anchor' },
 
             // Inner temple: staggered ascent
             { x: 8000, y: 560, width: 160, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -408,6 +415,7 @@ const LEVEL_CONFIGS = [
 
             // Upper ridge
             { x: 11200, y: 360, width: 1000, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 11330, y: 230, width: 48, height: 48, type: 'anchor' },
             // Choice Gate 3: final mixed-route exam
             { x: 11700, y: 360, width: 100, height: 290, type: 'wall', material: 'vine' },
             { x: 11658, y: 360, width: 34, height: 290, type: 'climb', style: 'vine' },
@@ -541,6 +549,7 @@ const LEVEL_CONFIGS = [
             // Deep Chasm
             { x: 5600, y: 380, width: 140, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 5900, y: 280, width: 140, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 6100, y: 180, width: 48, height: 48, type: 'anchor' },
             { x: 6200, y: 380, width: 140, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 6500, y: 480, width: 140, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6800, y: 580, width: 140, height: 24, type: 'static', tile: 'platform5_tile' },
@@ -554,6 +563,7 @@ const LEVEL_CONFIGS = [
             { x: 9300, y: 450, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.0, tile: 'platform6_tile' },
             { x: 9650, y: 350, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.4, timeOffset: 1.2, tile: 'platform6_tile' },
             { x: 10000, y: 450, width: 130, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.0, timeOffset: 2.4, tile: 'platform6_tile' },
+            { x: 10180, y: 240, width: 48, height: 48, type: 'anchor' },
             
             // Upper Ledges
             { x: 10500, y: 360, width: 1200, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -692,6 +702,7 @@ const LEVEL_CONFIGS = [
             // Echo Chamber: horizontal movers over a pit
             { x: 5500, y: 460, width: 130, height: 24, type: 'moving', axis: 'x', range: 150, speed: 1.6, tile: 'platform6_tile' },
             { x: 5950, y: 380, width: 130, height: 24, type: 'moving', axis: 'x', range: 150, speed: 1.6, timeOffset: 1.2, tile: 'platform6_tile' },
+            { x: 6250, y: 210, width: 48, height: 48, type: 'anchor' },
             { x: 6400, y: 460, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Waterfall Cliff: ascending staircase
@@ -714,6 +725,7 @@ const LEVEL_CONFIGS = [
             // Collapsing Path to Boss
             { x: 12700, y: 480, width: 120, height: 24, type: 'moving', axis: 'x', range: 130, speed: 2.0, tile: 'platform6_tile' },
             { x: 13200, y: 400, width: 120, height: 24, type: 'moving', axis: 'x', range: 130, speed: 2.0, timeOffset: 1.0, tile: 'platform6_tile' },
+            { x: 13650, y: 220, width: 48, height: 48, type: 'anchor' },
 
             // Boss Arena Approach
             { x: 13800, y: 500, width: 700, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -832,6 +844,7 @@ const LEVEL_CONFIGS = [
 
             // Crossroads Plaza: wide platform hub
             { x: 2700, y: 500, width: 600, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 2640, y: 230, width: 48, height: 48, type: 'anchor' },
 
             // Billboard Elevators: vertical movers
             { x: 3500, y: 450, width: 120, height: 24, type: 'moving', axis: 'y', range: 200, speed: 1.8, tile: 'platform5_tile' },
@@ -847,6 +860,7 @@ const LEVEL_CONFIGS = [
             // Rooftop Highway: long run with gaps
             { x: 6000, y: 490, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 6700, y: 420, width: 350, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 5700, y: 200, width: 48, height: 48, type: 'anchor' },
 
             // Floating Neon Bars: horizontal movers
             { x: 7200, y: 500, width: 110, height: 24, type: 'moving', axis: 'x', range: 120, speed: 2.0, tile: 'platform5_tile' },
@@ -858,6 +872,7 @@ const LEVEL_CONFIGS = [
 
             // Final Alley
             { x: 9000, y: 380, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 8750, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 9400, y: 500, width: 700, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 10400, y: 420, width: 320, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 10900, y: 530, width: 250, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -979,6 +994,7 @@ const LEVEL_CONFIGS = [
             // Swinging Crystals: pendulum-style movers
             { x: 3700, y: 400, width: 130, height: 24, type: 'moving', axis: 'x', range: 180, speed: 1.6, tile: 'platform6_tile' },
             { x: 4200, y: 340, width: 130, height: 24, type: 'moving', axis: 'x', range: 180, speed: 1.6, timeOffset: 1.3, tile: 'platform6_tile' },
+            { x: 4550, y: 200, width: 48, height: 48, type: 'anchor' },
             { x: 4700, y: 450, width: 300, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Ridge Spine: thin high walkway
@@ -993,6 +1009,7 @@ const LEVEL_CONFIGS = [
             // Crystal Elevator Shafts: fast vertical movers
             { x: 7600, y: 500, width: 120, height: 24, type: 'moving', axis: 'y', range: 200, speed: 2.5, tile: 'platform6_tile' },
             { x: 7950, y: 380, width: 120, height: 24, type: 'moving', axis: 'y', range: 200, speed: 2.5, timeOffset: 1.0, tile: 'platform6_tile' },
+            { x: 8200, y: 210, width: 48, height: 48, type: 'anchor' },
             { x: 8300, y: 460, width: 250, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Summit Approach
@@ -1136,6 +1153,7 @@ const LEVEL_CONFIGS = [
             // Pendulum Crossing: horizontal movers over gaps
             { x: 5300, y: 480, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, tile: 'platform_tile' },
             { x: 5800, y: 380, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, timeOffset: 1.5, tile: 'platform_tile' },
+            { x: 6200, y: 210, width: 48, height: 48, type: 'anchor' },
             { x: 6300, y: 480, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Mushroom Shelf: alternating heights
@@ -1149,6 +1167,7 @@ const LEVEL_CONFIGS = [
             { x: 8500, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, tile: 'platform_tile' },
             { x: 8850, y: 350, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 0.7, tile: 'platform_tile' },
             { x: 9200, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 1.4, tile: 'platform_tile' },
+            { x: 9450, y: 230, width: 48, height: 48, type: 'anchor' },
 
             // Deep Shelf: safety platform
             { x: 9600, y: 400, width: 500, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -1281,6 +1300,7 @@ const LEVEL_CONFIGS = [
 
             // Server Room: tight alternating heights
             { x: 2700, y: 400, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2640, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 3050, y: 510, width: 150, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3350, y: 400, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3650, y: 300, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
@@ -1296,6 +1316,7 @@ const LEVEL_CONFIGS = [
 
             // Neon Catwalk
             { x: 5700, y: 480, width: 400, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 5580, y: 190, width: 48, height: 48, type: 'anchor' },
 
             // Circuit Board: zigzag descent
             { x: 6300, y: 400, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -1310,6 +1331,7 @@ const LEVEL_CONFIGS = [
 
             // Terminal Run: boss approach
             { x: 8900, y: 380, width: 350, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 8620, y: 210, width: 48, height: 48, type: 'anchor' },
             { x: 9500, y: 480, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 10200, y: 400, width: 300, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 10700, y: 500, width: 350, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -1427,6 +1449,7 @@ const LEVEL_CONFIGS = [
             { x: 1750, y: 420, width: 100, height: 24, type: 'moving', axis: 'y', range: 200, speed: 3.0, tile: 'platform5_tile' },
             { x: 2050, y: 340, width: 100, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.8, tile: 'platform5_tile' },
             { x: 2400, y: 450, width: 100, height: 24, type: 'moving', axis: 'y', range: 200, speed: 3.0, timeOffset: 1.0, tile: 'platform5_tile' },
+            { x: 2520, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 2700, y: 380, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Crumbling Fortress: ascending then descending
@@ -1439,6 +1462,7 @@ const LEVEL_CONFIGS = [
             // Death Bridge: long narrow with movers on each side
             { x: 4800, y: 420, width: 100, height: 24, type: 'moving', axis: 'x', range: 100, speed: 2.4, tile: 'platform5_tile' },
             { x: 5100, y: 350, width: 500, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 5480, y: 190, width: 48, height: 48, type: 'anchor' },
             { x: 5750, y: 420, width: 100, height: 24, type: 'moving', axis: 'x', range: 100, speed: 2.4, timeOffset: 1.2, tile: 'platform5_tile' },
 
             // Chaos Zone: mixed elevation with fast movers
@@ -1452,6 +1476,7 @@ const LEVEL_CONFIGS = [
             { x: 7800, y: 460, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 8000, y: 360, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 8200, y: 260, width: 160, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 8400, y: 210, width: 48, height: 48, type: 'anchor' },
 
             // Arena Approach: final stretch to the boss
             { x: 8600, y: 380, width: 400, height: 24, type: 'static', tile: 'platform4_tile' },

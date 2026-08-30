@@ -1,0 +1,551 @@
+/*!
+ * Chip Savage
+ * Copyright (c) 2026 Mephitideus Interactive. All Rights Reserved.
+ * Proprietary and confidential — unauthorized copying, distribution, or use
+ * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
+ */
+/**
+ * Sprite loader and animation system
+ */
+
+class SpriteLoader {
+    constructor() {
+        this.sprites = {};
+        this.loadQueue = [];
+        this.loadedCount = 0;
+        this.totalAssets = 0;
+        this._ready = false;
+        this._readyCallbacks = [];
+        // Enable cache-busting in development when Config.DEBUG is true to avoid stale browser cache
+        // Enable cache-busting in development when Config.DEBUG is true
+        // or when the URL includes ?devcache=1 (useful for local debugging without changing Config)
+        try {
+            const force = (typeof Config !== 'undefined' && Config.DEBUG) || (typeof location !== 'undefined' && (new URL(location.href)).searchParams.get('devcache') === '1');
+            this._cacheBuster = force ? Date.now() : null;
+        } catch (e) {
+            this._cacheBuster = null;
+        }
+        // Known animation frame counts for player sheets — used to synthesize
+        // placeholder sheets when the real asset is missing.
+        this.expectedFrames = {
+            'chip_idle': 4,
+            'chip_walk': 4,
+            'chip_jump': 4,
+            'chip_climb': 4,
+            'chip_attack': 4,
+            'chip_golf_shot': 4,
+            'chip_kick': 4,
+            'chip_hurt': 2,
+            'chip_death': 4,
+            'basic_idle': 4,
+            'basic_walk': 4,
+            'basic_attack': 4,
+            'basic_hurt': 4,
+            'second_idle': 4,
+            'second_walk': 4,
+            'second_attack': 4,
+            'second_hurt': 2,
+            'third_idle': 4,
+            'third_walk': 4,
+            'third_attack': 4,
+            'third_hurt': 4,
+            'fourth_idle': 4,
+            'fourth_walk': 4,
+            'fourth_attack': 4,
+            'fourth_hurt': 4,
+            'fifth_idle': 4,
+            'fifth_walk': 4,
+            'fifth_attack': 4,
+            'fifth_hurt': 4,
+            'boss_idle': 4,
+            'boss_walk': 4,
+            'boss_attack1': 4,
+            'boss_hurt': 4,
+        };
+    }
+
+    _appendQuery(path, extraQuery) {
+        if (!extraQuery) return path;
+        return path.includes('?') ? (path + '&' + extraQuery) : (path + '?' + extraQuery);
+    }
+
+    /**
+     * Load an image by trying a list of candidate paths (useful for backgrounds)
+     * Tries combinations of suffixes (@1x,@2x) and extensions (.webp,.png).
+     * Stores the first successfully decoded image into `this.sprites[name]`.
+     * Returns the stored image (ImageBitmap or HTMLImageElement or canvas placeholder).
+     */
+    async loadSpriteBest(name, basePathNoExt) {
+        const v = (typeof Config !== 'undefined' && Config.ASSET_VERSION) ? ('v=' + encodeURIComponent(Config.ASSET_VERSION)) : '';
+        const cb = this._cacheBuster ? ('cb=' + this._cacheBuster) : '';
+        const query = [v, cb].filter(Boolean).join('&');
+        const suffixes = ['', '@1x', '@2x'];
+        // Try PNG first to avoid noisy .webp 404s on hosts without WebP variants
+        const exts = ['.png', '.webp'];
+
+        const tryLoad = async (path) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                try { img.decoding = 'async'; } catch (e) { __err('sprite', e); }
+                try { img.crossOrigin = 'anonymous'; } catch (e) { __err('sprite', e); }
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('failed to load ' + path));
+                try { img.src = path; } catch (e) { reject(e); }
+            });
+        };
+
+        // Loop ext first (png variants for all suffixes), then webp variants
+        for (const e of exts) {
+            for (const s of suffixes) {
+                const raw = `${basePathNoExt}${s}${e}`;
+                const path = this._appendQuery(raw, query);
+                try {
+                    const img = await tryLoad(path);
+                    // Prefer ImageBitmap when available
+                    if (typeof createImageBitmap === 'function') {
+                        try {
+                            const bitmap = await createImageBitmap(img);
+                            this.sprites[name] = bitmap;
+                            this.loadedCount++;
+                            try { if (typeof Config !== 'undefined' && Config.DEBUG && typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${bitmap.width}x${bitmap.height}`); } catch (e) { __err('sprite', e); }
+                            return bitmap;
+                        } catch (e) {
+                            // fallback to image element if bitmap creation fails
+                            this.sprites[name] = img;
+                            this.loadedCount++;
+                            try { if (typeof Config !== 'undefined' && Config.DEBUG && typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${img.width}x${img.height}`); } catch (e) { __err('sprite', e); }
+                            return img;
+                        }
+                    } else {
+                        this.sprites[name] = img;
+                        this.loadedCount++;
+                        try { if (typeof Config !== 'undefined' && Config.DEBUG && typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} from ${path} -> ${img.width}x${img.height}`); } catch (e) { __err('sprite', e); }
+                        return img;
+                    }
+                } catch (e) {
+                    // try next candidate
+                }
+            }
+        }
+
+        // All candidates failed — fall back to placeholder behavior similar to loadSprite onerror
+        if (!this._missing) this._missing = [];
+        this._missing.push({ name, path: basePathNoExt });
+
+        // Provide a simple fallback canvas (single-tile placeholder)
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#808080';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(name || 'missing', 4, 12);
+        this.sprites[name] = canvas;
+        return canvas;
+    }
+
+    /**
+     * Load a sprite image
+     */
+    loadSprite(name, path) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            // Hint to the browser to decode off-main-thread where supported
+            try { img.decoding = 'async'; } catch (e) { __err('sprite', e); }
+            // Allow cross-origin decoding if assets are served from CDN
+            try { img.crossOrigin = 'anonymous'; } catch (e) { __err('sprite', e); }
+
+            img.onload = () => {
+                // Prefer creating an ImageBitmap when available to avoid
+                // main-thread decode stalls. Fall back to the HTMLImageElement.
+                const finishWith = (stored) => {
+                    this.sprites[name] = stored;
+                    try {
+                        if (typeof Config !== 'undefined' && Config.DEBUG && typeof console !== 'undefined') console.log(`SpriteLoader: loaded ${name} -> ${stored.width}x${stored.height}`);
+                    } catch (e) { __err('sprite', e); }
+                    this.loadedCount++;
+                    resolve(stored);
+                };
+
+                if (typeof createImageBitmap === 'function') {
+                    try {
+                        createImageBitmap(img).then(bitmap => finishWith(bitmap)).catch(() => finishWith(img));
+                    } catch (e) {
+                        finishWith(img);
+                    }
+                } else {
+                    finishWith(img);
+                }
+            };
+            img.onerror = () => {
+                // Record missing asset
+                if (!this._missing) this._missing = [];
+                this._missing.push({ name, path });
+
+                // If this is a known sprite sheet (multiple frames), synthesize
+                // a simple placeholder sheet so animations keep working.
+                const frameCount = this.expectedFrames[name];
+                if (frameCount) {
+                    const frameW = 64;
+                    const pad = 1; // spacing between frames
+                    const canvas = document.createElement('canvas');
+                    canvas.width = frameCount * frameW + Math.max(0, frameCount - 1) * pad;
+                    canvas.height = frameW;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+
+                    for (let i = 0; i < frameCount; i++) {
+                        const sx = i * (frameW + pad);
+                        // alternating color bands for visual clarity
+                        ctx.fillStyle = i % 2 === 0 ? '#6b6b6b' : '#8b8b8b';
+                        ctx.fillRect(sx, 0, frameW, frameW);
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '12px monospace';
+                        ctx.fillText(String(i + 1), sx + 6, 18);
+                    }
+                    this.sprites[name] = canvas;
+                    this.loadedCount++;
+                    resolve(canvas);
+                    return;
+                }
+
+                // Fallback: single-tile placeholder
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#808080';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px sans-serif';
+                ctx.fillText(name || 'missing', 4, 12);
+                this.sprites[name] = canvas;
+                this.loadedCount++;
+                resolve(canvas);
+            };
+            // Start loading
+            try {
+                img.src = path;
+            } catch (e) {
+                // In some environments setting src may throw; handle as error
+                img.onerror && img.onerror();
+            }
+        });
+    }
+
+    /**
+     * Load all game sprites
+     */
+    async loadAllSprites() {
+        // Reset counters for a fresh progress run
+        this.loadedCount = 0;
+        this.totalAssets = 0;
+        this._ready = false;
+
+        const baseList = [
+            // Player sprites
+            ['chip_idle', 'assets/sprites/characters/chip_idle.png'],
+            ['chip_walk', 'assets/sprites/characters/chip_walk.png'],
+            ['chip_jump', 'assets/sprites/characters/chip_jump.png'],
+            ['chip_climb', 'assets/sprites/characters/chip_climb.png'],
+            ['chip_attack', 'assets/sprites/characters/chip_attack.png'],
+            ['chip_golf_shot', 'assets/sprites/characters/chip_golf_shot.png'],
+            ['chip_kick', 'assets/sprites/characters/chip_kick.png'],
+            ['chip_hurt', 'assets/sprites/characters/chip_hurt.png'],
+            ['chip_death', 'assets/sprites/characters/chip_death.png'],
+            
+            // Enemy sprites
+            ['basic_idle', 'assets/sprites/enemies/basic_idle.png'],
+            ['basic_walk', 'assets/sprites/enemies/basic_walk.png'],
+            ['basic_attack', 'assets/sprites/enemies/basic_attack.png'],
+            ['basic_hurt', 'assets/sprites/enemies/basic_hurt.png'],
+            ['second_idle', 'assets/sprites/enemies/second_idle.png'],
+            ['second_walk', 'assets/sprites/enemies/second_walk.png'],
+            ['second_attack', 'assets/sprites/enemies/second_attack.png'],
+            ['second_hurt', 'assets/sprites/enemies/second_hurt.png'],
+            ['third_idle', 'assets/sprites/enemies/third_idle.png'],
+            ['third_walk', 'assets/sprites/enemies/third_walk.png'],
+            ['third_attack', 'assets/sprites/enemies/third_attack.png'],
+            ['third_hurt', 'assets/sprites/enemies/third_hurt.png'],
+            ['fourth_idle', 'assets/sprites/enemies/fourth_idle.png'],
+            ['fourth_walk', 'assets/sprites/enemies/fourth_walk.png'],
+            ['fourth_attack', 'assets/sprites/enemies/fourth_attack.png'],
+            ['fourth_hurt', 'assets/sprites/enemies/fourth_hurt.png'],
+            ['fifth_idle', 'assets/sprites/enemies/fifth_idle.png'],
+            ['fifth_walk', 'assets/sprites/enemies/fifth_walk.png'],
+            ['fifth_attack', 'assets/sprites/enemies/fifth_attack.png'],
+            ['fifth_hurt', 'assets/sprites/enemies/fifth_hurt.png'],
+            ['boss_idle', 'assets/sprites/enemies/boss_idle.png'],
+            ['boss_walk', 'assets/sprites/enemies/boss_walk.png'],
+            ['boss_attack1', 'assets/sprites/enemies/boss_attack1.png'],
+            ['boss_hurt', 'assets/sprites/enemies/boss_hurt.png'],
+
+            // Background / tile sprites
+            ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
+            ['ground2_tile', 'assets/sprites/backgrounds/tiles/ground2_tile.png'],
+            ['ground3_tile', 'assets/sprites/backgrounds/tiles/ground3_tile.png'],
+            ['platform_tile', 'assets/sprites/backgrounds/tiles/platform_tile.png'],
+            ['platform2_tile', 'assets/sprites/backgrounds/tiles/platform2_tile.png'],
+            ['platform3_tile', 'assets/sprites/backgrounds/tiles/platform3_tile.png'],
+            ['platform4_tile', 'assets/sprites/backgrounds/tiles/platform4_tile.png'],
+            ['platform5_tile', 'assets/sprites/backgrounds/tiles/platform5_tile.png'],
+            ['platform6_tile', 'assets/sprites/backgrounds/tiles/platform6_tile.png'],    
+            ['wall_tile', 'assets/sprites/backgrounds/tiles/wall_tile.png'],
+
+            // Items / pickups
+            ['health_regen_item', 'assets/sprites/items/health_regen_item.svg'],
+            ['extra_life', 'assets/sprites/items/extra_life.svg'],
+            ['golden_idol', 'assets/sprites/items/golden_idol.svg'],
+            // Background panoramas are large; load them lazily per-level to
+            // avoid decoding and memory spikes on startup. Leave them out of
+            // the global preload list so Level can request only what it needs.
+        ];
+
+        const versionQuery = (typeof Config !== 'undefined' && Config.ASSET_VERSION)
+            ? ('v=' + encodeURIComponent(Config.ASSET_VERSION))
+            : '';
+        const cacheQuery = this._cacheBuster ? ('cb=' + this._cacheBuster) : '';
+        const query = [versionQuery, cacheQuery].filter(Boolean).join('&');
+
+        // Add version/cache query params to asset paths (helps with aggressive CDN caching)
+        const spritesToLoad = baseList.map(([n, p]) => {
+            if (query) return [n, this._appendQuery(p, query)];
+            return [n, p];
+        });
+
+        this.totalAssets = spritesToLoad.length;
+        const promises = spritesToLoad.map(([name, path]) => this.loadSprite(name, path));
+        await Promise.all(promises);
+
+        // Validate common player sprite sheet frame sizes and warn if mismatched
+            try {
+            const expectedFrames = this.expectedFrames;
+            for (const [name, count] of Object.entries(expectedFrames)) {
+                const img = this.sprites[name];
+                if (!img) continue;
+
+                // Try to detect a uniform padding between frames (common when
+                    // sheets have 1px-8px gaps between frames). If detected, annotate
+                    // the image with the discovered frameWidth/frameStride so
+                    // createAnimation can use them even when the sheet width happens
+                    // to be divisible by frameCount (padding can still be present).
+                    let detectedPad = 0;
+                    let detectedFrameWidth = null;
+                    for (let pad = 1; pad <= 8; pad++) {
+                        const adjusted = img.width - pad * (count - 1);
+                        if (adjusted > 0 && (adjusted % count) === 0) {
+                            detectedPad = pad;
+                            detectedFrameWidth = adjusted / count;
+                            break;
+                        }
+                    }
+
+                    if (detectedPad > 0) {
+                        img._detectedPad = detectedPad;
+                        img._detectedFrameWidth = detectedFrameWidth;
+                        img._detectedFrameStride = detectedFrameWidth + detectedPad;
+                        try {
+                            if (typeof Config !== 'undefined' && Config.DEBUG) console.info(`SpriteLoader: sprite ${name} width ${img.width}; detected uniform ${detectedPad}px padding (frameWidth=${detectedFrameWidth}, stride=${img._detectedFrameStride})`);
+                        } catch (e) { __err('sprite', e); }
+                    } else if ((img.width % count) !== 0) {
+                        try {
+                            if (typeof Config !== 'undefined' && Config.DEBUG) console.warn(`SpriteLoader: sprite ${name} width ${img.width} is not divisible by frameCount ${count} (frame width=${(img.width/count).toFixed(2)})`);
+                        } catch (e) { __err('sprite', e); }
+                    }
+            }
+            // Ensure tile sprites are upscaled to 64x64 for consistent tiling
+            const tileNames = ['ground_tile', 'platform_tile', 'wall_tile'];
+            for (const t of tileNames) {
+                const img = this.sprites[t];
+                if (!img) continue;
+                try {
+                    if (img.width !== 64 || img.height !== 64) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 64;
+                        canvas.height = 64;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) ctx.imageSmoothingEnabled = false;
+                        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 64, 64);
+                        this.sprites[t] = canvas;
+                        if (typeof Config !== 'undefined' && Config.DEBUG) console.log(`SpriteLoader: upscaled tile ${t} from ${img.width}x${img.height} to 64x64`);
+                    }
+                } catch (e) {
+                    // ignore scaling errors
+                }
+            }
+        } catch (e) { __err('sprite', e); }
+
+        // Report missing assets once
+        if (this._missing && this._missing.length > 0) {
+            if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('SpriteLoader: missing assets', this._missing.map(m => m.path));
+        }
+
+        // Mark ready and flush deferred callbacks
+        this._ready = true;
+        const cbs = this._readyCallbacks;
+        this._readyCallbacks = [];
+        for (let i = 0; i < cbs.length; i++) {
+            try { cbs[i](); } catch (e) { __err('sprite', e); }
+        }
+
+        return this.sprites;
+    }
+
+    /**
+     * Get a sprite by name
+     */
+    getSprite(name) {
+        return this.sprites[name] || null;
+    }
+
+    /**
+     * Call fn immediately if sprites are loaded, otherwise defer until ready.
+     */
+    whenReady(fn) {
+        if (this._ready) {
+            fn();
+        } else {
+            this._readyCallbacks.push(fn);
+        }
+    }
+
+    /**
+     * Convenience: create an Animation for a named sprite sheet using
+     * sensible defaults or auto-detected frame stride when the sheet
+     * width isn't perfectly divisible by frameCount.
+     */
+    createAnimation(name, frameCount, frameDuration = 0.1, opts = {}) {
+        const sheet = this.getSprite(name);
+        if (!sheet) return new Animation(null, frameCount, frameDuration, opts);
+
+        // Prefer explicit opts, then any detected values, then naive inference
+        const inferredFrameWidth = opts.frameWidth || sheet._detectedFrameWidth || Math.floor(sheet.width / frameCount);
+        const inferredFrameHeight = opts.frameHeight || sheet.height || 64;
+
+        let frameStride = opts.frameStride;
+        if (!frameStride) {
+            // Prefer any detected stride (handles sheets with uniform padding)
+            if (sheet._detectedFrameStride) {
+                frameStride = sheet._detectedFrameStride;
+            } else if ((sheet.width % frameCount) === 0) {
+                frameStride = inferredFrameWidth;
+            } else {
+                // Choose the nearest integer stride and warn — this handles
+                // sheets that include padding or fractional frames.
+                frameStride = Math.round(sheet.width / frameCount);
+                try { if (typeof Config !== 'undefined' && Config.DEBUG) console.warn(`SpriteLoader: ${name} width ${sheet.width} not divisible by ${frameCount}; using inferred stride ${frameStride}`); } catch (e) { __err('sprite', e); }
+            }
+        }
+
+        // Compute the total used width for frames: start of last frame + frameWidth
+        // (i.e., (frameCount - 1) * frameStride + frameWidth)
+        const totalUsed = (frameCount - 1) * frameStride + inferredFrameWidth;
+
+        // Respect an explicitly provided frameOffset (including 0). Only auto-center
+        // when the caller did not provide a frameOffset.
+        const hasFrameOffset = Object.prototype.hasOwnProperty.call(opts, 'frameOffset');
+        let frameOffset = hasFrameOffset ? opts.frameOffset : 0;
+        if (!hasFrameOffset && sheet.width > totalUsed) {
+            frameOffset = Math.floor((sheet.width - totalUsed) / 2);
+        }
+
+        const cfg = Object.assign({}, opts, { frameWidth: inferredFrameWidth, frameHeight: inferredFrameHeight, frameStride, frameOffset });
+        return new Animation(sheet, frameCount, frameDuration, cfg);
+    }
+
+    /**
+     * Get loading progress (0-1)
+     */
+    getProgress() {
+        return this.totalAssets > 0 ? this.loadedCount / this.totalAssets : 0;
+    }
+}
+
+/**
+ * Animation class for sprite sheet animations
+ */
+class Animation {
+    constructor(spriteSheet, frameCount, frameDuration = 0.1) {
+        this.spriteSheet = spriteSheet;
+        this.frameCount = frameCount;
+        this.frameDuration = frameDuration;
+        this.currentFrame = 0;
+        this.timer = 0;
+        // Backwards-compatible: accept an options object if provided as 4th arg
+        const opts = (arguments && arguments.length >= 4) ? arguments[3] : {};
+        // Optional: sample frames from a larger sheet (e.g., use 4 frames out of an 8-frame sheet)
+        this.frameIndices = (opts && Array.isArray(opts.frameIndices) && opts.frameIndices.length > 0) ? opts.frameIndices.slice() : null;
+        if (this.frameIndices) {
+            this.frameCount = this.frameIndices.length;
+        }
+        // If explicit frameWidth provided, use it. Otherwise infer from sheet width.
+        this.frameWidth = opts.frameWidth || (spriteSheet ? (spriteSheet.width / frameCount) : 64);
+        this.frameHeight = opts.frameHeight || (spriteSheet ? spriteSheet.height : 64);
+        // If frames in the sheet have padding/spacing, frameStride is the distance
+        // between consecutive frames on the sheet. Default to frameWidth.
+        this.frameStride = opts.frameStride || this.frameWidth;
+        // Optional offset to account for centered padding/margins on the sheet
+        this.frameOffset = opts.frameOffset || 0;
+    }
+
+    /**
+     * Update animation
+     */
+    update(dt) {
+        this.timer += dt;
+        while (this.timer >= this.frameDuration) {
+            this.timer -= this.frameDuration;
+            this.currentFrame = (this.currentFrame + 1) % this.frameCount;
+        }
+    }
+
+    /**
+     * Reset animation to first frame
+     */
+    reset() {
+        this.currentFrame = 0;
+        this.timer = 0;
+    }
+
+    /**
+     * Draw current frame
+     */
+    draw(ctx, x, y, width, height, flipHorizontal = false) {
+        if (!this.spriteSheet) return;
+
+        // Subpixel destination coordinates can cause sampling/"seam" artifacts
+        // on sprite sheets (especially when scaled). Snap to whole pixels
+        // when enabled.
+        let dx = x;
+        let dy = y;
+        let dw = width;
+        let dh = height;
+        try {
+            if (typeof Config !== 'undefined' && Config.PIXEL_SNAP) {
+                dx = Math.round(x);
+                dy = Math.round(y);
+                dw = Math.max(1, Math.round(width));
+                dh = Math.max(1, Math.round(height));
+            }
+        } catch (e) { __err('sprite', e); }
+
+        const sheetFrameIndex = this.frameIndices ? (this.frameIndices[this.currentFrame] || 0) : this.currentFrame;
+        const sx = Math.floor(this.frameOffset + (sheetFrameIndex * this.frameStride));
+        const sy = 0;
+
+        ctx.save();
+        if (flipHorizontal) {
+            ctx.translate(dx + dw, dy);
+            ctx.scale(-1, 1);
+            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, 0, 0, dw, dh);
+        } else {
+            ctx.drawImage(this.spriteSheet, sx, sy, this.frameWidth, this.frameHeight, dx, dy, dw, dh);
+        }
+        ctx.restore();
+    }
+}
+
+// Global sprite loader instance
+const spriteLoader = new SpriteLoader();
