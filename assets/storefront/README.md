@@ -2,11 +2,11 @@
 
 Generated promotional artwork built entirely from the game's existing sprites and backgrounds.
 
-| File                              |        Size | Intended use                                        |
-| --------------------------------- | ----------: | --------------------------------------------------- |
-| `feature-graphic-1024x500.png`    |  1024 x 500 | Google Play feature graphic                         |
-| `store-poster-1080x1350.png`      | 1080 x 1350 | Portrait promotional post or store editorial art    |
-| `social-preview-1200x630.png`     |  1200 x 630 | Open Graph and social sharing preview                |
+| File | Size | Intended use |
+| --- | ---: | --- |
+| `feature-graphic-1024x500.png` | 1024 x 500 | Google Play feature graphic |
+| `store-poster-1080x1350.png` | 1080 x 1350 | Portrait promotional post or store editorial art |
+| `social-preview-1200x630.png` | 1200 x 630 | Open Graph and social sharing preview |
 
 Regenerate all exports from the repository root:
 
