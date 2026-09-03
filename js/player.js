@@ -125,7 +125,7 @@ class Player {
         this.golfShotTypes = ['gold', 'fireball', 'hookshot', 'fishing', 'bomb'];
         this.availableGolfShotTypes = [...this.golfShotTypes];
         this.selectedGolfShotIndex = 0;
-        this.hookshotPull = null;
+        this.hookshotSwing = null;
         
         // Idol collection bonuses (tiered, per-level)
         // { speed: 0.05, damage: 0.05, count: 1 } - tiers by collected count
@@ -209,6 +209,10 @@ class Player {
 
         if (isDown && !wasDown) {
             if (k === 'space' || k === 'spacebar' || k === ' ') {
+                if (this.hookshotSwing) {
+                    this.releaseHookshotSwing(true);
+                    return;
+                }
                 if (this.isClimbing) {
                     this.jump();
                 } else {
@@ -223,6 +227,10 @@ class Player {
                 this.shootGolfProjectile();
             } else if (k === 'keyv' || k === 'v') {
                 this.cycleGolfShot();
+            } else if (k === 'arrowdown' || k === 's' || k === 'keys') {
+                if (this.hookshotSwing) {
+                    this.releaseHookshotSwing(false);
+                }
             }
         }
     }
@@ -429,15 +437,39 @@ class Player {
         }
     }
 
-    startHookshotPull(anchor) {
+    startHookshotSwing(anchor) {
         if (!anchor) return false;
         const targetX = anchor.x + anchor.width / 2;
         const targetY = anchor.y + anchor.height / 2;
         const dx = targetX - (this.x + this.width / 2);
         const dy = targetY - (this.y + this.height / 2);
-        if (Math.sqrt(dx * dx + dy * dy) < 48) return false;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 48) return false;
+
+        const ropeLength = Utils.clamp(distance, 110, 430);
         this._stopClimbing();
-        this.hookshotPull = { x: targetX, y: targetY, timer: 0.55 };
+        this.hookshotSwing = {
+            x: targetX,
+            y: targetY,
+            ropeLength,
+            timer: 2.6
+        };
+        this.onGround = false;
+        this.coyoteTimer = 0;
+
+        // Add a slight forward kick so the swing starts moving right away.
+        const direction = this.facingRight ? 1 : -1;
+        this.velocityX += direction * 140;
+        this.velocityY = Math.min(this.velocityY, 120);
+        return true;
+    }
+
+    releaseHookshotSwing(jumpOff = false) {
+        if (!this.hookshotSwing) return false;
+        this.hookshotSwing = null;
+        if (jumpOff) {
+            this.velocityY = Math.min(this.velocityY, -this.jumpForce * 0.7);
+        }
         return true;
     }
 
@@ -490,7 +522,7 @@ class Player {
                     : null;
 
                 if (hitAnchor) {
-                    this.startHookshotPull(hitAnchor);
+                    this.startHookshotSwing(hitAnchor);
                     this.createGolfImpact(
                         hitAnchor.x + hitAnchor.width / 2,
                         hitAnchor.y + hitAnchor.height / 2,
@@ -702,7 +734,7 @@ class Player {
         this.golfAmmo = 1;
         this.setAvailableGolfShotTypes(this.golfShotTypes);
         this.golfCooldownTimer = 0;
-        this.hookshotPull = null;
+        this.hookshotSwing = null;
         try { this.hitEnemies && this.hitEnemies.clear && this.hitEnemies.clear(); } catch (e) { __err('player', e); }
         this._prevAttackHitbox = null;
         this.jumpBufferTimer = 0;
@@ -877,18 +909,10 @@ class Player {
             }
         }
 
-        if (this.hookshotPull) {
-            this.hookshotPull.timer -= dt;
-            const dx = this.hookshotPull.x - (this.x + this.width / 2);
-            const dy = this.hookshotPull.y - (this.y + this.height / 2);
-            const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-            if (this.hookshotPull.timer <= 0 || distance < 54) {
-                this.hookshotPull = null;
-            } else {
-                const pullSpeed = 820;
-                this.velocityX = (dx / distance) * pullSpeed;
-                this.velocityY = (dy / distance) * pullSpeed;
-                this.onGround = false;
+        if (this.hookshotSwing) {
+            this.hookshotSwing.timer -= dt;
+            if (this.hookshotSwing.timer <= 0 || this.hitStunTimer > 0 || this.isDying) {
+                this.releaseHookshotSwing(false);
             }
         }
 
@@ -939,6 +963,16 @@ class Player {
             this.velocityY = 0;
         }
 
+        if (this.hookshotSwing) {
+            const leftHeld = !!(this.keys['arrowleft'] || this.keys['a'] || this.keys['keya']);
+            const rightHeld = !!(this.keys['arrowright'] || this.keys['d'] || this.keys['keyd']);
+            const controlDir = (rightHeld ? 1 : 0) - (leftHeld ? 1 : 0);
+            if (controlDir !== 0) {
+                const tangentBoost = 980;
+                this.velocityX += controlDir * tangentBoost * dt;
+            }
+        }
+
 
         // Update horizontal position
         if (!this.isClimbing && Math.abs(this.velocityX) > 0) {
@@ -948,6 +982,33 @@ class Player {
         // Update vertical position
         if (!this.isClimbing) {
             this.y += this.velocityY * dt;
+        }
+
+        if (this.hookshotSwing) {
+            const centerX = this.x + this.width / 2;
+            const centerY = this.y + this.height / 2;
+            const dx = centerX - this.hookshotSwing.x;
+            const dy = centerY - this.hookshotSwing.y;
+            const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            // Enforce a rigid rope length and strip radial velocity so
+            // movement remains tangential around the anchor.
+            const correction = dist - this.hookshotSwing.ropeLength;
+            const correctedCenterX = centerX - nx * correction;
+            const correctedCenterY = centerY - ny * correction;
+            this.x = correctedCenterX - this.width / 2;
+            this.y = correctedCenterY - this.height / 2;
+
+            const radialSpeed = (this.velocityX * nx) + (this.velocityY * ny);
+            this.velocityX -= radialSpeed * nx;
+            this.velocityY -= radialSpeed * ny;
+
+            // Light damping avoids runaway oscillations from control input.
+            this.velocityX *= 0.996;
+            this.velocityY *= 0.998;
+            this.onGround = false;
         }
 
         // Preserve pre-resolution vertical velocity so hard landings still
@@ -975,6 +1036,7 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            if (this.hookshotSwing) this.releaseHookshotSwing(false);
             if (this.isClimbing) this._stopClimbing();
             this.jumpsRemaining = this.maxJumps;
             
@@ -989,6 +1051,7 @@ class Player {
         } else {
             this.onGround = groundedBySolid;
             if (groundedBySolid) {
+                if (this.hookshotSwing) this.releaseHookshotSwing(false);
                 this.jumpsRemaining = this.maxJumps;
                 if (!wasOnGround && preCollisionVY > 450 && this.audioManager) {
                     const rate = 0.96 + Math.random() * 0.06;
@@ -1106,6 +1169,7 @@ class Player {
         this.velocityY = 0;
         this.isAttacking = false;
         this.isKicking = false;
+        this.hookshotSwing = null;
         this.hitStunTimer = 0;
         this.invulnerableTimer = 0;
         const isFinal = !!(opts && opts.final);
@@ -1169,7 +1233,7 @@ class Player {
             this.damageBoostEffect.draw(ctx);
         }
 
-        if (this.hookshotPull) {
+        if (this.hookshotSwing) {
             const startX = this.x + this.width / 2;
             const startY = this.y + this.height / 2;
             ctx.save();
@@ -1177,7 +1241,7 @@ class Player {
             ctx.lineWidth = 6;
             ctx.beginPath();
             ctx.moveTo(startX, startY);
-            ctx.lineTo(this.hookshotPull.x, this.hookshotPull.y);
+            ctx.lineTo(this.hookshotSwing.x, this.hookshotSwing.y);
             ctx.stroke();
             ctx.strokeStyle = '#D9F7FF';
             ctx.lineWidth = 2;
@@ -1185,7 +1249,7 @@ class Player {
             ctx.lineDashOffset = -(Date.now() / 25) % 14;
             ctx.beginPath();
             ctx.moveTo(startX, startY);
-            ctx.lineTo(this.hookshotPull.x, this.hookshotPull.y);
+            ctx.lineTo(this.hookshotSwing.x, this.hookshotSwing.y);
             ctx.stroke();
             ctx.restore();
         }
