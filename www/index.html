@@ -136,8 +136,8 @@
         #touch-controls {
             position: fixed;
             left: 0; right: 0;
-            bottom: calc(20px + var(--safe-bottom));
-            height: 240px;
+            bottom: var(--safe-bottom);
+            height: 160px;
             pointer-events: none;
             z-index: 100;
             display: none;
@@ -147,52 +147,74 @@
         }
         #touch-controls.visible { opacity: 1; transform: translateY(0); }
         .control-group {
-            position: absolute; bottom: 20px;
+            position: absolute; bottom: 12px;
             pointer-events: auto;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.32) 0%, transparent 75%);
-            border-radius: 20px; padding: 10px 8px 4px;
+            padding: 0;
         }
         #d-pad {
             left: max(12px, var(--safe-left));
-            display: grid;
-            grid-template-columns: repeat(2, var(--touch-action-size, 68px));
-            grid-template-rows: repeat(2, var(--touch-action-size, 68px));
-            gap: 8px;
+            padding: 0;
+            background: none;
         }
+        #move-stick {
+            position: relative;
+            box-sizing: border-box;
+            width: 124px; height: 124px;
+            border: 1px solid rgba(255,255,255,0.24);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(15,23,20,0.16) 30%, rgba(15,23,20,0.48));
+            box-shadow: inset 0 0 0 12px rgba(255,255,255,0.025);
+            touch-action: none;
+            -webkit-user-select: none; user-select: none;
+            color: rgba(255,255,255,0.65);
+        }
+        .stick-direction { position: absolute; font: 18px 'Space Grotesk', sans-serif; pointer-events: none; }
+        .stick-up { top: 5px; left: 50%; transform: translateX(-50%); }
+        .stick-down { bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .stick-left { left: 7px; top: 50%; transform: translateY(-50%); }
+        .stick-right { right: 7px; top: 50%; transform: translateY(-50%); }
+        .stick-thumb {
+            position: absolute; left: 50%; top: 50%;
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.65);
+            background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.38), rgba(30,45,38,0.78));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+            transform: translate(calc(-50% + var(--stick-x, 0px)), calc(-50% + var(--stick-y, 0px)));
+            pointer-events: none;
+        }
+        #move-stick.is-pressed { border-color: rgba(134,239,172,0.8); }
+        #move-stick.is-pressed .stick-thumb { border-color: #B9F6CE; }
         #actions {
             right: max(12px, var(--safe-right));
-            display: grid;
-            grid-template-columns: repeat(2, var(--touch-action-size, 68px));
-            grid-template-rows: repeat(2, var(--touch-action-size, 68px));
-            gap: 8px;
+            width: 176px; height: 136px;
+            pointer-events: none;
         }
         #game-over-controls { display: none !important; }
 
         .touch-btn {
-            width: clamp(56px, 9vw, 84px); height: clamp(56px, 9vw, 84px);
-            background: radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,0.22), rgba(0,0,0,0.45));
-            border: 2px solid rgba(255,255,255,0.22);
-            border-radius: 16px; color: white;
-            font-size: clamp(20px, 3.2vw, 28px); font-weight: 900;
+            box-sizing: border-box;
+            width: 56px; height: 56px;
+            background: rgba(18,27,23,0.7);
+            border: 1px solid rgba(255,255,255,0.42);
+            border-radius: 50%; color: white;
+            font-size: 24px; font-weight: 700;
             display: inline-flex; justify-content: center; align-items: center;
-            margin: 5px;
+            margin: 0;
             -webkit-user-select: none; user-select: none;
             outline: 2px solid transparent; outline-offset: 2px;
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
             -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-            box-shadow: 0 12px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25) inset;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.24);
             transition: transform 90ms ease, filter 160ms ease, box-shadow 160ms ease;
         }
-        #d-pad .touch-btn { width: 100%; height: 100%; margin: 0; }
-        .touch-btn--move   { border-color: rgba(80,255,244,0.26); }
-        .touch-btn--attack { border-color: rgba(255,80,80,0.30); }
-        .touch-btn--special{ border-color: rgba(180,90,255,0.30); }
-        .touch-btn--jump   { border-color: rgba(120,220,255,0.28); }
-        .touch-btn--golf   { border-color: rgba(80,255,80,0.30); transition: opacity 0.3s ease, filter 0.3s ease; }
+        .touch-btn--golf   { transition: opacity 0.3s ease, filter 0.3s ease; }
         .touch-btn--shot-cycle { display: none; }
-        #actions .touch-btn { width: 100%; height: 100%; margin: 0; }
-        #btn-skunk { position: relative; border-color: rgba(255,213,74,0.52); }
+        #actions .touch-btn { position: absolute; pointer-events: auto; }
+        #btn-attack { left: 8px; top: 8px; width: 62px; height: 62px; border-color: #F2A99D; background: rgba(87,37,32,0.8); }
+        #btn-jump { right: 0; bottom: 0; width: 72px; height: 72px; font-size: 32px; color: #123327; background: rgba(225,249,234,0.93); border-color: #FFFFFF; }
+        #btn-special { right: 8px; top: 6px; width: 48px; height: 48px; font-size: 20px; }
+        #btn-skunk { left: 10px; bottom: 0; border-color: rgba(255,213,74,0.75); }
         #btn-skunk::after {
             content: attr(data-ammo);
             position: absolute; right: -5px; top: -7px;
@@ -205,7 +227,7 @@
             line-height: 1;
         }
         #btn-skunk[data-ammo="0"]::after { background: #62686D; color: #E4E7E9; }
-        .touch-btn--golf.disabled { opacity: 0.35; filter: grayscale(0.7) brightness(0.5); pointer-events: none; }
+        .touch-btn--golf.disabled { opacity: 0.4; filter: grayscale(0.7); }
         .touch-btn--pause  { border-color: rgba(255,255,255,0.18); }
         .touch-btn--restart{ border-color: rgba(255,160,80,0.28); }
         .touch-btn:active, .touch-btn.is-pressed { filter: brightness(1.18); transform: scale(0.92); }
@@ -219,24 +241,25 @@
             left: var(--shot-tray-left, 50%); top: var(--shot-tray-top, calc(var(--safe-top) + 72px));
             z-index: 1900;
             display: flex; align-items: center; gap: 8px;
-            padding: 6px 8px;
-            background: rgba(10,14,16,0.82);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 8px;
-            box-shadow: 0 8px 22px rgba(0,0,0,0.42);
+            padding: 3px 5px;
+            background: rgba(10,20,15,0.68);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
             opacity: 0; pointer-events: none;
             transform: translate(-50%, -6px);
             transition: opacity 160ms ease, transform 160ms ease;
         }
         #shot-ability-tray.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
-        .shot-ability-buttons { display: flex; gap: 5px; }
+        .shot-ability-buttons { display: flex; gap: 2px; }
         .shot-ability-btn {
             --shot-color: #fff;
             width: 44px; height: 44px; padding: 0;
             display: grid; place-items: center;
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 6px;
-            background: rgba(255,255,255,0.06);
+            border: 1px solid transparent;
+            border-bottom: 2px solid transparent;
+            border-radius: 3px;
+            background: transparent;
             color: #fff; font-size: 22px; cursor: pointer;
             opacity: 0.68;
             transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease, transform 120ms ease;
@@ -245,19 +268,18 @@
         .shot-ability-btn[data-shot="fireball"] { --shot-color: #FF5A1F; }
         .shot-ability-btn[data-shot="hookshot"] { --shot-color: #D9E1E8; }
         .shot-ability-btn[data-shot="bomb"] { --shot-color: #FF9B32; }
-        .shot-ability-btn:hover { opacity: 1; border-color: var(--shot-color); }
+        .shot-ability-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
         .shot-ability-btn:active { transform: scale(0.92); }
         .shot-ability-btn:disabled {
             opacity: 0.22;
             cursor: not-allowed;
             filter: grayscale(1);
         }
-        .shot-ability-btn:disabled:hover { border-color: rgba(255,255,255,0.16); }
+        .shot-ability-btn:disabled:hover { background: transparent; }
         .shot-ability-btn.is-selected {
             opacity: 1;
-            border-color: var(--shot-color);
-            background: color-mix(in srgb, var(--shot-color) 24%, rgba(10,14,16,0.9));
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--shot-color) 35%, transparent);
+            border-bottom-color: var(--shot-color);
+            background: color-mix(in srgb, var(--shot-color) 16%, transparent);
         }
         #shot-ability-name {
             min-width: 58px;
@@ -282,20 +304,17 @@
         }
         #shot-context.visible { opacity: 1; transform: translate(-50%, 0); }
         @media (pointer: coarse), (max-width: 1100px) {
-            :root { --touch-action-size: clamp(56px, 8.5vw, 68px); }
-            #touch-controls { bottom: var(--safe-bottom); height: 180px; }
-            .control-group { bottom: 8px; padding: 6px; }
-            #shot-ability-tray {
-                padding: 5px 6px;
-            }
             .shot-ability-btn { width: 44px; height: 44px; font-size: 20px; }
             #shot-ability-name { display: none; }
         }
         @media (max-height: 430px) and (pointer: coarse), (max-height: 430px) and (max-width: 1100px) {
-            :root { --touch-action-size: 56px; }
             #touch-controls { height: 148px; }
-            .touch-btn { border-radius: 12px; }
+            #move-stick { width: 112px; height: 112px; }
             .shot-ability-btn { width: 44px; height: 44px; font-size: 19px; }
+        }
+        @media (max-width: 360px) {
+            #move-stick { width: 104px; height: 104px; }
+            #actions { width: 164px; }
         }
 
         /* ── Pause button ── */
@@ -524,6 +543,7 @@
             transition: opacity 280ms cubic-bezier(.2,.9,.2,1), transform 280ms cubic-bezier(.2,.9,.2,1);
         }
         #mobile-start-overlay.visible { opacity: 1; transform: translateY(0); }
+        #mobile-start-overlay[hidden] { display: none; }
         #mobile-start-btn {
             padding: 18px 48px;
             font-family: 'Bangers', 'Arial Black', sans-serif;
@@ -769,19 +789,22 @@
             <!-- ── TOUCH CONTROLS ── -->
             <div id="touch-controls">
                 <div id="d-pad" class="control-group">
-                    <button class="touch-btn touch-btn--jump" id="btn-up" aria-label="Climb up">⇡</button>
-                    <button class="touch-btn touch-btn--jump" id="btn-down" aria-label="Climb down">⇣</button>
-                    <button class="touch-btn touch-btn--move" id="btn-left"  aria-label="Move left">⟸</button>
-                    <button class="touch-btn touch-btn--move" id="btn-right" aria-label="Move right">⟹</button>
+                    <div id="move-stick" role="group" aria-label="Move and climb" title="Drag to move or climb">
+                        <span class="stick-direction stick-up" aria-hidden="true">⇡</span>
+                        <span class="stick-direction stick-down" aria-hidden="true">⇣</span>
+                        <span class="stick-direction stick-left" aria-hidden="true">⟸</span>
+                        <span class="stick-direction stick-right" aria-hidden="true">⟹</span>
+                        <span class="stick-thumb" aria-hidden="true"></span>
+                    </div>
                 </div>
                 <div id="game-over-controls" class="control-group" style="pointer-events:auto;display:flex;gap:8px;align-items:center;">
                     <button class="touch-btn touch-btn--menu"    id="btn-menu"    style="display:none;font-size:18px;opacity:0.7;" aria-label="Menu">☰</button>
                     <button class="touch-btn touch-btn--restart" id="btn-restart" style="display:none;" aria-label="Restart">↺</button>
                 </div>
                 <div id="actions" class="control-group">
-                    <button class="touch-btn touch-btn--attack"  id="btn-attack"  aria-label="Attack">🗡</button>
-                    <button class="touch-btn touch-btn--jump"    id="btn-jump"    aria-label="Jump">⤴</button>
-                    <button class="touch-btn touch-btn--special" id="btn-special" aria-label="Kick">💥</button>
+                    <button class="touch-btn touch-btn--attack"  id="btn-attack"  aria-label="Attack" title="Attack">🗡</button>
+                    <button class="touch-btn touch-btn--jump"    id="btn-jump"    aria-label="Jump" title="Jump">⤴</button>
+                    <button class="touch-btn touch-btn--special" id="btn-special" aria-label="Kick" title="Kick">💥</button>
                     <button class="touch-btn touch-btn--shot-cycle" id="btn-shot-cycle" aria-label="Change golf shot">🟡</button>
                     <button class="touch-btn touch-btn--golf" id="btn-skunk" data-ammo="0" aria-label="Fire Stun shot">⚡</button>
                 </div>
@@ -837,6 +860,7 @@
         const ua = navigator.userAgent || '';
         if (/Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(ua)) return true;
         try { if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return true; } catch(e){}
+        if (navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches) return true;
         return false;
     }
     function isLandscape() {
@@ -856,40 +880,111 @@
     // ── TOUCH CONTROLS ───────────────────────────────────────────────────────
     function initTouchControls() {
         if (!isMobile()) return;
+        const releases = [];
+        const stick = document.getElementById('move-stick');
+        if (stick) {
+            let activePointer = null;
+            const heldKeys = new Set();
+            const updateStick = (event) => {
+                const bounds = stick.getBoundingClientRect();
+                const radius = bounds.width / 2;
+                const deltaX = event.clientX - bounds.left - radius;
+                const deltaY = event.clientY - bounds.top - radius;
+                const distance = Math.hypot(deltaX, deltaY);
+                const travel = Math.min(1, (radius - 25) / (distance || 1));
+                stick.style.setProperty('--stick-x', `${deltaX * travel}px`);
+                stick.style.setProperty('--stick-y', `${deltaY * travel}px`);
+                const nextKeys = new Set();
+                const threshold = radius * 0.25;
+                if (deltaX < -threshold) nextKeys.add('ArrowLeft');
+                if (deltaX > threshold) nextKeys.add('ArrowRight');
+                if (deltaY < -threshold) nextKeys.add('ArrowUp');
+                if (deltaY > threshold) nextKeys.add('ArrowDown');
+                for (const key of heldKeys) {
+                    if (!nextKeys.has(key)) triggerKeyEvent(key, 'keyup');
+                }
+                for (const key of nextKeys) {
+                    if (!heldKeys.has(key)) triggerKeyEvent(key, 'keydown');
+                }
+                heldKeys.clear();
+                for (const key of nextKeys) heldKeys.add(key);
+            };
+            const releaseStick = () => {
+                const pointer = activePointer;
+                activePointer = null;
+                for (const key of heldKeys) triggerKeyEvent(key, 'keyup');
+                heldKeys.clear();
+                stick.classList.remove('is-pressed');
+                stick.style.removeProperty('--stick-x');
+                stick.style.removeProperty('--stick-y');
+                if (pointer !== null && stick.hasPointerCapture(pointer)) stick.releasePointerCapture(pointer);
+            };
+            stick.addEventListener('pointerdown', (event) => {
+                if (activePointer !== null || !window.game || game.state !== 'PLAYING') return;
+                event.preventDefault();
+                activePointer = event.pointerId;
+                stick.setPointerCapture(activePointer);
+                stick.classList.add('is-pressed');
+                updateStick(event);
+            });
+            stick.addEventListener('pointermove', (event) => {
+                if (event.pointerId === activePointer) updateStick(event);
+            });
+            for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+                stick.addEventListener(type, (event) => {
+                    if (event.pointerId === activePointer) releaseStick();
+                });
+            }
+            releases.push(releaseStick);
+        }
         const setupBtn = (id, key) => {
             const btn = document.getElementById(id);
             if (!btn) return;
             btn.oncontextmenu = (e) => { e.preventDefault(); return false; };
-            let lastDown = 0;
-            const down = (e) => {
-                try { e && e.preventDefault(); } catch(_){}
-                const now = performance.now();
-                if (now - lastDown < 40) return;
-                lastDown = now;
+            let activePointer = null;
+            const down = (event) => {
+                if (activePointer !== null || !window.game || game.state !== 'PLAYING') return;
+                if (btn.classList.contains('disabled')) return;
+                event.preventDefault();
+                activePointer = event.pointerId;
+                btn.setPointerCapture(activePointer);
                 btn.classList.add('is-pressed');
                 try { if (navigator.vibrate) navigator.vibrate(10); } catch(_){}
                 triggerKeyEvent(key, 'keydown');
             };
-            const up = (e) => {
-                try { e && e.preventDefault(); } catch(_){}
+            const up = (event) => {
+                if (event && event.pointerId !== activePointer) return;
+                const pointer = activePointer;
+                activePointer = null;
                 btn.classList.remove('is-pressed');
                 triggerKeyEvent(key, 'keyup');
+                if (pointer !== null && btn.hasPointerCapture(pointer)) btn.releasePointerCapture(pointer);
             };
-            btn.addEventListener('touchstart', down, { passive: false });
-            btn.addEventListener('touchend',   up,   { passive: false });
             btn.addEventListener('pointerdown', down);
             btn.addEventListener('pointerup',   up);
             btn.addEventListener('pointercancel', up);
+            btn.addEventListener('lostpointercapture', up);
+            btn.addEventListener('click', (event) => {
+                if (event.detail !== 0 || !window.game || game.state !== 'PLAYING' || btn.classList.contains('disabled')) return;
+                triggerKeyEvent(key, 'keydown');
+                triggerKeyEvent(key, 'keyup');
+            });
+            releases.push(() => up());
         };
-        setupBtn('btn-left',    'ArrowLeft');
-        setupBtn('btn-right',   'ArrowRight');
-        setupBtn('btn-up',      'ArrowUp');
-        setupBtn('btn-down',    'ArrowDown');
         setupBtn('btn-jump',    ' ');
         setupBtn('btn-attack',  'x');
         setupBtn('btn-special', 'z');
         setupBtn('btn-shot-cycle', 'v');
         setupBtn('btn-skunk',   'c');
+        const releaseAll = () => {
+            releases.forEach(release => release());
+            if (window.game && typeof game._clearAllInput === 'function') game._clearAllInput();
+        };
+        window.addEventListener('blur', releaseAll);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
+        window.addEventListener('gameStateChange', (event) => {
+            if (event.detail && event.detail.state !== 'PLAYING') releaseAll();
+        });
     }
 
     function initShotAbilityTray() {
@@ -925,6 +1020,7 @@
                 }
             };
             button.addEventListener('pointerdown', select);
+            button.addEventListener('click', (event) => { if (event.detail === 0) select(event); });
         });
     }
 
@@ -935,7 +1031,6 @@
         window._touchLockUntil = Date.now() + ms;
     };
     window.hideTouchControls = function() {
-        if (window._touchLockUntil && Date.now() < window._touchLockUntil) return;
         const tc = document.getElementById('touch-controls');
         if (!tc) return;
         tc.classList.remove('visible');
@@ -1281,7 +1376,7 @@
         const st = e && e.detail && e.detail.state;
         if (st === 'PLAYING') {
             showTouchControls(3600000);
-        } else if (st === 'MENU') {
+        } else {
             hideTouchControls();
         }
     });
