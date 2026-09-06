@@ -133,14 +133,6 @@ try {
     { id: 'armageddon', name: 'Five-Thousand-Stroke Club', desc: 'Defeat 5,000 rivals across all rounds', icon: '🏆', check: (stats) => statNumber(stats.totalEnemiesDefeated) >= 5000 },
     { id: 'time_invested', name: 'Range Hours', desc: 'Play for 1 hour total', icon: '⏳', check: (stats) => statNumber(stats.totalPlayTime) >= 3600 },
 
-    // ── Founder / Early Access ──
-    // Granted automatically the first time a Founder finishes a run —
-    // gating it on `world_saver_or_run_count >= 1` so it doesn't pop in the
-    // tutorial. The actual entitlement check lives in FounderManager.
-    { id: 'day_one_skunk', name: 'Founding Foursome', desc: 'Joined the club during early access', icon: '🌟', check: (stats) => {
-        try { return !!(window.FounderManager && FounderManager.isFounder()); }
-        catch (e) { return false; }
-    } },
     { id: 'no_lifer', name: 'Dawn-to-Dusk Golfer', desc: 'Play for 5 hours total', icon: '🌙', check: (stats) => statNumber(stats.totalPlayTime) >= 18000 },
 
     // ── Damage & Efficiency ──
@@ -213,7 +205,8 @@ try {
   function getPrestigeScore(achievements) {
     const achs = achievements || loadAchievements();
     let total = 0;
-    for (const [id, data] of Object.entries(achs)) {
+    for (const { id } of ACHIEVEMENT_DEFINITIONS) {
+      const data = achs[id];
       if (data && data.unlocked) total += (PRESTIGE_WEIGHTS[id] || 1);
     }
     return total;
@@ -234,14 +227,14 @@ try {
 
   // --- Achievement logic (uses local storage, unchanged) ---
   function loadAchievements(){
-    if (window.safeStorage) {
-      const data = window.safeStorage.getJSON(ACHIEVEMENTS_KEY, {});
-      return (data && typeof data === 'object') ? data : {};
-    }
-    // Legacy fallback if safeStorage isn't loaded yet
     try {
-      const raw = localStorage.getItem(ACHIEVEMENTS_KEY);
-      return raw ? JSON.parse(raw) : {};
+      const data = window.safeStorage
+        ? window.safeStorage.getJSON(ACHIEVEMENTS_KEY, {})
+        : JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY) || '{}');
+      if (!data || typeof data !== 'object') return {};
+      return Object.fromEntries(ACHIEVEMENT_DEFINITIONS
+        .filter(achievement => Object.prototype.hasOwnProperty.call(data, achievement.id))
+        .map(achievement => [achievement.id, data[achievement.id]]));
     } catch(e){ return {}; }
   }
 
@@ -890,27 +883,10 @@ try {
         nameRow.className = 'scoreboard-name';
         nameRow.textContent = scoreData.name || '???';
 
-        // FOUNDER badge — only shown on the player's own row when they hold
-        // the early-access entitlement. The leaderboard API doesn't yet
-        // carry a founder flag for other players, so this is local-only.
-        const isOwnRow = myName && scoreData.name && scoreData.name.toLowerCase() === myName;
-        const isFounder = (() => {
-          try { return !!(window.FounderManager && FounderManager.isFounder()); }
-          catch (e) { return false; }
-        })();
-        if (isOwnRow && isFounder) {
-          const founderBadge = document.createElement('span');
-          founderBadge.className = 'scoreboard-founder-badge';
-          const lbl = document.createElement('span');
-          lbl.className = 'scoreboard-founder-badge__label';
-          lbl.textContent = 'FOUNDER';
-          founderBadge.appendChild(lbl);
-          nameRow.appendChild(document.createTextNode(' '));
-          nameRow.appendChild(founderBadge);
-        }
-
         // Title badge (derived from achievement count)
-        const achCount = (Array.isArray(scoreData.achievements) ? scoreData.achievements.length : 0);
+        const activeAchievements = (Array.isArray(scoreData.achievements) ? scoreData.achievements : [])
+          .filter(id => ACHIEVEMENT_DEFINITIONS.some(achievement => achievement.id === id));
+        const achCount = activeAchievements.length;
         const titleData = scoreData.title
           ? TITLE_TIERS.find(t => t.title === scoreData.title) || getTitleForCount(achCount)
           : getTitleForCount(achCount);
@@ -934,7 +910,7 @@ try {
         if (achCount > 0) {
           const badgeRow = document.createElement('div');
           badgeRow.className = 'scoreboard-badges';
-          const achIds = scoreData.achievements.slice(0, 5);
+          const achIds = activeAchievements.slice(0, 5);
           for (const achId of achIds) {
             const def = ACHIEVEMENT_DEFINITIONS.find(a => a.id === achId);
             if (def) {

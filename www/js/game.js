@@ -1433,7 +1433,6 @@ class Game {
             const shotUnlocks = [
                 { wave: 1, type: 'gold', label: 'STUN' },
                 { wave: 2, type: 'fireball', label: 'FIREBALL' },
-                { wave: 3, type: 'fishing', label: 'FISHING SHOT' },
                 { wave: 4, type: 'hookshot', label: 'HOOKSHOT' },
                 { wave: 5, type: 'bomb', label: 'BOMB' }
             ];
@@ -2904,10 +2903,6 @@ class Game {
                             this.player.velocityY = (dy / distanceToEnemy) * 420;
                             feedback = 'GRAPPLE!';
                             feedbackColor = '#D9E1E8';
-                        } else if (shotType === 'fishing') {
-                            enemy.takeDamage(8, -directionFromPlayer, { knockback: 520, hitStun: 1.1 });
-                            feedback = 'REELED IN!';
-                            feedbackColor = '#38D5F2';
                         } else if (shotType === 'bomb') {
                             const falloff = Math.max(0.35, 1 - distance / spray.maxRadius);
                             const damage = Math.round(42 * falloff);

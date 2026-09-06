@@ -215,7 +215,9 @@
         }
 
         #shot-ability-tray {
-            position: absolute; left: 50%; bottom: 14px; z-index: 1900;
+            position: absolute;
+            left: var(--shot-tray-left, 50%); top: var(--shot-tray-top, calc(var(--safe-top) + 72px));
+            z-index: 1900;
             display: flex; align-items: center; gap: 8px;
             padding: 6px 8px;
             background: rgba(10,14,16,0.82);
@@ -223,7 +225,7 @@
             border-radius: 8px;
             box-shadow: 0 8px 22px rgba(0,0,0,0.42);
             opacity: 0; pointer-events: none;
-            transform: translate(-50%, 8px);
+            transform: translate(-50%, -6px);
             transition: opacity 160ms ease, transform 160ms ease;
         }
         #shot-ability-tray.visible { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
@@ -242,7 +244,6 @@
         .shot-ability-btn[data-shot="gold"] { --shot-color: #FFD54A; }
         .shot-ability-btn[data-shot="fireball"] { --shot-color: #FF5A1F; }
         .shot-ability-btn[data-shot="hookshot"] { --shot-color: #D9E1E8; }
-        .shot-ability-btn[data-shot="fishing"] { --shot-color: #38D5F2; }
         .shot-ability-btn[data-shot="bomb"] { --shot-color: #FF9B32; }
         .shot-ability-btn:hover { opacity: 1; border-color: var(--shot-color); }
         .shot-ability-btn:active { transform: scale(0.92); }
@@ -264,7 +265,9 @@
             text-align: center; text-transform: uppercase;
         }
         #shot-context {
-            position: absolute; left: 50%; bottom: 70px; z-index: 1890;
+            position: absolute;
+            left: var(--shot-tray-left, 50%); top: calc(var(--shot-tray-top, calc(var(--safe-top) + 72px)) + 64px);
+            z-index: 1890;
             max-width: min(320px, calc(100vw - 24px));
             padding: 7px 10px;
             border: 1px solid var(--shot-context-color, rgba(255,255,255,0.35));
@@ -274,7 +277,7 @@
             font: 700 12px 'Space Grotesk', sans-serif;
             text-align: center;
             opacity: 0; pointer-events: none;
-            transform: translate(-50%, 6px);
+            transform: translate(-50%, -4px);
             transition: opacity 140ms ease, transform 140ms ease;
         }
         #shot-context.visible { opacity: 1; transform: translate(-50%, 0); }
@@ -283,28 +286,16 @@
             #touch-controls { bottom: var(--safe-bottom); height: 180px; }
             .control-group { bottom: 8px; padding: 6px; }
             #shot-ability-tray {
-                left: auto; right: max(12px, var(--safe-right));
-                bottom: calc(var(--safe-bottom) + (var(--touch-action-size) * 2) + 36px);
                 padding: 5px 6px;
-                transform: translateY(8px);
             }
-            #shot-ability-tray.visible { transform: translateY(0); }
             .shot-ability-btn { width: 44px; height: 44px; font-size: 20px; }
             #shot-ability-name { display: none; }
-            #shot-context {
-                left: auto; right: max(12px, var(--safe-right));
-                bottom: calc(var(--safe-bottom) + (var(--touch-action-size) * 2) + 98px);
-                transform: translateY(6px);
-            }
-            #shot-context.visible { transform: translateY(0); }
         }
         @media (max-height: 430px) and (pointer: coarse), (max-height: 430px) and (max-width: 1100px) {
             :root { --touch-action-size: 56px; }
             #touch-controls { height: 148px; }
             .touch-btn { border-radius: 12px; }
-            #shot-ability-tray { bottom: calc(var(--safe-bottom) + 148px); }
             .shot-ability-btn { width: 44px; height: 44px; font-size: 19px; }
-            #shot-context { bottom: calc(var(--safe-bottom) + 204px); }
         }
 
         /* ── Pause button ── */
@@ -801,7 +792,6 @@
                     <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables rivals">⚡</button>
                     <button class="shot-ability-btn" data-shot="fireball" aria-label="Fireball shot" title="Fireball: burns rivals and vine walls">🔥</button>
                     <button class="shot-ability-btn" data-shot="hookshot" aria-label="Hookshot" title="Hookshot: grapple toward rivals and anchor rings">⚓</button>
-                    <button class="shot-ability-btn" data-shot="fishing" aria-label="Fishing shot" title="Fishing: reel rivals toward you">♓</button>
                     <button class="shot-ability-btn" data-shot="bomb" aria-label="Bomb shot" title="Bomb: area damage and breaks rock walls">💣</button>
                 </div>
                 <span id="shot-ability-name" aria-live="polite">Stun</span>
@@ -835,7 +825,7 @@
     <script src="js/tutorialHints.js?v=1.0.0"></script>
     <script src="js/game.js?v=1.0.0"></script>
     <script src="js/purchaseManager.js?v=1.0.0"></script>
-    <script src="js/founderManager.js?v=1.0.0"></script>
+    <script src="js/skinManager.js?v=1.0.0"></script>
     <script src="js/goldenSkin.js?v=1.0.0"></script>
     <script src="js/adManager.js?v=1.0.0"></script>
     <script src="js/main.js?v=1.0.0" type="module"></script>
@@ -913,7 +903,6 @@
                 gold: ['Stun • disables rivals', '#FFD54A'],
                 fireball: ['Fireball • burns vines', '#FF5A1F'],
                 hookshot: ['Hookshot • grapple to anchor rings', '#D9E1E8'],
-                fishing: ['Fishing • reel rivals in', '#38D5F2'],
                 bomb: ['Bomb • breaks rock walls', '#FF9B32']
             };
             const detail = messages[shotType] || messages.gold;
@@ -958,6 +947,21 @@
     // ── GOLF SHOT BUTTON AVAILABILITY ────────────────────────────────────────
     setInterval(() => {
         try {
+            const game = window.game;
+            const tray = document.getElementById('shot-ability-tray');
+            const anchor = game && game.ui && game.ui.shotTrayAnchor;
+            if (tray && tray.offsetParent && anchor && game.canvas) {
+                const canvasBounds = game.canvas.getBoundingClientRect();
+                const parentBounds = tray.offsetParent.getBoundingClientRect();
+                if (canvasBounds.width > 0 && canvasBounds.height > 0) {
+                    const halfWidth = tray.offsetWidth / 2;
+                    const center = canvasBounds.left - parentBounds.left + anchor.x * canvasBounds.width / game.ui.width;
+                    const left = Math.max(halfWidth + 8, Math.min(parentBounds.width - halfWidth - 8, center));
+                    const top = canvasBounds.top - parentBounds.top + anchor.y * canvasBounds.height / game.ui.height + 8;
+                    tray.offsetParent.style.setProperty('--shot-tray-left', `${left}px`);
+                    tray.offsetParent.style.setProperty('--shot-tray-top', `${top}px`);
+                }
+            }
             const btn = document.getElementById('btn-skunk');
             const cycleBtn = document.getElementById('btn-shot-cycle');
             if (!btn) return;
@@ -966,8 +970,8 @@
             btn.classList.toggle('disabled', !hasAmmo);
             if (cycleBtn && player && typeof player.getSelectedGolfShot === 'function') {
                 const shot = player.getSelectedGolfShot();
-                const icons = { gold: '⚡', fireball: '🔥', hookshot: '⚓', fishing: '♓', bomb: '💣' };
-                const names = { gold: 'Stun', fireball: 'Fireball', hookshot: 'Hookshot', fishing: 'Fishing', bomb: 'Bomb' };
+                const icons = { gold: '⚡', fireball: '🔥', hookshot: '⚓', bomb: '💣' };
+                const names = { gold: 'Stun', fireball: 'Fireball', hookshot: 'Hookshot', bomb: 'Bomb' };
                 cycleBtn.textContent = icons[shot] || '↻';
                 cycleBtn.setAttribute('aria-label', `Change golf shot. Selected: ${names[shot] || shot}`);
                 btn.textContent = icons[shot] || '⛳';

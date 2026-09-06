@@ -1151,6 +1151,7 @@ class UI {
         const padLeft = basePad + this.safeLeft;
         const padRight = basePad + this.safeRight;
         const padding = padLeft; // legacy alias used by existing layout code
+        this.shotTrayAnchor = { x: this.width / 2, y: padTop + 44 };
 
         // Level timer (top-left, below health bar area)
         try {
@@ -1393,8 +1394,8 @@ class UI {
                     const ammoGap = 4;
                     const ammoX = idolX;
                     const shotType = typeof player.getSelectedGolfShot === 'function' ? player.getSelectedGolfShot() : 'gold';
-                    const shotLabels = { gold: 'STUN', fireball: 'FIRE', hookshot: 'HOOK', fishing: 'FISH', bomb: 'BOMB' };
-                    const shotColors = { gold: '#FFD54A', fireball: '#FF5A1F', hookshot: '#D9E1E8', fishing: '#38D5F2', bomb: '#FF9B32' };
+                    const shotLabels = { gold: 'STUN', fireball: 'FIRE', hookshot: 'HOOK', bomb: 'BOMB' };
+                    const shotColors = { gold: '#FFD54A', fireball: '#FF5A1F', hookshot: '#D9E1E8', bomb: '#FF9B32' };
                     const labelWidth = 48;
                     
                     ctx.save();
@@ -1508,6 +1509,7 @@ class UI {
                 const cardX   = Math.floor((this.width - cardW) / 2);
                 const cardY   = padTop - 4;
                 const cardR   = 8;
+                this.shotTrayAnchor = { x: cardX + cardW / 2, y: cardY + cardH };
 
                 // Card shadow + body
                 ctx.save();
@@ -1813,6 +1815,7 @@ class UI {
                 const iconY = padTop + 1;
                 const barX = startX + iconSize + iconGap;
                 const barY = padTop + 6;
+                this.shotTrayAnchor = { x: startX + totalW / 2, y: iconY + iconSize };
 
                 const drawIcon = (x, y, kind) => {
                     const s = iconSize;

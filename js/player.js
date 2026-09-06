@@ -122,7 +122,7 @@ class Player {
         this.golfSprays = []; // Active spray clouds (AoE on impact)
         this.golfCooldown = 0.5; // Cooldown between Golf Shots
         this.golfCooldownTimer = 0;
-        this.golfShotTypes = ['gold', 'fireball', 'hookshot', 'fishing', 'bomb'];
+        this.golfShotTypes = ['gold', 'fireball', 'hookshot', 'bomb'];
         this.availableGolfShotTypes = [...this.golfShotTypes];
         this.selectedGolfShotIndex = 0;
         this.hookshotSwing = null;
@@ -367,7 +367,6 @@ class Player {
                 gold: { speed: 600, lift: -50, gravityScale: 0.15, size: 24, lifetime: 2.0 },
                 fireball: { speed: 720, lift: -20, gravityScale: 0.04, size: 28, lifetime: 1.8 },
                 hookshot: { speed: 850, lift: 0, gravityScale: 0, size: 20, lifetime: 1.3 },
-                fishing: { speed: 560, lift: -140, gravityScale: 0.3, size: 20, lifetime: 2.3 },
                 bomb: { speed: 470, lift: -250, gravityScale: 0.55, size: 30, lifetime: 2.5 }
             }[shotType];
             this.golfAmmo--;
@@ -577,7 +576,6 @@ class Player {
             gold: { radius: 100, duration: 0.8, colors: ['#FFD54A', '#FFF4B0'] },
             fireball: { radius: 90, duration: 0.65, colors: ['#FF3B18', '#FFB11B'] },
             hookshot: { radius: 45, duration: 0.45, colors: ['#B8C4CE', '#F4F7FA'] },
-            fishing: { radius: 55, duration: 0.65, colors: ['#18B7D8', '#B8F4FF'] },
             bomb: { radius: 145, duration: 0.75, colors: ['#FF7A18', '#3A3131'] }
         }[shotType] || { radius: 100, duration: 0.8, colors: ['#FFFFFF', '#E0E0E0'] };
         const spray = {
@@ -1306,36 +1304,28 @@ class Player {
                 this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
                 ctx.restore();
             }
-            // Cosmetic skin aura. Gold = early-access Founder exclusive;
-            // sapphire/amethyst/steel = unlocked by Remove Ads ($2.99). The
-            // gating lives entirely inside FounderManager.isGoldSkinEnabled(),
-            // which now returns true for any player with an unlocked variant
-            // and the cosmetic toggle on.
-            const _founderGold = (typeof FounderManager !== 'undefined' &&
-                typeof FounderManager.isGoldSkinEnabled === 'function' &&
-                FounderManager.isGoldSkinEnabled());
-            const _founderVariant = (_founderGold && typeof FounderManager.getSkinVariant === 'function')
-                ? FounderManager.getSkinVariant()
-                : 'gold';
-            const _founderAuraColor = (_founderGold && typeof GoldenSkin !== 'undefined' && typeof GoldenSkin.getAuraColor === 'function')
-                ? GoldenSkin.getAuraColor(_founderVariant)
-                : '#FFC857';
-            if (_founderGold) {
+            const skinEnabled = (typeof SkinManager !== 'undefined' &&
+                typeof SkinManager.isGoldSkinEnabled === 'function' &&
+                SkinManager.isGoldSkinEnabled());
+            const skinVariant = (skinEnabled && typeof SkinManager.getSkinVariant === 'function')
+                ? SkinManager.getSkinVariant()
+                : 'sapphire';
+            const skinAuraColor = (skinEnabled && typeof GoldenSkin !== 'undefined' && typeof GoldenSkin.getAuraColor === 'function')
+                ? GoldenSkin.getAuraColor(skinVariant)
+                : '#4DA6FF';
+            if (skinEnabled) {
                 ctx.save();
-                ctx.shadowColor = _founderAuraColor;
+                ctx.shadowColor = skinAuraColor;
                 ctx.shadowBlur = 8 + Math.sin(Date.now() / 220) * 3;
                 ctx.globalCompositeOperation = 'lighter';
                 ctx.globalAlpha = 0.55;
                 this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
                 ctx.restore();
             }
-            // Final base-sprite blit. Founders get the chosen colour-tinted
-            // skin generated procedurally by GoldenSkin from the same source
-            // sprite sheet — silhouette and animation frames are identical.
-            if (_founderGold &&
+            if (skinEnabled &&
                 typeof GoldenSkin !== 'undefined' &&
                 typeof GoldenSkin.drawAnimation === 'function') {
-                GoldenSkin.drawAnimation(this.currentAnimation, ctx, this.x, this.y, this.width, this.height, !this.facingRight, _founderVariant);
+                GoldenSkin.drawAnimation(this.currentAnimation, ctx, this.x, this.y, this.width, this.height, !this.facingRight, skinVariant);
             } else {
                 this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, !this.facingRight);
             }
@@ -1410,7 +1400,6 @@ class Player {
                 gold: [`rgba(255, 213, 74, ${alpha * 0.35})`, 'rgba(255, 213, 74, 0)'],
                 fireball: [`rgba(255, 70, 20, ${alpha * 0.42})`, 'rgba(255, 40, 0, 0)'],
                 hookshot: [`rgba(190, 205, 215, ${alpha * 0.3})`, 'rgba(190, 205, 215, 0)'],
-                fishing: [`rgba(30, 190, 220, ${alpha * 0.32})`, 'rgba(30, 190, 220, 0)'],
                 bomb: [`rgba(255, 130, 20, ${alpha * 0.48})`, 'rgba(40, 30, 30, 0)']
             }[spray.shotType] || [`rgba(255, 255, 255, ${alpha * 0.3})`, 'rgba(230, 230, 230, 0)'];
             const cloudGrad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, spray.radius);
@@ -1455,7 +1444,6 @@ class Player {
                 gold: ['#FFF8C6', '#E4A900'],
                 fireball: ['#FFF2A0', '#F02B12'],
                 hookshot: ['#F4F7FA', '#788691'],
-                fishing: ['#D8FAFF', '#0796B5'],
                 bomb: ['#656565', '#171717']
             }[proj.shotType] || ['#FFFFFF', '#D8D8D8'];
             

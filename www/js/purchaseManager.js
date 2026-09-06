@@ -10,11 +10,9 @@
  *
  * What the purchase grants:
  *   • Removes banner + between-stage interstitial ads (rewarded ads stay opt-in).
- *   • Unlocks the Sapphire, Amethyst, and Steel ninja skins (FounderManager.isSkinUnlocked).
- *   • If purchased before EARLY_ACCESS_END_ISO (2026-12-31), also auto-grants
- *     Founder status + the exclusive Gold ninja skin.
+ *   • Unlocks the Sapphire, Amethyst, and Steel ninja skins (SkinManager.isSkinUnlocked).
  *
- * Entitlement is mirrored to localStorage so AdManager and FounderManager can
+ * Entitlement is mirrored to localStorage so AdManager and SkinManager can
  * synchronously gate calls without awaiting the plugin on every check.
  *
  * SETUP (Android, one-time):
@@ -24,13 +22,6 @@
  *      PRIMARY REVENUE PRODUCT (main IAP — always active):
  *        Product ID: remove_ads      | Type: One-time (managed) | Price: $1.99
  *        Grants: ad-free gameplay + Sapphire, Amethyst, Steel ninja skins.
- *        During early-access window also auto-grants Gold skin + Founder badge.
- *
- *      SECONDARY / OPTIONAL (early-access only — deactivate after 2026-12-31):
- *        Product ID: founder_pass    | Type: One-time (managed) | Price: $0.99
- *        Grants: Gold ninja skin + Founder badge ONLY. Does NOT remove ads.
- *        For players who want to cloud-sync Founder status without buying
- *        Remove Ads. This is NOT the primary revenue driver.
  *   3. npx cap sync android
  *   4. Upload a signed bundle to a Play Console internal testing track and add
  *      yourself as a license tester so the purchase flow works in test mode.
@@ -40,9 +31,7 @@ const PurchaseManager = (() => {
     'use strict';
 
     const PRODUCT_ID_REMOVE_ADS    = 'remove_ads';
-    const PRODUCT_ID_FOUNDER_PASS  = 'founder_pass';
     const STORAGE_KEY_AD_FREE      = 'chipsavage.adFree';
-    const STORAGE_KEY_FOUNDER_PASS = 'chipsavage.founderPassOwned';
     const STORAGE_KEY_PENDING_IAP  = 'chipsavage.pendingIapPurchases';
 
     let _store         = null;     // CdvPurchase.store reference
@@ -52,14 +41,12 @@ const PurchaseManager = (() => {
     let _readyMode     = 'not-ready'; // How _markReady was reached: 'store-init'|'init-error'|'watchdog'|'no-store'
     let _storeInitError = null;    // Error message if store.initialize() threw/timed-out
     let _adFree        = _readEntitlementFromStorage();
-    let _founderPass   = _readFounderPassFromStorage();
     let _product       = null;     // CdvPurchase.Product (remove_ads)
-    let _founderProduct = null;    // CdvPurchase.Product (founder_pass)
     // Last seen Google Play purchase token, keyed by SKU. Captured in
     // .approved() / .finished() so we can forward it to the server-side
     // entitlement endpoint for receipt verification.
     const _lastPurchaseToken = Object.create(null);
-    // Last order error string (code + message) for both SKUs — shown in the
+    // Last order error string (code + message) for Remove Ads — shown in the
     // in-app diagnostic panel without needing Chrome DevTools.
     let _lastOrderError = 'none';
     let _lastRemotePushStatus = 'none';
@@ -124,7 +111,7 @@ const PurchaseManager = (() => {
             const token = _extractPurchaseToken(tx);
             if (!token || !tx || !Array.isArray(tx.products)) return;
             for (const p of tx.products) {
-                if (p && p.id) {
+                if (p && p.id === PRODUCT_ID_REMOVE_ADS) {
                     _lastPurchaseToken[p.id] = token;
                     _rememberPendingPurchase(p.id, token, p.id);
                 }
@@ -132,7 +119,6 @@ const PurchaseManager = (() => {
         } catch (e) {}
     }
     const _listeners   = new Set();
-    const _founderListeners = new Set();
     const _readyListeners = new Set();
 
     function _markReady(reason) {
@@ -210,14 +196,9 @@ const PurchaseManager = (() => {
                 _log('Restored ad-free from server (player ' + pid.slice(0, 6) + '…)');
                 _setAdFree(true, 'remote-restore');
             }
-            if (remote.founderPass && !_founderPass) {
-                _log('Restored founder pass from server (player ' + pid.slice(0, 6) + '…)');
-                _setFounderPassOwned(true, 'remote-restore');
-            }
             // If we own something locally that the server doesn't, push it up
             // so a fresh device gets it next time.
             if (_adFree && !remote.adFree) _pushEntitlementRemote(PRODUCT_ID_REMOVE_ADS);
-            if (_founderPass && !remote.founderPass) _pushEntitlementRemote(PRODUCT_ID_FOUNDER_PASS);
         } catch (e) {
             _warn('Remote entitlement pull failed:', e);
         }
@@ -238,40 +219,6 @@ const PurchaseManager = (() => {
 
     function _writeEntitlement(v) {
         try { localStorage.setItem(STORAGE_KEY_AD_FREE, v ? '1' : '0'); } catch (e) {}
-    }
-
-    function _readFounderPassFromStorage() {
-        try { return localStorage.getItem(STORAGE_KEY_FOUNDER_PASS) === '1'; } catch (e) { return false; }
-    }
-
-    function _writeFounderPass(v) {
-        try { localStorage.setItem(STORAGE_KEY_FOUNDER_PASS, v ? '1' : '0'); } catch (e) {}
-    }
-
-    function _setFounderPassOwned(v, source) {
-        const prev = _founderPass;
-        _founderPass = !!v;
-        _writeFounderPass(_founderPass);
-        if (prev !== _founderPass) {
-            _log('Founder Pass entitlement changed →', _founderPass, '(source:', source + ')');
-            // Grant Founder status (cosmetic gold skin + badge) immediately.
-            // FounderManager handles its own no-op if already granted.
-            try {
-                if (_founderPass && window.FounderManager && typeof FounderManager.grant === 'function') {
-                    FounderManager.grant('founder-pass-' + source);
-                }
-            } catch (e) { _warn('FounderManager.grant failed:', e); }
-            // Mirror to server (skip if this flip CAME from the server).
-            if (_founderPass && source !== 'remote-restore' && source !== 'storage') {
-                _pushEntitlementRemote(PRODUCT_ID_FOUNDER_PASS);
-            }
-            _founderListeners.forEach(fn => { try { fn(_founderPass); } catch (e) {} });
-            try {
-                if (window.Analytics && Analytics.trackPurchase) {
-                    Analytics.trackPurchase({ product: PRODUCT_ID_FOUNDER_PASS, source });
-                }
-            } catch (e) {}
-        }
     }
 
     function _setAdFree(v, source) {
@@ -355,10 +302,9 @@ const PurchaseManager = (() => {
         _initialized = true;
 
         // Steam build: everything is included with the game purchase.
-        // Mark ad-free and founder pass as owned, skip all IAP initialisation.
+        // Mark ad-free as owned, skip all IAP initialisation.
         if (window.PLATFORM === 'steam') {
             _adFree = true;
-            _founderPass = true;
             _markReady('steam');
             return;
         }
@@ -414,11 +360,6 @@ const PurchaseManager = (() => {
                     id:       PRODUCT_ID_REMOVE_ADS,
                     type:     ProductType.NON_CONSUMABLE,
                     platform: Platform.GOOGLE_PLAY,
-                },
-                {
-                    id:       PRODUCT_ID_FOUNDER_PASS,
-                    type:     ProductType.NON_CONSUMABLE,
-                    platform: Platform.GOOGLE_PLAY,
                 }
             ]);
 
@@ -433,13 +374,6 @@ const PurchaseManager = (() => {
                         // now that the product details have arrived from Google Play.
                         if (!wasLoaded && p.pricing) {
                             _listeners.forEach(fn => { try { fn(_adFree); } catch(e) {} });
-                        }
-                    } else if (p.id === PRODUCT_ID_FOUNDER_PASS) {
-                        const wasLoaded = !!(_founderProduct && _founderProduct.pricing);
-                        _founderProduct = p;
-                        _log('Product loaded:', p.id, p.pricing && p.pricing.price);
-                        if (!wasLoaded && p.pricing) {
-                            _founderListeners.forEach(fn => { try { fn(_founderPass); } catch(e) {} });
                         }
                     }
                 })
@@ -466,9 +400,6 @@ const PurchaseManager = (() => {
                             if (tx.products.some(p => p && p.id === PRODUCT_ID_REMOVE_ADS)) {
                                 _setAdFree(true, 'approved');
                             }
-                            if (tx.products.some(p => p && p.id === PRODUCT_ID_FOUNDER_PASS)) {
-                                _setFounderPassOwned(true, 'approved');
-                            }
                         }
                     } catch (e) { _warn('entitlement flip in approved failed', e); }
                     try { tx.finish(); }
@@ -488,9 +419,6 @@ const PurchaseManager = (() => {
                         if (tx.products.some(p => p.id === PRODUCT_ID_REMOVE_ADS)) {
                             _setAdFree(true, 'purchase');
                         }
-                        if (tx.products.some(p => p.id === PRODUCT_ID_FOUNDER_PASS)) {
-                            _setFounderPassOwned(true, 'purchase');
-                        }
                         // Google Ads conversion — only fires on web (gtag script not loaded in Capacitor native).
                         try {
                             if (typeof gtag === 'function') {
@@ -506,7 +434,6 @@ const PurchaseManager = (() => {
                     // Reconcile owned products on each receipt update (handles restore).
                     try {
                         if (store.owned(PRODUCT_ID_REMOVE_ADS))   _setAdFree(true, 'restore');
-                        if (store.owned(PRODUCT_ID_FOUNDER_PASS)) _setFounderPassOwned(true, 'restore');
                     } catch (e) {}
                 });
 
@@ -536,7 +463,6 @@ const PurchaseManager = (() => {
             // Cross-check ownership on init.
             try {
                 if (store.owned(PRODUCT_ID_REMOVE_ADS))   _setAdFree(true, 'init-owned');
-                if (store.owned(PRODUCT_ID_FOUNDER_PASS)) _setFounderPassOwned(true, 'init-owned');
             } catch (e) {}
 
             // Mark the manager as ready BEFORE the auto-restore probe so
@@ -613,14 +539,14 @@ const PurchaseManager = (() => {
         const deadline = Date.now() + timeoutMs;
         while (Date.now() < deadline) {
             const p = (store.get && store.get(sku)) ||
-                      (sku === PRODUCT_ID_REMOVE_ADS ? _product : _founderProduct);
+                      _product;
             if (p && p.pricing && p.pricing.price) return p;
             await new Promise(r => setTimeout(r, 250));
         }
         // Last-ditch: return whatever we have, even without pricing — the order
         // call may still succeed (Play Billing can show its own pricing UI).
         return (store.get && store.get(sku)) ||
-               (sku === PRODUCT_ID_REMOVE_ADS ? _product : _founderProduct) ||
+               _product ||
                null;
     }
 
@@ -725,81 +651,6 @@ const PurchaseManager = (() => {
         return _ready;
     }
 
-    /** Same rationale as isRemoveAdsProductLoaded — unblock the Founder Pass
-     *  button as soon as the store init phase completes. */
-    function isFounderPassProductLoaded() {
-        return _ready;
-    }
-
-    /**
-     * Localized price string for the Founder Pass, or null if not yet loaded.
-     */
-    function getFounderPassPriceString() {
-        try {
-            const p = (_store && _store.get && _store.get(PRODUCT_ID_FOUNDER_PASS)) || _founderProduct;
-            if (p && p.pricing && p.pricing.price) return p.pricing.price;
-        } catch (e) {}
-        return '$0.99'; // fallback until Play product loads
-    }
-
-    function isFounderPassOwned() { return _founderPass; }
-
-    function onFounderPassChange(fn) {
-        if (typeof fn === 'function') _founderListeners.add(fn);
-        return () => _founderListeners.delete(fn);
-    }
-
-    /**
-     * Initiate purchase of the standalone Founder Pass (Gold skin + badge).
-     * Does NOT remove ads.
-     * @returns {Promise<{ok:boolean, reason?:string}>}
-     */
-    async function purchaseFounderPass() {
-        if (_founderPass) return { ok: true, reason: 'already-owned' };
-
-        const store = await _getStore();
-        if (!store) return { ok: false, reason: isNative() ? 'store-unavailable' : 'web-not-supported' };
-
-        // Wait for store.initialize() so the product catalogue is loaded.
-        await _waitForReady();
-
-        // Self-heal: same retry path as Remove Ads — force a fresh catalogue
-        // fetch if the SKU never propagated to this device.
-        let product = store.get(PRODUCT_ID_FOUNDER_PASS) || _founderProduct;
-        if (!product || !product.pricing) {
-            _log('founder_pass not in catalogue — forcing refresh before order.');
-            product = await _refreshProduct(PRODUCT_ID_FOUNDER_PASS);
-        }
-        if (!product) return { ok: false, reason: 'product-not-loaded' };
-
-        try {
-            // CdvPurchase v13: order() returns Promise<IError | undefined>.
-            // Surface any returned IError so the UI can show a real message.
-            const offer = product.getOffer && product.getOffer();
-            let orderErr;
-            if (offer && typeof offer.order === 'function') {
-                orderErr = await offer.order();
-            } else if (typeof product.order === 'function') {
-                orderErr = await product.order();
-            } else {
-                return { ok: false, reason: 'order-api-missing' };
-            }
-            if (orderErr) {
-                _warn('Founder Pass order rejected:', orderErr);
-                const errCode = orderErr.code != null ? String(orderErr.code) : '';
-                const errMsg  = orderErr.message || '';
-                const reason  = (errCode === '1') ? 'user-cancelled'
-                              : (errMsg || ('error-' + (errCode || 'unknown')));
-                _lastOrderError = '[' + PRODUCT_ID_FOUNDER_PASS + '] code=' + (errCode || '?') + ' msg=' + (errMsg || reason);
-                return { ok: false, reason };
-            }
-            return { ok: true, reason: 'pending' };
-        } catch (e) {
-            _warn('Founder Pass purchase failed:', e);
-            return { ok: false, reason: (e && e.message) || 'purchase-error' };
-        }
-    }
-
     /**
      * Diagnostic dump — call from Chrome Remote DevTools console:
      *   PurchaseManager.diagnose()
@@ -826,8 +677,6 @@ const PurchaseManager = (() => {
             storePollDone: _storePollDone,
             adFree_localStorage: _readEntitlementFromStorage(),
             adFree_runtime: _adFree,
-            founderPass_localStorage: _readFounderPassFromStorage(),
-            founderPass_runtime: _founderPass,
             lastPurchaseTokens: Object.assign({}, _lastPurchaseToken),
             pendingIapPurchases: _readPendingPurchases(),
             lastRemotePushStatus: _lastRemotePushStatus,
@@ -838,7 +687,6 @@ const PurchaseManager = (() => {
             try {
                 out.products = {
                     remove_ads:   store.get ? store.get(PRODUCT_ID_REMOVE_ADS)  : _product,
-                    founder_pass: store.get ? store.get(PRODUCT_ID_FOUNDER_PASS) : _founderProduct,
                 };
             } catch (e) { out.products_error = String(e); }
             // receipts — shows what Google Play has reported as owned
@@ -868,18 +716,11 @@ const PurchaseManager = (() => {
         restorePurchases,
         getPriceString,
         isRemoveAdsProductLoaded,
-        isFounderPassProductLoaded,
-        // Founder Pass (standalone Gold skin + Founder badge, no ad removal).
-        isFounderPassOwned,
-        onFounderPassChange,
-        purchaseFounderPass,
-        getFounderPassPriceString,
         // Cross-device sync: pulls server-side entitlements for the current
         // signed-in Play Games player and mirrors any owned SKUs locally.
         // Safe to call repeatedly; no-op until the player ID is known.
         syncRemoteEntitlements: (force = false) => _pullEntitlementsRemote(!!force),
         PRODUCT_ID_REMOVE_ADS,
-        PRODUCT_ID_FOUNDER_PASS,
         /** Diagnostic dump. Call from Chrome Remote DevTools: PurchaseManager.diagnose() */
         diagnose,
     };
