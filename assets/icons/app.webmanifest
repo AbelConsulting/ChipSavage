@@ -1,0 +1,24 @@
+{
+  "name": "Chip Savage Golf",
+  "short_name": "Chip Savage",
+  "id": "../../",
+  "start_url": "../../index.html",
+  "scope": "../../",
+  "display": "standalone",
+  "background_color": "#176B49",
+  "theme_color": "#176B49",
+  "icons": [
+    {
+      "src": "chip-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "chip-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

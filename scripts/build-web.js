@@ -23,6 +23,6 @@ function copyRecursive(source, destination) {
 fs.rmSync(webDir, { recursive: true, force: true });
 fs.mkdirSync(webDir, { recursive: true });
 
-for (const entry of ['index.html', 'assets', 'js']) {
+for (const entry of ['index.html', 'privacy.html', 'terms.html', 'assets', 'js']) {
   copyRecursive(path.join(rootDir, entry), path.join(webDir, entry));
 }

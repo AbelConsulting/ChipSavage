@@ -46,7 +46,7 @@ const AdManager = (() => {
         // Set to true to enable the AdSense H5 Games Ads API on web.
         // Requires the AdSense account to be approved and active.
         // false = web rewarded ads disabled.
-        webRewardedEnabled: true,
+        webRewardedEnabled: false,
 
         // Which rewarded ad format the configured rewardedAdUnitId belongs to.
         //   'rewardInterstitial' → prepareRewardInterstitialAd / showRewardInterstitialAd

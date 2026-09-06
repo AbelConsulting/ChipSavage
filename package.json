@@ -6,6 +6,7 @@
   "scripts": {
     "build:web": "node scripts/build-web.js",
     "build:storefront": "node scripts/generate-storefront-art.mjs",
+    "build:icons": "node scripts/generate-app-icons.mjs",
     "cap:add:android": "npm run build:web && npx cap add android",
     "cap:sync:android": "npm run build:web && npx cap sync android",
     "cap:open:android": "npx cap open android",

@@ -13,6 +13,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <title>Chip Savage Golf: Underground Tour</title>
+    <link rel="icon" type="image/png" href="assets/icons/chip-maskable-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/chip-maskable-192.png">
+    <link rel="manifest" href="assets/icons/app.webmanifest">
 
     <meta name="description" content="Chip Savage Golf: battle through outlaw courses, collect Golden Cups, and conquer the Underground Tour.">
     <meta name="keywords" content="chip savage, golf brawler, beat em up, 2D action, arcade fighter, combo brawler, free browser game">
@@ -474,6 +477,12 @@
             font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
             text-align: center; letter-spacing: 0.02em;
         }
+        .legal-links {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px;
+            font: 500 14px/1.5 'Space Grotesk', 'Segoe UI', sans-serif;
+        }
+        .legal-links a { display: inline-flex; align-items: center; min-height: 44px; color: #E6EEF6; text-underline-offset: 4px; }
+        .legal-links a:focus-visible { outline: 2px solid #FFD700; outline-offset: 3px; }
         .start-menu-enter-hint {
             margin: 2px 0 0;
             font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
@@ -726,6 +735,7 @@
                         </button>
                     </div>
                     <p class="start-menu-enter-hint">PRESS ENTER TO TEE OFF</p>
+                    <nav class="legal-links" aria-label="Legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a></nav>
                     <p class="start-menu-footer">&copy; 2026 Mephitideus Interactive</p>
                 </div>
             </div>
@@ -754,6 +764,7 @@
                         <span class="volume-value" id="menu-music-volume-value">50%</span>
                     </div>
                     <button id="reset-tutorial-btn" class="menu-btn">💡 Replay Caddie Tips</button>
+                    <nav class="legal-links" aria-label="Clubhouse legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a></nav>
                     <button id="menu-settings-back" class="menu-btn menu-btn--primary">← BACK</button>
                 </div>
             </div>
