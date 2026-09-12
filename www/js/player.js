@@ -533,10 +533,16 @@ class Player {
 
                 // If projectile hits solid geometry, create spray and remove projectile
                 if (hitWall || (collision && collision.platform && collision.platform.type === 'static')) {
+                    let wallBreakResult = null;
                     if (hitWall && typeof level.hitWall === 'function') {
-                        level.hitWall(hitWall, proj.shotType);
+                        wallBreakResult = level.hitWall(hitWall, proj.shotType);
                     }
-                    this.createGolfImpact(proj.x, proj.y, proj.shotType);
+                    const impactX = (wallBreakResult && wallBreakResult.destroyed && typeof wallBreakResult.x === 'number') ? wallBreakResult.x : proj.x;
+                    const impactY = (wallBreakResult && wallBreakResult.destroyed && typeof wallBreakResult.y === 'number') ? wallBreakResult.y : proj.y;
+                    this.createGolfImpact(impactX, impactY, proj.shotType, {
+                        isWallBreak: !!(wallBreakResult && wallBreakResult.destroyed),
+                        wallMaterial: wallBreakResult ? wallBreakResult.material : null
+                    });
                     this.golfProjectiles.splice(i, 1);
                     continue;
                 }
@@ -563,6 +569,22 @@ class Player {
                     spray.particles.splice(j, 1);
                 }
             }
+
+            // Update wall-break debris shards separately so we can make them chunkier.
+            if (spray.debrisParticles && spray.debrisParticles.length > 0) {
+                for (let j = spray.debrisParticles.length - 1; j >= 0; j--) {
+                    const d = spray.debrisParticles[j];
+                    d.x += d.vx * dt;
+                    d.y += d.vy * dt;
+                    d.vx *= 0.97;
+                    d.vy = d.vy * 0.97 + 460 * dt;
+                    d.spin += d.spinSpeed * dt;
+                    d.age += dt;
+                    if (d.age >= d.lifetime) {
+                        spray.debrisParticles.splice(j, 1);
+                    }
+                }
+            }
             
             // Remove spray cloud when expired
             if (spray.age >= spray.duration) {
@@ -571,13 +593,20 @@ class Player {
         }
     }
     
-    createGolfImpact(x, y, shotType = 'gold') {
+    createGolfImpact(x, y, shotType = 'gold', opts = null) {
+        const isWallBreak = !!(opts && opts.isWallBreak);
+        const wallMaterial = (opts && typeof opts.wallMaterial === 'string') ? opts.wallMaterial : null;
         const impactConfig = {
             gold: { radius: 100, duration: 0.8, colors: ['#FFD54A', '#FFF4B0'] },
             fireball: { radius: 90, duration: 0.65, colors: ['#FF3B18', '#FFB11B'] },
             hookshot: { radius: 45, duration: 0.45, colors: ['#B8C4CE', '#F4F7FA'] },
             bomb: { radius: 145, duration: 0.75, colors: ['#FF7A18', '#3A3131'] }
         }[shotType] || { radius: 100, duration: 0.8, colors: ['#FFFFFF', '#E0E0E0'] };
+        const wallPalette = {
+            vine: ['#97D76A', '#D8F4A5', '#5A7E46'],
+            rock: ['#B8AFA1', '#EBE2D2', '#5A4D44'],
+            solid: ['#D3C5AF', '#F5E5CB', '#6A5B49']
+        }[wallMaterial || 'solid'] || ['#D3C5AF', '#F5E5CB', '#6A5B49'];
         const spray = {
             x: x,
             y: y,
@@ -587,8 +616,14 @@ class Player {
             startRadius: 30,
             maxRadius: impactConfig.radius,
             radius: 30,
+            isWallBreak,
+            wallMaterial,
+            wallRingWidth: isWallBreak ? 14 : 0,
+            wallRingMaxRadius: isWallBreak ? (impactConfig.radius + 48) : 0,
+            wallRingColor: isWallBreak ? wallPalette[1] : null,
             hitEnemies: new Set(), // Track which enemies have been hit
-            particles: []
+            particles: [],
+            debrisParticles: []
         };
         
         // Create spray particles
@@ -606,6 +641,27 @@ class Player {
                 size: 3 + Math.random() * 5,
                 color: impactConfig.colors[Math.random() > 0.5 ? 0 : 1]
             });
+        }
+
+        if (isWallBreak) {
+            const debrisCount = wallMaterial === 'vine' ? 16 : 22;
+            for (let i = 0; i < debrisCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 130 + Math.random() * 280;
+                spray.debrisParticles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - (40 + Math.random() * 130),
+                    age: 0,
+                    lifetime: 0.6 + Math.random() * 0.55,
+                    width: 4 + Math.random() * 7,
+                    height: 3 + Math.random() * 6,
+                    color: wallPalette[Math.floor(Math.random() * wallPalette.length)],
+                    spin: Math.random() * Math.PI * 2,
+                    spinSpeed: (Math.random() - 0.5) * 10
+                });
+            }
         }
         
         this.golfSprays.push(spray);
@@ -1409,6 +1465,18 @@ class Player {
             ctx.beginPath();
             ctx.arc(screenX, screenY, spray.radius, 0, Math.PI * 2);
             ctx.fill();
+
+            if (spray.isWallBreak) {
+                const ringProgress = Math.min(1, spray.age / Math.max(0.001, spray.duration));
+                const ringRadius = 22 + (spray.wallRingMaxRadius - 22) * ringProgress;
+                ctx.globalAlpha = Math.max(0, alpha * 0.7);
+                ctx.lineWidth = Math.max(2, spray.wallRingWidth * (1 - ringProgress * 0.6));
+                ctx.strokeStyle = spray.wallRingColor || '#F7E8C8';
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, ringRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
             
             // Draw spray particles
             ctx.globalCompositeOperation = 'lighter';
@@ -1428,6 +1496,20 @@ class Player {
                 ctx.beginPath();
                 ctx.arc(p.x - cameraX, p.y - cameraY, p.size, 0, Math.PI * 2);
                 ctx.fill();
+            }
+
+            if (spray.isWallBreak && spray.debrisParticles) {
+                ctx.globalCompositeOperation = 'source-over';
+                for (const d of spray.debrisParticles) {
+                    const dAlpha = Math.max(0, 1 - (d.age / d.lifetime));
+                    ctx.save();
+                    ctx.globalAlpha = dAlpha;
+                    ctx.translate(d.x - cameraX, d.y - cameraY);
+                    ctx.rotate(d.spin);
+                    ctx.fillStyle = d.color;
+                    ctx.fillRect(-d.width / 2, -d.height / 2, d.width, d.height);
+                    ctx.restore();
+                }
             }
             
             ctx.restore();

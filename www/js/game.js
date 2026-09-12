@@ -3585,7 +3585,23 @@ class Game {
         const backtrack = Math.max(220, Math.floor((this.level && this.level.width ? this.level.width : 10000) * 0.03));
         const targetX = Math.max(80, Math.floor(deathX - backtrack));
 
-        if (this.level && this.level.platforms && this.level.platforms.length > 0) {
+        let usedCheckpoint = false;
+        const levelSpawnPoints = (this.level && Array.isArray(this.level.spawnPoints))
+            ? this.level.spawnPoints.filter((sp) => sp && typeof sp.x === 'number' && typeof sp.y === 'number')
+            : [];
+
+        if (levelSpawnPoints.length > 0) {
+            const checkpoint = levelSpawnPoints
+                .filter((sp) => sp.x <= targetX)
+                .reduce((best, sp) => (!best || sp.x > best.x ? sp : best), null);
+            if (checkpoint) {
+                this.player.x = checkpoint.x;
+                this.player.y = checkpoint.y;
+                usedCheckpoint = true;
+            }
+        }
+
+        if (!usedCheckpoint && this.level && this.level.platforms && this.level.platforms.length > 0) {
             const platforms = this.level.platforms;
             const nonGroundPlatforms = platforms.filter(p => !(p.y >= this.level.height - 40 && p.width >= this.level.width * 0.8));
             const candidatePool = nonGroundPlatforms.length > 0 ? nonGroundPlatforms : platforms;
@@ -3599,7 +3615,7 @@ class Game {
             const maxX = spawnPlatform.x + spawnPlatform.width - this.player.width;
             this.player.x = Utils.clamp(targetX, spawnPlatform.x, maxX);
             this.player.y = spawnPlatform.y - this.player.height - 8;
-        } else {
+        } else if (!usedCheckpoint) {
             this.player.x = targetX;
             this.player.y = 300;
         }

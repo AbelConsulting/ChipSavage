@@ -16,17 +16,26 @@ const LEVEL_CONFIGS = [
     {
         name: "Pine Valley Front Nine",
         id: "level_1",
-        width: 10000,
-        completion: { exitX: 9900 },
+        width: 13200,
+        completion: { exitX: 13100 },
         background: 'bg_1',
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [ 
+            { x: 600, y: 300 },
             { x: 1200, y: 300 },
+            { x: 1900, y: 300 },
             { x: 2600, y: 300 },
+            { x: 3450, y: 300 },
             { x: 4300, y: 300 },
+            { x: 5200, y: 300 },
             { x: 6100, y: 300 },
+            { x: 7000, y: 300 },
             { x: 7900, y: 300 },
+            { x: 8600, y: 300 },
             { x: 9200, y: 300 },
+            { x: 10800, y: 300 },
+            { x: 11600, y: 300 },
+            { x: 12400, y: 300 },
             { x: 'right', y: 300 },
             { x: 'left', y: 300 } 
         ],
@@ -36,7 +45,8 @@ const LEVEL_CONFIGS = [
             { x: 1850, y: 680, width: 1450, height: 40, type: 'static', tile: 'ground_tile' },
             { x: 3650, y: 660, width: 1750, height: 40, type: 'static', tile: 'ground_tile' },
             { x: 5750, y: 680, width: 1750, height: 40, type: 'static', tile: 'ground_tile' },
-            { x: 7850, y: 670, width: 2150, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 7850, y: 670, width: 1950, height: 40, type: 'static', tile: 'ground_tile' },
+            { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
             { x: 1180, y: 460, width: 80, height: 220, type: 'wall', material: 'vine' },
@@ -47,6 +57,7 @@ const LEVEL_CONFIGS = [
             { x: 1540, y: 560, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1710, y: 500, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 260, width: 48, height: 48, type: 'anchor' },
+            { x: 1360, y: 310, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section B: watchtower choke ---
             { x: 2750, y: 430, width: 90, height: 250, type: 'wall', material: 'rock' },
@@ -55,59 +66,109 @@ const LEVEL_CONFIGS = [
             { x: 1960, y: 340, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 3080, y: 310, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // Gap 2 bridge
             { x: 3340, y: 520, width: 130, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.8, tile: 'platform4_tile' },
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 220, width: 48, height: 48, type: 'anchor' },
+            { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---
             { x: 4580, y: 390, width: 90, height: 270, type: 'wall', material: 'vine' },
             { x: 4538, y: 390, width: 36, height: 270, type: 'climb', style: 'vine' },
             { x: 4300, y: 390, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3 bridge
             { x: 5480, y: 560, width: 120, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5650, y: 500, width: 120, height: 24, type: 'moving', axis: 'x', range: 70, speed: 2.0, tile: 'platform5_tile' },
+            { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // --- Section D: split ladder ascent ---
             { x: 6880, y: 420, width: 95, height: 260, type: 'wall', material: 'rock' },
             { x: 6836, y: 420, width: 36, height: 260, type: 'climb', style: 'ladder' },
             { x: 6620, y: 420, width: 430, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 6340, y: 260, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Gap 4 bridge
             { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // --- Section E: final fortress wall run ---
             { x: 8940, y: 350, width: 110, height: 320, type: 'wall', material: 'vine' },
             { x: 8896, y: 350, width: 36, height: 320, type: 'climb', style: 'vine' },
             { x: 8670, y: 350, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 9520, y: 470, width: 280, height: 24, type: 'static', tile: 'platform3_tile' }
+            { x: 9520, y: 470, width: 280, height: 24, type: 'static', tile: 'platform3_tile' },
+
+            // --- Upper return lane: ties early and mid districts into looped traversal ---
+            { x: 2140, y: 210, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 2690, y: 190, width: 320, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 3240, y: 215, width: 340, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3820, y: 195, width: 340, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4370, y: 205, width: 360, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 4960, y: 210, width: 330, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5320, y: 165, width: 48, height: 48, type: 'anchor' },
+            { x: 5590, y: 250, width: 230, height: 24, type: 'static', tile: 'platform6_tile' },
+
+            // --- Section F: ridge maze with dual gates (late-game expansion) ---
+            { x: 10280, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
+            { x: 10236, y: 400, width: 36, height: 270, type: 'climb', style: 'ladder' },
+            { x: 9890, y: 560, width: 130, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.8, tile: 'platform3_tile' },
+            { x: 9980, y: 400, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 10480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 100, speed: 1.7, tile: 'platform3_tile' },
+            { x: 11080, y: 450, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 11260, y: 360, width: 108, height: 310, type: 'wall', material: 'vine' },
+            { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
+            { x: 10980, y: 360, width: 460, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 11480, y: 260, width: 260, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 11330, y: 210, width: 48, height: 48, type: 'anchor' },
+
+            // --- Section G: final canopy run and exit approach ---
+            { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 80, speed: 2.0, tile: 'platform_tile' },
+            { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.9, tile: 'platform_tile' },
+            { x: 12130, y: 410, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12370, y: 340, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 12540, y: 270, width: 48, height: 48, type: 'anchor' },
+            { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
         ],
         idols: [
             { x: 1210, y: 420 },
             { x: 4620, y: 350 },
-            { x: 8990, y: 310 }
+            { x: 8990, y: 310 },
+            { x: 10640, y: 280 },
+            { x: 12420, y: 300 }
         ],
         speedBoosts: [
             { x: 2570, y: 390 },
-            { x: 6980, y: 380 }
+            { x: 6980, y: 380 },
+            { x: 11130, y: 320 }
         ],
         damageBoosts: [
-            { x: 5350, y: 260 }
+            { x: 5350, y: 260 },
+            { x: 12190, y: 380 }
         ],
         skunkPowerups: [
             { x: 1750, y: 460 },
-            { x: 8400, y: 240 }
+            { x: 8400, y: 240 },
+            { x: 10320, y: 360 },
+            { x: 12680, y: 470 }
         ],
         enemyConfig: {
             spawnInterval: 3.0,
-            maxEnemies: 5,
-            aggression: 0.5,
+            maxEnemies: 6,
+            aggression: 0.55,
             allowedTypes: ['BASIC', 'SECOND_BASIC']
         }
     },
@@ -118,11 +179,11 @@ const LEVEL_CONFIGS = [
     {
         name: "Pine Valley Playoff",
         id: "level_1_boss",
-        width: 4000,
-        completion: { bossTriggerX: 3200, exitX: 3900 },
+        width: 5200,
+        completion: { bossTriggerX: 4380, exitX: 5100 },
         boss: {
             type: "BOSS",
-            spawnX: 3480,
+            spawnX: 4680,
             spawnY: 520,
             healthMultiplier: 6.5,
             speedMultiplier: 1.0,
@@ -132,26 +193,61 @@ const LEVEL_CONFIGS = [
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [
             { x: 200, y: 300 },
+            { x: 640, y: 300 },
+            { x: 1220, y: 300 },
+            { x: 1850, y: 300 },
+            { x: 2520, y: 300 },
+            { x: 3050, y: 300 },
+            { x: 3720, y: 300 },
+            { x: 4300, y: 300 },
             { x: 'right', y: 300 }
         ],
         platforms: [
-            { x: 0, y: 680, width: 4000, height: 40, type: 'static', tile: 'ground_tile' },
-            { x: 300, y: 540, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 750, y: 440, width: 220, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 1200, y: 340, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 1750, y: 460, width: 280, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 2300, y: 360, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 2850, y: 490, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 3350, y: 390, width: 280, height: 24, type: 'static', tile: 'platform2_tile' }
+            // Ground lane with stepped pockets
+            { x: 0, y: 680, width: 5200, height: 40, type: 'static', tile: 'ground_tile' },
+
+            // Entry quarter: low-intensity warm-up loop
+            { x: 300, y: 560, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 720, y: 470, width: 230, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1130, y: 380, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 1470, y: 460, width: 90, height: 220, type: 'wall', material: 'vine' },
+            { x: 1428, y: 460, width: 34, height: 220, type: 'climb', style: 'vine' },
+            { x: 1610, y: 520, width: 190, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.6, tile: 'platform_tile' },
+            { x: 1830, y: 420, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
+
+            // Mid quarter: forked tower route
+            { x: 2240, y: 500, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2480, y: 380, width: 90, height: 300, type: 'wall', material: 'rock' },
+            { x: 2438, y: 380, width: 34, height: 300, type: 'climb', style: 'ladder' },
+            { x: 2260, y: 320, width: 230, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2710, y: 310, width: 240, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 2950, y: 520, width: 130, height: 24, type: 'moving', axis: 'x', range: 80, speed: 1.8, tile: 'platform5_tile' },
+            { x: 3170, y: 430, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3010, y: 240, width: 48, height: 48, type: 'anchor' },
+
+            // Pre-boss quarter: layered catwalk with one last gate
+            { x: 3520, y: 360, width: 96, height: 320, type: 'wall', material: 'vine' },
+            { x: 3478, y: 360, width: 34, height: 320, type: 'climb', style: 'vine' },
+            { x: 3250, y: 360, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 3820, y: 290, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 4090, y: 500, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 4310, y: 390, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 4510, y: 260, width: 48, height: 48, type: 'anchor' },
+
+            // Boss arena scaffolding near trigger/exit
+            { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4700, y: 470, width: 210, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 4920, y: 400, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 4780, y: 320, width: 160, height: 24, type: 'static', tile: 'platform2_tile' }
         ],
         idols: [],
-        speedBoosts: [{ x: 900, y: 400 }],
-        damageBoosts: [{ x: 2600, y: 460 }],
-        skunkPowerups: [{ x: 1600, y: 420 }],
+        speedBoosts: [{ x: 900, y: 430 }, { x: 3340, y: 320 }],
+        damageBoosts: [{ x: 2600, y: 460 }, { x: 4340, y: 350 }],
+        skunkPowerups: [{ x: 1600, y: 420 }, { x: 3860, y: 250 }],
         enemyConfig: {
             spawnInterval: 3.5,
-            maxEnemies: 3,
-            aggression: 0.6,
+            maxEnemies: 4,
+            aggression: 0.65,
             allowedTypes: ['BASIC', 'SECOND_BASIC']
         }
     },
