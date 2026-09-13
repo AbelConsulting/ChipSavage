@@ -69,7 +69,7 @@ const LEVEL_CONFIGS = [
             { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // Gap 2 bridge
-            { x: 3340, y: 520, width: 130, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.8, tile: 'platform4_tile' },
+            { x: 3340, y: 520, width: 130, height: 24, type: 'moving', axis: 'y', range: 72, speed: 1.55, tile: 'platform4_tile' },
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -119,12 +119,12 @@ const LEVEL_CONFIGS = [
             { x: 10280, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
             { x: 10236, y: 400, width: 36, height: 270, type: 'climb', style: 'ladder' },
             { x: 9890, y: 560, width: 130, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.8, tile: 'platform3_tile' },
+            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 48, speed: 1.45, tile: 'platform3_tile' },
             { x: 9980, y: 400, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 10480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 100, speed: 1.7, tile: 'platform3_tile' },
+            { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.45, tile: 'platform3_tile' },
             { x: 11080, y: 450, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 11260, y: 360, width: 108, height: 310, type: 'wall', material: 'vine' },
             { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
@@ -134,10 +134,11 @@ const LEVEL_CONFIGS = [
 
             // --- Section G: final canopy run and exit approach ---
             { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 80, speed: 2.0, tile: 'platform_tile' },
+            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform_tile' },
+            { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.9, tile: 'platform_tile' },
-            { x: 12130, y: 410, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform_tile' },
+            { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 12370, y: 340, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 270, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -212,7 +213,7 @@ const LEVEL_CONFIGS = [
             { x: 1130, y: 380, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 1470, y: 460, width: 90, height: 220, type: 'wall', material: 'vine' },
             { x: 1428, y: 460, width: 34, height: 220, type: 'climb', style: 'vine' },
-            { x: 1610, y: 520, width: 190, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.6, tile: 'platform_tile' },
+            { x: 1610, y: 520, width: 190, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.35, tile: 'platform_tile' },
             { x: 1830, y: 420, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Mid quarter: forked tower route
@@ -221,8 +222,9 @@ const LEVEL_CONFIGS = [
             { x: 2438, y: 380, width: 34, height: 300, type: 'climb', style: 'ladder' },
             { x: 2260, y: 320, width: 230, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 2710, y: 310, width: 240, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 2950, y: 520, width: 130, height: 24, type: 'moving', axis: 'x', range: 80, speed: 1.8, tile: 'platform5_tile' },
+            { x: 2950, y: 520, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.55, tile: 'platform5_tile' },
             { x: 3170, y: 430, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3360, y: 500, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3010, y: 240, width: 48, height: 48, type: 'anchor' },
 
             // Pre-boss quarter: layered catwalk with one last gate
@@ -231,6 +233,7 @@ const LEVEL_CONFIGS = [
             { x: 3250, y: 360, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3820, y: 290, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4090, y: 500, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 4210, y: 450, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4310, y: 390, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4510, y: 260, width: 48, height: 48, type: 'anchor' },
 
