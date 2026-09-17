@@ -1,7 +1,7 @@
 {
   "name": "chip-savage",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Chip Savage web game and Android wrapper",
   "scripts": {
     "build:web": "node scripts/build-web.js",
