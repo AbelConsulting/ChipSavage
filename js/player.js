@@ -358,6 +358,30 @@ class Player {
         }
     }
 
+    findHookshotTarget(level, maxRange = 800) {
+        if (!level || !Array.isArray(level.platforms)) return null;
+        const playerX = this.x + this.width / 2;
+        const playerY = this.y + this.height / 2;
+        let bestTarget = null;
+        let bestDistance = Infinity;
+
+        for (const platform of level.platforms) {
+            if (!platform || platform.type !== 'anchor') continue;
+            const targetX = platform.x + platform.width / 2;
+            const targetY = platform.y + platform.height / 2;
+            const dx = targetX - playerX;
+            const dy = targetY - playerY;
+            if ((this.facingRight && dx < -32) || (!this.facingRight && dx > 32)) continue;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance <= maxRange && distance < bestDistance) {
+                bestTarget = platform;
+                bestDistance = distance;
+            }
+        }
+
+        return bestTarget;
+    }
+
     shootGolfProjectile() {
         if (this.isClimbing) return;
         // Check if player has skunk ammo and cooldown is ready
@@ -369,6 +393,8 @@ class Player {
                 hookshot: { speed: 850, lift: 0, gravityScale: 0, size: 20, lifetime: 1.3 },
                 bomb: { speed: 470, lift: -250, gravityScale: 0.55, size: 30, lifetime: 2.5 }
             }[shotType];
+            const hookTarget = shotType === 'hookshot' ? this.findHookshotTarget(this.level) : null;
+            if (shotType === 'hookshot' && !hookTarget) return;
             this.golfAmmo--;
             this.golfCooldownTimer = this.golfCooldown;
             this._golfShotJustFired = true; // Flag for gameStats tracking
@@ -379,16 +405,30 @@ class Player {
                 this.animations.golf_shot.reset();
             }
             
-            // Create projectile
+            const launchX = this.x + (this.facingRight ? this.width : 0);
+            const launchY = this.y + this.height / 2;
+            let velocityX = (this.facingRight ? shotConfig.speed : -shotConfig.speed);
+            let velocityY = shotConfig.lift;
+            if (hookTarget) {
+                const targetX = hookTarget.x + hookTarget.width / 2;
+                const targetY = hookTarget.y + hookTarget.height / 2;
+                const dx = targetX - launchX;
+                const dy = targetY - launchY;
+                const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                velocityX = dx / distance * shotConfig.speed;
+                velocityY = dy / distance * shotConfig.speed;
+            }
+
             const projectile = {
-                x: this.x + (this.facingRight ? this.width : 0),
-                y: this.y + this.height / 2,
+                x: launchX,
+                y: launchY,
                 width: shotConfig.size,
                 height: shotConfig.size,
-                velocityX: (this.facingRight ? shotConfig.speed : -shotConfig.speed),
-                velocityY: shotConfig.lift,
+                velocityX,
+                velocityY,
                 facingRight: this.facingRight,
                 shotType,
+                targetAnchor: hookTarget,
                 gravityScale: shotConfig.gravityScale,
                 lifetime: shotConfig.lifetime,
                 age: 0
@@ -482,6 +522,20 @@ class Player {
             
             // Apply per-shot gravity for straight hooks and arcing bombs.
             proj.velocityY += Config.GRAVITY * (proj.gravityScale ?? 0.15) * dt;
+
+            if (proj.shotType === 'hookshot' && proj.targetAnchor) {
+                const targetX = proj.targetAnchor.x + proj.targetAnchor.width / 2;
+                const targetY = proj.targetAnchor.y + proj.targetAnchor.height / 2;
+                const dx = targetX - proj.x;
+                const dy = targetY - proj.y;
+                const remainingDistance = Math.sqrt(dx * dx + dy * dy);
+                const stepDistance = Math.sqrt(proj.velocityX * proj.velocityX + proj.velocityY * proj.velocityY) * dt;
+                if (remainingDistance <= stepDistance + proj.width / 2) {
+                    this.startHookshotSwing(proj.targetAnchor);
+                    this.golfProjectiles.splice(i, 1);
+                    continue;
+                }
+            }
             
             // Update lifetime
             proj.age += dt;
@@ -522,11 +576,6 @@ class Player {
 
                 if (hitAnchor) {
                     this.startHookshotSwing(hitAnchor);
-                    this.createGolfImpact(
-                        hitAnchor.x + hitAnchor.width / 2,
-                        hitAnchor.y + hitAnchor.height / 2,
-                        proj.shotType
-                    );
                     this.golfProjectiles.splice(i, 1);
                     continue;
                 }
@@ -1519,6 +1568,44 @@ class Player {
         for (const proj of this.golfProjectiles) {
             const screenX = proj.x - cameraX;
             const screenY = proj.y - cameraY;
+
+            if (proj.shotType === 'hookshot') {
+                const launchX = this.x + (proj.facingRight ? this.width * 0.78 : this.width * 0.22) - cameraX;
+                const launchY = this.y + this.height * 0.48 - cameraY;
+                const angle = Math.atan2(proj.velocityY, proj.velocityX);
+                ctx.save();
+                ctx.strokeStyle = 'rgba(15, 24, 30, 0.92)';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(launchX, launchY);
+                ctx.lineTo(screenX, screenY);
+                ctx.stroke();
+                ctx.strokeStyle = '#D9F7FF';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 5]);
+                ctx.lineDashOffset = -(Date.now() / 24) % 13;
+                ctx.beginPath();
+                ctx.moveTo(launchX, launchY);
+                ctx.lineTo(screenX, screenY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.translate(screenX, screenY);
+                ctx.rotate(angle);
+                ctx.shadowColor = '#7DE3FF';
+                ctx.shadowBlur = 8;
+                ctx.strokeStyle = '#F4F7FA';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(-10, 0);
+                ctx.lineTo(7, 0);
+                ctx.moveTo(7, 0);
+                ctx.lineTo(13, -7);
+                ctx.moveTo(7, 0);
+                ctx.lineTo(13, 7);
+                ctx.stroke();
+                ctx.restore();
+                continue;
+            }
             
             ctx.save();
             ctx.translate(screenX, screenY);

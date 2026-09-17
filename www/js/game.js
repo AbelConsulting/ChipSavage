@@ -140,6 +140,7 @@ class Game {
         // Initialize game components
         this.player = new Player(100, 500, this.audioManager);
         this.level = new Level(this.width, this.height);
+        this.player.level = this.level;
         // Keep a flag so Level can reduce visual complexity on mobile
         this.level.useMobileOptimizations = this.isMobile;
         // Set background parallax based on mobile/desktop
@@ -2831,6 +2832,7 @@ class Game {
         if (this.player && this.player.golfProjectiles) {
             for (let i = this.player.golfProjectiles.length - 1; i >= 0; i--) {
                 const proj = this.player.golfProjectiles[i];
+                if (proj.shotType === 'hookshot') continue;
                 const projRect = {
                     x: proj.x - proj.width / 2,
                     y: proj.y - proj.height / 2,
