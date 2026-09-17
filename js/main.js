@@ -649,6 +649,14 @@ class GameApp {
         return a0;
     }
 
+    _getAxisY(gamepad) {
+        if (!gamepad || !gamepad.axes || gamepad.axes.length < 2) return 0;
+        const a1 = typeof gamepad.axes[1] === 'number' ? gamepad.axes[1] : 0;
+        const a3 = typeof gamepad.axes[3] === 'number' ? gamepad.axes[3] : 0;
+        if (Math.abs(a3) > Math.abs(a1) + 0.05) return a3;
+        return a1;
+    }
+
     _pickGamepads() {
         const pads = (navigator.getGamepads && navigator.getGamepads()) ? Array.from(navigator.getGamepads()) : [];
         let leftPad = null;
@@ -766,17 +774,24 @@ class GameApp {
         const rightIsXr = !!(actionPad && actionPad.mapping === 'xr-standard');
         const isStandard = !!(actionPad && actionPad.mapping === 'standard');
 
-        // Left thumbstick: move left/right
+        // Left thumbstick: move and climb
         const axisX = this._getAxisX(movePad);
+        const axisY = this._getAxisY(movePad);
         const leftDown  = axisX < -0.25;
         const rightDown = axisX > 0.25;
+        const upDown    = axisY < -0.25;
+        const downDown  = axisY > 0.25;
 
-        // D-pad: left/right movement (standard mapping buttons 14/15)
+        // D-pad: movement and climbing (standard mapping buttons 12-15)
+        const dpadUp    = isStandard ? this._getButtonPressed(movePad, 12) : false;
+        const dpadDown  = isStandard ? this._getButtonPressed(movePad, 13) : false;
         const dpadLeft  = isStandard ? this._getButtonPressed(movePad, 14) : false;
         const dpadRight = isStandard ? this._getButtonPressed(movePad, 15) : false;
 
         this._setKeyState('ArrowLeft',  leftDown  || dpadLeft);
         this._setKeyState('ArrowRight', rightDown || dpadRight);
+        this._setKeyState('ArrowUp',    upDown    || dpadUp);
+        this._setKeyState('ArrowDown',  downDown  || dpadDown);
 
         // Left trigger: Golf Shot (KeyC)
         const leftTrigger = leftIsXr
@@ -826,11 +841,11 @@ class GameApp {
         // Left bumper / Start button: pause (Escape)
         this._setKeyState('Escape', leftBumper || startButton);
 
-        // Select button (standard button 8): Enter (confirm/restart)
+        // Select/View cycles the shot selector during play and confirms elsewhere.
         const selectButton = isStandard ? this._getButtonPressed(actionPad, 8) : false;
-        if (selectButton && !this._selectLast) this._sendKeyEvent('Enter', 'keydown');
-        if (!selectButton && this._selectLast) this._sendKeyEvent('Enter', 'keyup');
-        this._selectLast = selectButton;
+        const isPlaying = !!(this.game && this.game.state === 'PLAYING');
+        this._setKeyState('v', selectButton && isPlaying);
+        this._setKeyState('Enter', selectButton && !isPlaying);
 
         // ── Gamepad-driven game start / Enter ──────────────────────────
         // Any face button or trigger can start the game from non-playing
