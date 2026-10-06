@@ -120,6 +120,22 @@ class Level {
     }
 
     /**
+     * Restock configured wall-side pickups only when out of ammo and the gate is intact.
+     * Wall ammoRefill coordinates must match a skunkPowerups entry in the level data.
+     */
+    updateProgressionPickups(player, itemManager) {
+        if (player.golfAmmo > 0) return;
+        for (const wall of this.platforms) {
+            if (wall.type !== 'wall' || !wall.ammoRefill) continue;
+            const { x, y } = wall.ammoRefill;
+            const hasPickup = itemManager.items.some(item =>
+                !item.collected && item.type === 'SKUNK_POWERUP' && item.x === x && item.baseY === y
+            );
+            if (!hasPickup) itemManager.spawnSkunkPowerup(x, y);
+        }
+    }
+
+    /**
      * Check collision against platforms using previous-frame position to avoid tunneling.
      * Returns { collided: boolean, platform?: Object, landingY?: number }
      * @param {Object} rect - Current object bounding rect { x,y,width,height }
@@ -618,10 +634,12 @@ class Level {
                 ctx.lineTo(wall.x + wall.width, y);
                 ctx.stroke();
             }
-            ctx.fillStyle = '#FF9B32';
-            ctx.font = 'bold 18px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('💣', wall.x + wall.width / 2, wall.y + 26);
+            if (wall.material === 'rock') {
+                ctx.fillStyle = '#FF9B32';
+                ctx.font = 'bold 18px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('💣', wall.x + wall.width / 2, wall.y + 26);
+            }
         }
         ctx.strokeStyle = 'rgba(0,0,0,0.8)';
         ctx.lineWidth = 3;
@@ -746,7 +764,7 @@ class Level {
                     continue;
                 }
 
-                if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock')) {
+                if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock' || p.material === 'solid')) {
                     this.drawDestructibleWall(c, scaled);
                     continue;
                 }

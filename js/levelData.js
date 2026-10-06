@@ -49,9 +49,9 @@ const LEVEL_CONFIGS = [
             { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
-            { x: 1180, y: 460, width: 80, height: 220, type: 'wall', material: 'vine' },
-            { x: 1138, y: 460, width: 36, height: 220, type: 'climb', style: 'vine' },
-            { x: 980, y: 460, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 1180, y: 400, width: 80, height: 280, type: 'wall', material: 'vine' },
+            { x: 1138, y: 400, width: 36, height: 280, type: 'climb', style: 'vine' },
+            { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap 1 bridge
             { x: 1540, y: 560, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
@@ -60,9 +60,9 @@ const LEVEL_CONFIGS = [
             { x: 1360, y: 310, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section B: watchtower choke ---
-            { x: 2750, y: 430, width: 90, height: 250, type: 'wall', material: 'rock' },
-            { x: 2708, y: 430, width: 36, height: 250, type: 'climb', style: 'ladder' },
-            { x: 2490, y: 430, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 2750, y: 300, width: 90, height: 380, type: 'wall', material: 'rock' },
+            { x: 2708, y: 300, width: 36, height: 380, type: 'climb', style: 'ladder' },
+            { x: 2490, y: 300, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 1960, y: 340, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 3080, y: 310, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
@@ -75,9 +75,9 @@ const LEVEL_CONFIGS = [
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---
-            { x: 4580, y: 390, width: 90, height: 270, type: 'wall', material: 'vine' },
-            { x: 4538, y: 390, width: 36, height: 270, type: 'climb', style: 'vine' },
-            { x: 4300, y: 390, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4580, y: 320, width: 90, height: 340, type: 'wall', material: 'vine' },
+            { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
+            { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
 
@@ -86,10 +86,14 @@ const LEVEL_CONFIGS = [
             { x: 5650, y: 500, width: 120, height: 24, type: 'moving', axis: 'x', range: 70, speed: 2.0, tile: 'platform5_tile' },
             { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
 
-            // --- Section D: split ladder ascent ---
-            { x: 6880, y: 420, width: 95, height: 260, type: 'wall', material: 'rock' },
-            { x: 6836, y: 420, width: 36, height: 260, type: 'climb', style: 'ladder' },
-            { x: 6620, y: 420, width: 430, height: 24, type: 'static', tile: 'platform5_tile' },
+            // --- Section D: climb, dismount, then burn the mandatory vine passage ---
+            // The solid cap blocks the upper lane; the base extends below the fall-death line.
+            { x: 6880, y: -720, width: 95, height: 1040, type: 'wall', material: 'solid' },
+            { x: 6880, y: 320, width: 95, height: 160, type: 'wall', material: 'vine', ammoRefill: { x: 6710, y: 440 } },
+            { x: 6880, y: 480, width: 95, height: 420, type: 'wall', material: 'solid' },
+            { x: 6836, y: 480, width: 36, height: 200, type: 'climb', style: 'ladder' },
+            { x: 6620, y: 480, width: 260, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 6975, y: 480, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 6340, y: 260, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
 
@@ -99,9 +103,9 @@ const LEVEL_CONFIGS = [
             { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // --- Section E: final fortress wall run ---
-            { x: 8940, y: 350, width: 110, height: 320, type: 'wall', material: 'vine' },
-            { x: 8896, y: 350, width: 36, height: 320, type: 'climb', style: 'vine' },
-            { x: 8670, y: 350, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 8940, y: 270, width: 110, height: 400, type: 'wall', material: 'vine' },
+            { x: 8896, y: 270, width: 36, height: 400, type: 'climb', style: 'vine' },
+            { x: 8670, y: 270, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 9520, y: 470, width: 280, height: 24, type: 'static', tile: 'platform3_tile' },
 
@@ -116,11 +120,11 @@ const LEVEL_CONFIGS = [
             { x: 5590, y: 250, width: 230, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section F: ridge maze with dual gates (late-game expansion) ---
-            { x: 10280, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
-            { x: 10236, y: 400, width: 36, height: 270, type: 'climb', style: 'ladder' },
+            { x: 10280, y: 300, width: 108, height: 370, type: 'wall', material: 'rock' },
+            { x: 10236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 9890, y: 560, width: 130, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 48, speed: 1.45, tile: 'platform3_tile' },
-            { x: 9980, y: 400, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 9980, y: 300, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 10480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -139,21 +143,24 @@ const LEVEL_CONFIGS = [
             { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform_tile' },
             { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12280, y: 300, width: 90, height: 370, type: 'wall', material: 'rock' },
+            { x: 12236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
+            { x: 12070, y: 300, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 12370, y: 340, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 270, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
         ],
         idols: [
-            { x: 1210, y: 420 },
-            { x: 4620, y: 350 },
-            { x: 8990, y: 310 },
+            { x: 1210, y: 360 },
+            { x: 4620, y: 280 },
+            { x: 8990, y: 230 },
             { x: 10640, y: 280 },
             { x: 12420, y: 300 }
         ],
         speedBoosts: [
-            { x: 2570, y: 390 },
-            { x: 6980, y: 380 },
+            { x: 2570, y: 260 },
+            { x: 7090, y: 440 },
             { x: 11130, y: 320 }
         ],
         damageBoosts: [
@@ -162,8 +169,9 @@ const LEVEL_CONFIGS = [
         ],
         skunkPowerups: [
             { x: 1750, y: 460 },
+            { x: 6710, y: 440 },
             { x: 8400, y: 240 },
-            { x: 10320, y: 360 },
+            { x: 10320, y: 260 },
             { x: 12680, y: 470 }
         ],
         enemyConfig: {

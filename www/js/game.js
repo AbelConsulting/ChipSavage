@@ -2279,6 +2279,7 @@ class Game {
 
         // Update item manager
         if (this.itemManager) {
+            this.level.updateProgressionPickups(this.player, this.itemManager);
             this.itemManager.update(dt);
             // Check item collection
             const collected = this.itemManager.checkPlayerCollision(this.player);
