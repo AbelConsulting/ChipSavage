@@ -796,7 +796,7 @@ class GameApp {
         // Left trigger: Golf Shot (KeyC)
         const leftTrigger = leftIsXr
             ? (this._getButtonPressed(leftPad, 0) || this._getButtonPressed(leftPad, 1))
-            : (this._getButtonPressed(leftPad, 6) || this._getButtonPressed(leftPad, 4));
+            : (this._getButtonPressed(leftPad, 6) || (!isStandard && this._getButtonPressed(leftPad, 4)));
         
         // Left bumper: pause (Escape)
         // For VR: grip button on left controller
@@ -816,35 +816,34 @@ class GameApp {
             : this._getButtonPressed(actionPad, 1);
         const rightTrigger = rightIsXr
             ? this._getButtonPressed(actionPad, 0)
-            : (this._getButtonPressed(actionPad, 7) || this._getButtonPressed(actionPad, 5));
+            : (this._getButtonPressed(actionPad, 7) || (!isStandard && this._getButtonPressed(actionPad, 5)));
 
         // Xbox (standard mapping) extra buttons
         const xPressed = isStandard ? this._getButtonPressed(actionPad, 2) : false;
         const yPressed = isStandard ? this._getButtonPressed(actionPad, 3) : false;
         
-        // Right grip/shoulder button: Golf Shot (KeyC)
-        // For VR: grip button (button 1 on right controller)
-        // For Xbox: right bumper (button 5)
+        // Standard RB selects shots; VR right grip still fires Golf Shot.
+        const rightBumper = isStandard ? this._getButtonPressed(actionPad, 5) : false;
         const rightGrip = rightIsXr
             ? this._getButtonPressed(actionPad, 1)
-            : this._getButtonPressed(actionPad, 5);
+            : (!isStandard && this._getButtonPressed(actionPad, 5));
 
         // A: jump (Space)
         this._setKeyState(' ', aPressed);
-        // Right trigger + X button: regular attack (KeyX)
-        this._setKeyState('x', rightTrigger || xPressed);
-        // Left trigger + right bumper: Golf Shot (KeyC)
-        this._setKeyState('c', leftTrigger || rightGrip);
-        // B button + Y: special attack (KeyZ)
-        const specialPressed = bPressed || (isStandard && yPressed);
+        // Standard X/Y + right trigger: regular attack (KeyX)
+        this._setKeyState('x', rightTrigger || xPressed || yPressed);
+        // Standard B + left trigger, or VR right grip: Golf Shot (KeyC)
+        this._setKeyState('c', leftTrigger || rightGrip || (isStandard && bPressed));
+        // Preserve B special attack for non-standard/VR controllers.
+        const specialPressed = !isStandard && bPressed;
         this._setKeyState('z', specialPressed);
         // Left bumper / Start button: pause (Escape)
         this._setKeyState('Escape', leftBumper || startButton);
 
-        // Select/View cycles the shot selector during play and confirms elsewhere.
+        // Standard RB cycles shots during play; Select/View only confirms in menus.
         const selectButton = isStandard ? this._getButtonPressed(actionPad, 8) : false;
         const isPlaying = !!(this.game && this.game.state === 'PLAYING');
-        this._setKeyState('v', selectButton && isPlaying);
+        this._setKeyState('v', rightBumper && isPlaying);
         this._setKeyState('Enter', selectButton && !isPlaying);
 
         // ── Gamepad-driven game start / Enter ──────────────────────────
