@@ -65,7 +65,6 @@ const LEVEL_CONFIGS = [
             { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 140, width: 48, height: 48, type: 'anchor' },
             { x: 1360, y: 310, width: 180, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform6_tile' },
-            { x: 1890, y: 410, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Optional bomb shortcut; the low ladder keeps it passable without ammo.
             { x: 2210, y: 520, width: 64, height: 160, type: 'wall', material: 'rock' },
