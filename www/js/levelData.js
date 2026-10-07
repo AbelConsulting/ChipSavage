@@ -78,6 +78,10 @@ const LEVEL_CONFIGS = [
             { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 3080, y: 310, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            // Watchtower bonus: spend Stun or climb the upper shock screen.
+            { x: 2770, y: 80, width: 64, height: 110, type: 'wall', material: 'shock' },
+            { x: 2728, y: 80, width: 36, height: 110, type: 'climb', style: 'ladder' },
+            { x: 2710, y: 80, width: 180, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // Gap 2: a slow, wide lift with a lower recovery step.
             { x: 3260, y: 590, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -92,6 +96,11 @@ const LEVEL_CONFIGS = [
             { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
+            // Cup alcove: jump off the ravine roof, then burn or climb the vine screen.
+            { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4800, y: 160, width: 64, height: 160, type: 'wall', material: 'vine' },
+            { x: 4758, y: 160, width: 36, height: 160, type: 'climb', style: 'vine' },
+            { x: 4750, y: 160, width: 210, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
             { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
@@ -121,7 +130,10 @@ const LEVEL_CONFIGS = [
             { x: 8940, y: 270, width: 110, height: 400, type: 'wall', material: 'vine' },
             { x: 8896, y: 270, width: 36, height: 400, type: 'climb', style: 'vine' },
             { x: 8670, y: 270, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 8970, y: 170, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
+            // Staggered ammo shelves require two distinct jumps, not a ground pickup.
+            { x: 8230, y: 430, width: 150, height: 24, type: 'static', tile: 'platform6_tile' },
             // Optional Stun shortcut with a ladder bypass for players without ammo.
             { x: 8460, y: 510, width: 80, height: 160, type: 'wall', material: 'shock', tile: 'wall_tile_shock' },
             { x: 8418, y: 510, width: 36, height: 160, type: 'climb', style: 'ladder' },
@@ -147,6 +159,10 @@ const LEVEL_CONFIGS = [
             { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 48, speed: 1.45, tile: 'platform3_tile' },
             { x: 9980, y: 300, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
+            // Ridge cup: a bomb shortcut or short climb above the landing ledge.
+            { x: 10690, y: 240, width: 64, height: 80, type: 'wall', material: 'rock' },
+            { x: 10648, y: 240, width: 36, height: 80, type: 'climb', style: 'ladder' },
+            { x: 10610, y: 240, width: 240, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.45, tile: 'platform3_tile' },
@@ -154,6 +170,7 @@ const LEVEL_CONFIGS = [
             { x: 11260, y: 360, width: 108, height: 310, type: 'wall', material: 'vine' },
             { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
             { x: 10980, y: 360, width: 460, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 11000, y: 230, width: 160, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 11480, y: 260, width: 260, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11280, y: 180, width: 48, height: 48, type: 'anchor' },
 
@@ -168,38 +185,47 @@ const LEVEL_CONFIGS = [
             { x: 12236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 12070, y: 300, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 12370, y: 340, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
+            // Final cup: climb the rock tower, jump to the alcove, then clear its vine screen.
+            { x: 12400, y: 240, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 12440, y: 160, width: 64, height: 80, type: 'wall', material: 'vine' },
+            { x: 12398, y: 160, width: 36, height: 80, type: 'climb', style: 'vine' },
+            { x: 12400, y: 160, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 270, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
         ],
         idols: [
+            // First climb, vine alcove, fortress jump, ridge screen, final alcove.
             { x: 1210, y: 360 },
-            { x: 4620, y: 280 },
-            { x: 8990, y: 230 },
-            { x: 10640, y: 280 },
-            { x: 12420, y: 300 }
+            { x: 4890, y: 120 },
+            { x: 9030, y: 130 },
+            { x: 10750, y: 200 },
+            { x: 12500, y: 120 }
         ],
         speedBoosts: [
-            { x: 2570, y: 260 },
+            // Upper shock screen, mandatory fire passage, late rooftop jump.
+            { x: 2820, y: 40 },
             { x: 7090, y: 440 },
-            { x: 11130, y: 320 }
+            { x: 11060, y: 190 }
         ],
         damageBoosts: [
+            // Hookshot canopy crossing and the final moving-platform ascent.
             { x: 5960, y: 230 },
-            { x: 12190, y: 380 }
+            { x: 12190, y: 395 }
         ],
         skunkPowerups: [
+            // Ammo stays on jump/climb approaches, never behind an ammo-only gate.
             { x: 1280, y: 360 },
             { x: 1750, y: 460 },
-            { x: 2070, y: 640 },
-            { x: 5590, y: 210 },
+            { x: 2010, y: 370 },
+            { x: 5630, y: 210 },
             { x: 6710, y: 440 },
             { x: 7390, y: 460 },
-            { x: 8400, y: 240 },
-            { x: 8270, y: 630 },
+            { x: 8270, y: 240 },
+            { x: 8270, y: 390 },
             { x: 10320, y: 260 },
             { x: 11040, y: 320 },
-            { x: 12680, y: 470 }
+            { x: 12680, y: 380 }
         ],
         enemyConfig: {
             spawnInterval: 3.0,

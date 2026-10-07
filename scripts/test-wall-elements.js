@@ -102,7 +102,7 @@ test('plain and explicitly solid walls stay indestructible for every shot', () =
 test('the optional shock wall can be climbed without ammo', () => {
     const { level, player, stage } = setup();
     level.loadLevel(stage);
-    const wall = level.platforms.find(p => p.material === 'shock');
+    const wall = level.platforms.find(p => p.material === 'shock' && p.x === 8460);
     player.x = wall.x - 42;
     player.y = 670 - player.height;
     player.golfAmmo = 0;
@@ -116,7 +116,7 @@ test('the optional shock wall can be climbed without ammo', () => {
     assert.ok(player.x > wall.x + wall.width);
     assert.equal(player.onGround, true);
     assert.equal(player.golfAmmo, 0);
-    assert.ok(stage.skunkPowerups.some(p => p.x === 8270 && p.y === 630));
+    assert.ok(stage.skunkPowerups.some(p => p.x === 8270 && p.y === 390));
 });
 
 test('all elemental PNGs are preloaded and packaged byte-for-byte', () => {
