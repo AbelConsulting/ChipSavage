@@ -60,8 +60,7 @@ const LEVEL_CONFIGS = [
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 780, y: 540, width: 160, height: 24, type: 'static', tile: 'platform2_tile' },
 
-            // Gap 1: broad stepping stones below an optional hookshot crossing.
-            
+            // Gap 1: drifting ledge and stepping stone below a hookshot crossing to the far ground.
             { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 140, width: 48, height: 48, type: 'anchor' },
             { x: 1360, y: 310, width: 180, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform6_tile' },
@@ -81,9 +80,9 @@ const LEVEL_CONFIGS = [
             { x: 2728, y: 80, width: 36, height: 110, type: 'climb', style: 'ladder' },
             { x: 2710, y: 80, width: 180, height: 24, type: 'static', tile: 'platform3_tile' },
 
-            // Gap 2: a slow, wide lift with a lower recovery step.
+            // Gap 2: a slow, wide lift reached from the ground, with an upper ledge above its travel.
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
-            { x: 3370, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3370, y: 330, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 100, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
@@ -213,7 +212,7 @@ const LEVEL_CONFIGS = [
             // Ammo stays on jump/climb approaches, never behind an ammo-only gate.
             { x: 1280, y: 360 },
             { x: 1750, y: 460 },
-            { x: 2010, y: 370 },
+            { x: 2330, y: 260 },
             { x: 5630, y: 210 },
             { x: 6710, y: 440 },
             { x: 7390, y: 460 },

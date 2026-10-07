@@ -30,6 +30,9 @@ const Config = {
     SCREEN_WIDTH: 1280,
     SCREEN_HEIGHT: 720,
     FPS: 60,
+    // Fixed simulation rate. Kept independent of the (mobile-throttled) render
+    // rate so jump heights and level routes are identical on every device.
+    PHYSICS_FPS: 60,
 
     // Game physics
     GRAVITY: 1500, // pixels per second squared
@@ -144,8 +147,9 @@ const Config = {
     // Reduced parallax on mobile for performance and readability
     BACKGROUND_PARALLAX_MOBILE: 0.25,
     // Mobile performance tuning
-    MOBILE_FPS: 30, // target FPS cap on mobile devices
-    MOBILE_DPR_SCALE_REDUCTION: 0.6, // multiply devicePixelRatio by this on mobile to save pixels
+    MOBILE_FPS: 30, // render-rate cap on mobile (presets raise this to 60 on capable devices)
+    MOBILE_MAX_DPR: 1, // devicePixelRatio cap on mobile (presets raise this on capable devices)
+    MOBILE_DPR_SCALE_REDUCTION: 0.85, // multiply devicePixelRatio by this on mobile to save pixels
     MOBILE_MAX_PARTICLES: 0, // number of spark particles allowed on mobile (0 = disabled)
     MOBILE_MAX_DAMAGE_NUMBERS: 1, // limit on-screen damage numbers on mobile
     // When true, HitSpark draws use a flat fillStyle instead of createRadialGradient

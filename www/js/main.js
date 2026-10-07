@@ -415,7 +415,7 @@ class GameApp {
         })();
         const dpr = window.devicePixelRatio || 1;
         // Cap devicePixelRatio on mobile to avoid excessive rendering cost
-        const maxDPR = isMobileDevice ? 1 : 1.5;
+        const maxDPR = isMobileDevice ? (Config.MOBILE_MAX_DPR || 1) : 1.5;
         let finalDpr = Math.min(dpr, maxDPR);
         // Respect any forced DPR from the Game instance (e.g., iPad Safari heuristic)
         try {
@@ -902,26 +902,19 @@ class GameApp {
         try { console.log('[Capacitor] Running inside native shell (' + window.Capacitor.getPlatform() + ')'); } catch (e) { __err('main', e); }
 
         // ── 1. Android back-button handling ─────────────────────────
-        // Without this, pressing Back instantly kills the app.
-        // Strategy: PLAYING → pause · PAUSED → resume · MENU/GAME_OVER → let OS handle (minimise)
+        // MainActivity intercepts Back and calls window.__chipNativeBack();
+        // a false result lets the native side go back in webview history
+        // (legal pages) or minimise the app from the main menu.
+        // Strategy: sub-menu → close · PLAYING/PAUSED → toggle pause ·
+        // GAME_OVER → main menu · MENU → minimise.
         try {
-            document.addEventListener('backbutton', (e) => {
-                e.preventDefault();
-                this._handleNativeBack();
-            });
-
-            // Capacitor also exposes the 'ionBackButton' event (Ionic compat)
-            document.addEventListener('ionBackButton', (ev) => {
-                if (ev && ev.detail && ev.detail.register) {
-                    ev.detail.register(10, () => this._handleNativeBack());
-                } else {
-                    this._handleNativeBack();
-                }
-            });
+            window.__chipNativeBack = () => {
+                try { return this._handleNativeBack(); } catch (e) { __err('main', e); return false; }
+            };
         } catch (e) { __err('main', e); }
 
         // ── 2. App-state changes (background / foreground) ──────────
-        // Capacitor fires 'pause' & 'resume' on the document when the
+        // MainActivity fires 'pause' & 'resume' on the document when the
         // app goes to background / returns. Suspend audio & pause game.
         try {
             document.addEventListener('pause', () => {
@@ -995,18 +988,31 @@ class GameApp {
         } catch (e) { /* PlayGames not available — web build */ }
     }
 
+    /**
+     * Android back button. Returns true when the game consumed the press;
+     * false lets the native shell fall back (webview history, then minimise).
+     */
     _handleNativeBack() {
-        if (!this.game) return;
+        const visible = (id) => {
+            const el = document.getElementById(id);
+            return !!(el && !el.hidden && el.style.display !== 'none' && el.offsetParent !== null);
+        };
+        const click = (id) => { const el = document.getElementById(id); if (el) el.click(); };
+        try {
+            if (visible('menu-settings-overlay')) { click('menu-settings-back'); return true; }
+            if (visible('menu-scores-overlay')) { click('menu-scores-back'); return true; }
+        } catch (e) { __err('main', e); }
+        if (!this.game) return false;
         const state = this.game.state;
-        if (state === 'PLAYING') {
-            // Pause the game
+        if (state === 'PLAYING' || state === 'PAUSED') {
             this.game.togglePause();
-        } else if (state === 'PAUSED') {
-            // Resume the game
-            this.game.togglePause();
+            return true;
         }
-        // On MENU or GAME_OVER we do nothing — lets the OS minimise the app
-        // (Capacitor default behaviour if we don't preventDefault)
+        if (state === 'GAME_OVER' && visible('game-over-menu-btn')) {
+            click('game-over-menu-btn');
+            return true;
+        }
+        return false;
     }
 
     async init() {
@@ -1085,8 +1091,9 @@ class GameApp {
                         if (typeof Config !== 'undefined' && Config.DEBUG) console.log('setMobilePerformanceMode: not mobile, still applying settings');
                     }
                     if (mode === 'low') {
-                        Config.MOBILE_FPS = 20;
-                        Config.MOBILE_DPR_SCALE_REDUCTION = 0.5;
+                        Config.MOBILE_FPS = 30;
+                        Config.MOBILE_MAX_DPR = 1;
+                        Config.MOBILE_DPR_SCALE_REDUCTION = 0.7;
                         Config.MOBILE_MAX_PARTICLES = 0;
                         Config.MOBILE_MAX_DAMAGE_NUMBERS = 0;
                         Config.MOBILE_FLAT_PARTICLES = true;
@@ -1095,7 +1102,8 @@ class GameApp {
                         Config.BACKGROUND_PARALLAX_MOBILE = 0.08;
                     } else if (mode === 'mid') {
                         Config.MOBILE_FPS = 30;
-                        Config.MOBILE_DPR_SCALE_REDUCTION = 0.6;
+                        Config.MOBILE_MAX_DPR = 1;
+                        Config.MOBILE_DPR_SCALE_REDUCTION = 1.0;
                         Config.MOBILE_MAX_PARTICLES = 3;
                         Config.MOBILE_FLAT_PARTICLES = true;
                         Config.MOBILE_DISABLE_SHADOW_BLUR = true;
@@ -1104,8 +1112,10 @@ class GameApp {
                         Config.BACKGROUND_PARALLAX_MOBILE = 0.2;
                     } else {
                         // high / default
-                        Config.MOBILE_FPS = 40;
-                        Config.MOBILE_DPR_SCALE_REDUCTION = 0.7;
+                        mode = 'high';
+                        Config.MOBILE_FPS = 60;
+                        Config.MOBILE_MAX_DPR = 1.5;
+                        Config.MOBILE_DPR_SCALE_REDUCTION = 1.0;
                         Config.MOBILE_MAX_PARTICLES = 6;
                         Config.MOBILE_FLAT_PARTICLES = false;
                         Config.MOBILE_DISABLE_SHADOW_BLUR = false;
@@ -1115,10 +1125,11 @@ class GameApp {
                     }
                     // Apply immediate changes
                     if (this.isMobile) {
-                        Config.FPS = Math.min(Config.FPS || 60, Config.MOBILE_FPS || 30);
+                        Config.FPS = Math.min(60, Config.MOBILE_FPS || 30);
                         try { this.adjustCanvasForMobile(); } catch (e) { __err('main', e); }
                     }
                     try { if (typeof Config !== 'undefined' && Config.DEBUG) console.log('Mobile performance mode set to', mode, { MOBILE_FPS: Config.MOBILE_FPS, MOBILE_DPR_SCALE_REDUCTION: Config.MOBILE_DPR_SCALE_REDUCTION }); } catch (e) { __err('main', e); }
+                    this._perfMode = mode;
                     try { localStorage.setItem('mobilePerfMode', mode); } catch (e) { __err('main', e); }
                     return true;
                 } catch (e) { console.warn('setMobilePerformanceMode failed', e); return false; }
@@ -1126,6 +1137,13 @@ class GameApp {
 
             // Apply persisted mobile performance preset if present
             try {
+                // v2 presets: earlier builds wrongly saved 'low' for every
+                // 360dp-wide phone (which also hides the level background),
+                // so re-evaluate each device once.
+                if (localStorage.getItem('mobilePerfModeVersion') !== '2') {
+                    localStorage.removeItem('mobilePerfMode');
+                    localStorage.setItem('mobilePerfModeVersion', '2');
+                }
                 const pm = localStorage.getItem('mobilePerfMode');
                 if (pm && typeof window.setMobilePerformanceMode === 'function') {
                     window.setMobilePerformanceMode(pm);
@@ -1277,9 +1295,9 @@ class GameApp {
                         const hw = navigator.hardwareConcurrency || 4;
                         const dm = navigator.deviceMemory || 4;
                         const dpr = window.devicePixelRatio || 1;
-                        const sw = Math.min(window.screen.width, window.screen.height) || 0;
-                        // Heuristic: low-end if <=2 logical cores or <=2GB RAM or small screen or low DPR
-                        if (hw <= 2 || dm <= 2 || sw <= 360 || dpr <= 1) return true;
+                        // Heuristic: low-end if <=2 logical cores, <=2GB RAM or a 1x display.
+                        // Screen width is not used: most current phones are 360dp wide.
+                        if (hw <= 2 || dm <= 2 || dpr <= 1) return true;
                     } catch (e) { __err('main', e); }
                     return false;
                 };
@@ -1352,6 +1370,8 @@ class GameApp {
             // Pause the main loop when page hidden to save battery/CPU
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
+                    // Auto-pause so the player doesn't return mid-jump.
+                    try { if (this.game && this.game.state === 'PLAYING') this.game.togglePause(); } catch (e) { __err('main', e); }
                     this.stop();
                 } else {
                     if (!this.running) {
@@ -1711,15 +1731,17 @@ class GameApp {
         // Also poll XR input sources if the WebXR bridge is active
         try { this._pollXRInputSources(); } catch (e) { __err('main', e); }
 
-        // Throttle to target FPS to save CPU on mobile
-        const step = 1 / Config.FPS;
+        // Physics always runs at a fixed rate; only rendering is throttled on
+        // mobile. A coarser step lowers jump apexes (~9% at 20 Hz), which
+        // would make desktop-tuned routes unreachable on phones.
+        const step = 1 / (Config.PHYSICS_FPS || 60);
         const rawDt = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
         // Accumulate time and run fixed-step updates. Render once per RAF.
         // Clamp rawDt so a tab returning from background (large elapsed time)
         // doesn't queue many frames worth of catch-up — cap at maxSteps worth.
-        const maxSteps = 5;
+        const maxSteps = 6;
         this._accumulator += Math.min(rawDt, step * maxSteps);
 
         // Prevent spiral of death by capping steps per frame
@@ -1739,8 +1761,10 @@ class GameApp {
         // gameplay remains deterministic).
         if (this.game) {
             const now = currentTime; // ms
-            const renderFps = (this.isMobile) ? Math.min(30, Config.FPS || 30) : (Config.FPS || 60);
-            const minRenderDt = 1000 / renderFps; // ms
+            const renderFps = (this.isMobile) ? Math.min(60, Config.FPS || 30) : (Config.FPS || 60);
+            // Small tolerance so rAF jitter on a 60 Hz display doesn't skip
+            // alternate frames and halve the effective rate.
+            const minRenderDt = 1000 / renderFps - 2; // ms
             if (!this.lastRenderTime || (now - this.lastRenderTime) >= minRenderDt) {
                 try {
                     this.game.render();
@@ -1749,7 +1773,35 @@ class GameApp {
                 }
                 this.lastRenderTime = now;
             }
+            if (this.isMobile) this._governMobileQuality(rawDt, renderFps);
         }
+    }
+
+    /**
+     * Steps the mobile performance preset down when real gameplay can't hold
+     * the render target (the start-up probe only measures the idle menu).
+     * Two consecutive slow 3-second windows are required, so one hitch
+     * (level load, GC) never downgrades quality. Never steps back up.
+     */
+    _governMobileQuality(rawDt, renderFps) {
+        const g = this._perfGovernor || (this._perfGovernor = { time: 0, frames: 0, slowWindows: 0 });
+        const mode = this._perfMode || 'high';
+        // Only sample steady gameplay; long gaps mean loading or backgrounding.
+        if (mode === 'low' || !this.game || this.game.state !== 'PLAYING' || document.hidden || rawDt > 0.25) {
+            g.time = 0; g.frames = 0;
+            return;
+        }
+        g.time += rawDt;
+        g.frames++;
+        if (g.time < 3) return;
+        const fps = g.frames / g.time;
+        g.time = 0; g.frames = 0;
+        g.slowWindows = fps < renderFps * 0.8 ? g.slowWindows + 1 : 0;
+        if (g.slowWindows < 2) return;
+        g.slowWindows = 0;
+        const next = mode === 'high' ? 'mid' : 'low';
+        try { console.log('[perf] Gameplay at ' + Math.round(fps) + ' fps; lowering quality ' + mode + ' -> ' + next); } catch (e) { __err('main', e); }
+        if (typeof window.setMobilePerformanceMode === 'function') window.setMobilePerformanceMode(next);
     }
 
     /**

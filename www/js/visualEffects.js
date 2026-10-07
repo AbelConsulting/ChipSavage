@@ -341,6 +341,53 @@ function drawAttackWispTelegraph(ctx, hb, opts = {}) {
 }
 
 /**
+ * Draw a custom attack indicator image (art faces right) over the hitbox.
+ * The image keeps its aspect ratio, fills the hitbox width and is centred
+ * vertically. Returns false when the image is unavailable so callers can
+ * fall back to drawAttackWispTelegraph.
+ */
+function drawAttackIndicatorSprite(ctx, spriteName, hb, opts = {}) {
+    if (!ctx || !hb || !spriteName) return false;
+    const loader = (typeof spriteLoader !== 'undefined') ? spriteLoader : null;
+    const img = (loader && typeof loader.getSprite === 'function') ? loader.getSprite(spriteName) : null;
+    if (!img || img._isPlaceholder || !img.width || !img.height) return false;
+
+    const hbW = hb.width || 0;
+    const hbH = hb.height || 0;
+    if (hbW <= 0 || hbH <= 0) return false;
+
+    const progress = (typeof opts.progress === 'number') ? Math.max(0, Math.min(1, opts.progress)) : 0.5;
+    const fadeIn = Math.min(1, progress / 0.2);
+    const fadeOut = Math.min(1, (1 - progress) / 0.3);
+    const alpha = Math.max(0, Math.min(1, (typeof opts.alpha === 'number' ? opts.alpha : 1) * Math.min(fadeIn, fadeOut)));
+    if (alpha <= 0) return true;
+
+    const drawW = hbW;
+    const drawH = Math.min(hbH * 1.5, drawW * (img.height / img.width));
+    const facingRight = opts.facingRight !== false;
+    // Slide slightly forward through the swing for a sense of motion.
+    const slide = (progress - 0.5) * 6 * (facingRight ? 1 : -1);
+    const dx = (hb.x || 0) + slide;
+    const dy = (hb.y || 0) + (hbH - drawH) / 2;
+
+    ctx.save();
+    ctx.globalAlpha *= alpha;
+    ctx.imageSmoothingEnabled = false;
+    // Soft dark edge keeps light/green art readable over bright backgrounds.
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    ctx.shadowBlur = 3;
+    if (facingRight) {
+        ctx.drawImage(img, dx, dy, drawW, drawH);
+    } else {
+        ctx.translate(dx + drawW, dy);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img, 0, 0, drawW, drawH);
+    }
+    ctx.restore();
+    return true;
+}
+
+/**
  * ScreenFlash — full-screen color wash that fades out quickly.
  * Used to punctuate big combo milestones and special hits.
  */

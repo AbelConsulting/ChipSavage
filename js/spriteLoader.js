@@ -146,6 +146,7 @@ class SpriteLoader {
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.fillText(name || 'missing', 4, 12);
+        canvas._isPlaceholder = true;
         this.sprites[name] = canvas;
         return canvas;
     }
@@ -225,6 +226,7 @@ class SpriteLoader {
                 ctx.fillStyle = '#ffffff';
                 ctx.font = '10px sans-serif';
                 ctx.fillText(name || 'missing', 4, 12);
+                canvas._isPlaceholder = true;
                 this.sprites[name] = canvas;
                 this.loadedCount++;
                 resolve(canvas);
@@ -304,6 +306,12 @@ class SpriteLoader {
             ['wall_tile_fire', 'assets/sprites/backgrounds/tiles/wall_tile_fire.png'],
             ['wall_tile_bomb', 'assets/sprites/backgrounds/tiles/wall_tile_bomb.png'],
             ['wall_tile_shock', 'assets/sprites/backgrounds/tiles/wall_tile_shock.png'],
+
+            // Attack range indicators (single frame, drawn facing right over the hitbox)
+            ['attack_chip', 'assets/sprites/backgrounds/tiles/attack_chip.png'],
+            ['attack_kick', 'assets/sprites/backgrounds/tiles/attack_kick.png'],
+            ['attack_enemy', 'assets/sprites/backgrounds/tiles/attack_enemy.png'],
+            ['attack_boss', 'assets/sprites/backgrounds/tiles/attack_boss.png'],
 
             // Items / pickups
             ['health_regen_item', 'assets/sprites/items/health_regen_item.svg'],

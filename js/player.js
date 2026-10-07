@@ -1455,10 +1455,16 @@ class Player {
         if (this.isAttacking && this.isAttackDamageActive() && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
             try {
                 const hb = this.getAttackHitboxForCollision() || this.attackHitbox;
-                if (typeof drawAttackWispTelegraph === 'function') {
+                const progress = (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5;
+                const drewSprite = typeof drawAttackIndicatorSprite === 'function' &&
+                    drawAttackIndicatorSprite(ctx, this.isKicking ? 'attack_kick' : 'attack_chip', hb, {
+                        facingRight: this.facingRight,
+                        progress
+                    });
+                if (!drewSprite && typeof drawAttackWispTelegraph === 'function') {
                     drawAttackWispTelegraph(ctx, hb, {
                         facingRight: this.facingRight,
-                        progress: (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5,
+                        progress,
                         intensity: this.isKicking ? 1.15 : 1,
                         alpha: this.isKicking ? 0.5 : 0.42,
                         coreColor: this.isKicking ? 'rgba(255, 246, 210, 0.95)' : 'rgba(255, 240, 220, 0.95)',

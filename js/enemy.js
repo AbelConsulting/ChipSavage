@@ -1968,10 +1968,16 @@ class Enemy {
         if (this.isAttacking && this.attackHitbox && !(typeof Config !== 'undefined' && Config.SHOW_HITBOXES)) {
             try {
                 const hb = this.attackHitbox;
-                if (typeof drawAttackWispTelegraph === 'function') {
+                const progress = (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5;
+                const drewSprite = typeof drawAttackIndicatorSprite === 'function' &&
+                    drawAttackIndicatorSprite(ctx, this.isBossType() ? 'attack_boss' : 'attack_enemy', hb, {
+                        facingRight: this.facingRight,
+                        progress
+                    });
+                if (!drewSprite && typeof drawAttackWispTelegraph === 'function') {
                     drawAttackWispTelegraph(ctx, hb, {
                         facingRight: this.facingRight,
-                        progress: (this.attackDuration > 0) ? (1 - (this.attackTimer / this.attackDuration)) : 0.5,
+                        progress,
                         intensity: this.isBossType() ? 1.2 : 1,
                         alpha: this.isBossType() ? 0.45 : 0.38,
                         coreColor: 'rgba(236, 255, 244, 0.95)',

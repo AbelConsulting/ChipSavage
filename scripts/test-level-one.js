@@ -163,7 +163,7 @@ test('the optional early rock shortcut has a usable ammo-free ladder route', () 
 });
 
 for (const [name, launchX, launchY, anchorX, landingX, jumpFrames] of [
-    ['first ravine', 1500, 310, 1770, 1960, 20],
+    ['first ravine', 1500, 310, 1770, 1850, 20],
     ['canopy reward', 5650, 250, 5800, 5900, 20],
     ['post-gate ravine', 7500, 500, 7650, 7850, 20],
     ['late vine wall', 11170, 360, 11280, 11480, 20]
@@ -181,7 +181,8 @@ for (const [name, launchX, launchY, anchorX, landingX, jumpFrames] of [
         advance(player, level, jumpFrames);
         const target = player.findHookshotTarget(level);
         assert.equal(target.x, anchorX);
-        const landing = level.platforms.find(p => p.type === 'static' && p.x === landingX && p.height === 24);
+        const landing = level.platforms.find(p => p.type === 'static' && p.x === landingX &&
+            (p.height === 24 || p.tile === 'ground_tile'));
         assert.ok(landing);
         player.shootGolfProjectile();
         for (let frame = 0; frame < 90 && !player.hookshotSwing; frame++) {
@@ -224,6 +225,21 @@ test('hookshot launch areas have ammo and the canopy reward sits on its landing 
     assert.equal(reward.y, landing.y - 40);
 });
 
+test('no static platform sits inside a moving platform travel envelope', () => {
+    const { stage } = loadStage();
+    const statics = stage.platforms.filter(p => p.type === 'static');
+    for (const lift of stage.platforms.filter(p => p.type === 'moving')) {
+        const rx = lift.axis === 'x' ? lift.range : 0;
+        const ry = lift.axis === 'y' ? lift.range : 0;
+        const env = { x: lift.x - rx, y: lift.y - ry, width: lift.width + rx * 2, height: lift.height + ry * 2 };
+        for (const p of statics) {
+            const overlaps = p.x < env.x + env.width && p.x + p.width > env.x &&
+                p.y < env.y + env.height && p.y + p.height > env.y;
+            assert.ok(!overlaps, `Static ${p.x},${p.y} overlaps lift ${lift.x},${lift.y}`);
+        }
+    }
+});
+
 for (const phase of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
     test(`the introductory lift is reachable without ammo at motion phase ${phase}`, () => {
         const { level, player } = loadStage();
@@ -231,12 +247,13 @@ for (const phase of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
         level._motionTime = phase / lift.speed;
         level.update(0);
         player.x = 3290;
-        player.y = 590 - player.height;
+        player.y = 680 - player.height;
         player.golfAmmo = 0;
         player.onGround = true;
         player.jump();
         player.keys = { arrowright: true };
         for (let frame = 0; frame < 120; frame++) {
+            if (frame === 18 && !player.onGround) player.jump();
             if (player.x >= 3400) player.keys = {};
             level.update(1 / 60);
             player.update(1 / 60, level);
@@ -259,8 +276,8 @@ const itemRoutes = [
     ['damageBoosts', 5960, 230, 'hook', 5650, 250],
     ['damageBoosts', 12190, 395, 'jump', 12125, 570],
     ['skunkPowerups', 1280, 360, 'climb', 1138, 680, 400],
-    ['skunkPowerups', 1750, 460, 'jump', 1580, 560],
-    ['skunkPowerups', 2010, 370, 'jump', 1770, 500],
+    ['skunkPowerups', 1750, 460, 'jump', 1450, 310],
+    ['skunkPowerups', 2330, 260, 'double jump', 2290, 520],
     ['skunkPowerups', 5630, 210, 'jump', 5380, 300],
     ['skunkPowerups', 6710, 440, 'climb', 6836, 680, 480],
     ['skunkPowerups', 7390, 460, 'jump', 7150, 480],
