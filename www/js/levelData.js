@@ -65,7 +65,6 @@ const LEVEL_CONFIGS = [
             { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 140, width: 48, height: 48, type: 'anchor' },
             { x: 1360, y: 310, width: 180, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform6_tile' },
-            { x: 1890, y: 410, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Optional bomb shortcut; the low ladder keeps it passable without ammo.
             { x: 2210, y: 520, width: 64, height: 160, type: 'wall', material: 'rock' },
@@ -76,9 +75,7 @@ const LEVEL_CONFIGS = [
             { x: 2750, y: 300, width: 90, height: 380, type: 'wall', material: 'rock' },
             { x: 2708, y: 300, width: 36, height: 380, type: 'climb', style: 'ladder' },
             { x: 2490, y: 300, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 1960, y: 340, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 3080, y: 310, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
             // Watchtower bonus: spend Stun or climb the upper shock screen.
             { x: 2770, y: 80, width: 64, height: 110, type: 'wall', material: 'shock' },
@@ -86,7 +83,6 @@ const LEVEL_CONFIGS = [
             { x: 2710, y: 80, width: 180, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // Gap 2: a slow, wide lift with a lower recovery step.
-            { x: 3260, y: 590, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 100, width: 48, height: 48, type: 'anchor' },
@@ -96,7 +92,6 @@ const LEVEL_CONFIGS = [
             { x: 4580, y: 320, width: 90, height: 340, type: 'wall', material: 'vine' },
             { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
             { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
             // Cup alcove: jump off the ravine roof, then burn or climb the vine screen.
             { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
