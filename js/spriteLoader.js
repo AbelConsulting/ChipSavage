@@ -61,6 +61,10 @@ class SpriteLoader {
             'boss_walk': 4,
             'boss_attack1': 4,
             'boss_hurt': 4,
+            'boss1_idle': 4,
+            'boss1_walk': 4,
+            'boss1_attack': 4,
+            'boss1_hurt': 4,
         };
     }
 
@@ -281,6 +285,10 @@ class SpriteLoader {
             ['boss_walk', 'assets/sprites/enemies/boss_walk.png'],
             ['boss_attack1', 'assets/sprites/enemies/boss_attack1.png'],
             ['boss_hurt', 'assets/sprites/enemies/boss_hurt.png'],
+            ['boss1_idle', 'assets/sprites/enemies/boss1_idle.png'],
+            ['boss1_walk', 'assets/sprites/enemies/boss1_walk.png'],
+            ['boss1_attack', 'assets/sprites/enemies/boss1_attack.png'],
+            ['boss1_hurt', 'assets/sprites/enemies/boss1_hurt.png'],
 
             // Background / tile sprites
             ['ground_tile', 'assets/sprites/backgrounds/tiles/ground_tile.png'],
@@ -336,7 +344,7 @@ class SpriteLoader {
                     // to be divisible by frameCount (padding can still be present).
                     let detectedPad = 0;
                     let detectedFrameWidth = null;
-                    for (let pad = 1; pad <= 8; pad++) {
+                    for (let pad = 1; pad <= 8 && img.width !== count * img.height; pad++) {
                         const adjusted = img.width - pad * (count - 1);
                         if (adjusted > 0 && (adjusted % count) === 0) {
                             detectedPad = pad;

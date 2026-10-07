@@ -12,6 +12,7 @@
  * Wall tiles bind to shots: wall_tile_fire -> fireball, wall_tile_bomb -> bomb,
  * wall_tile_shock -> gold (Stun). Plain wall_tile/solid walls cannot be broken.
  * Hookshot anchors occupy the upper band (y=64..150) for higher swing routes.
+ * Boss spritePrefix optionally selects artwork without changing the boss type or AI.
  */
 
 const LEVEL_CONFIGS = [
@@ -468,6 +469,7 @@ const LEVEL_CONFIGS = [
         completion: { bossTriggerX: 3200, exitX: 3900 },
         boss: {
             type: "BOSS",
+            spritePrefix: "boss1",
             spawnX: 3480,
             spawnY: 520,
             healthMultiplier: 8.5,

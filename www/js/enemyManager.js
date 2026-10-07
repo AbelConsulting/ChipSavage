@@ -76,7 +76,7 @@ class EnemyManager {
             return null;
         }
 
-        const boss = new Enemy(x, y, bossType, this.audioManager);
+        const boss = new Enemy(x, y, bossType, this.audioManager, bossConfig.spritePrefix);
 
         // Snap boss onto the nearest supporting platform to avoid falling through gaps
         try {

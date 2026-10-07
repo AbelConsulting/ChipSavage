@@ -50,11 +50,12 @@ if (typeof window !== 'undefined') {
 }
 
 class Enemy {
-    constructor(x, y, enemyType = "BASIC", audioManager = null) {
+    constructor(x, y, enemyType = "BASIC", audioManager = null, spritePrefix = null) {
         this.x = x;
         this.y = y;
         this.enemyType = enemyType;
         this.audioManager = audioManager;
+        this.spritePrefix = spritePrefix;
 
         // Get configuration for this enemy type
         const config = ENEMY_TYPE_CONFIG[enemyType] || ENEMY_TYPE_CONFIG['BASIC'];
@@ -246,7 +247,7 @@ class Enemy {
 
         // Get sprite prefix from config
         const config = ENEMY_TYPE_CONFIG[this.enemyType] || ENEMY_TYPE_CONFIG['BASIC'];
-        const prefix = config.prefix;
+        const prefix = this.spritePrefix || config.prefix;
         const fallbackPrefix = config.fallback ? ENEMY_TYPE_CONFIG[config.fallback]?.prefix : null;
 
         const getSpriteKeySafe = (key, fallbackKey = null) => {
@@ -280,7 +281,7 @@ class Enemy {
         const walk_sprite = getSpriteKeySafe(`${prefix}_walk`, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
         
         // Get attack animation name (bosses have special naming)
-        const attackName = config.attackAnim || `${prefix}_attack`;
+        const attackName = this.spritePrefix ? `${prefix}_attack` : (config.attackAnim || `${prefix}_attack`);
         const fallbackAttackName = fallbackPrefix ? 
             (ENEMY_TYPE_CONFIG[config.fallback]?.attackAnim || `${fallbackPrefix}_attack`) : null;
         const attack_sprite = getSpriteKeySafe(attackName, fallbackAttackName);
@@ -1876,7 +1877,7 @@ class Enemy {
                     // Try idle first, then walk/attack as fallbacks for enemies
                     // that have no _idle sheet (e.g. boss8).
                     const config = ENEMY_TYPE_CONFIG[this.enemyType] || ENEMY_TYPE_CONFIG['BASIC'];
-                    const prefix = config.prefix;
+                    const prefix = this.spritePrefix || config.prefix;
                     const fallbackPrefix = config.fallback ? ENEMY_TYPE_CONFIG[config.fallback]?.prefix : null;
                     const probeKeys = [`${prefix}_idle`, `${prefix}_walk`, `${prefix}_attack`,
                                        fallbackPrefix ? `${fallbackPrefix}_idle` : null].filter(Boolean);
