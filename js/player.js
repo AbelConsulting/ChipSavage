@@ -38,6 +38,7 @@ class Player {
         this.friction = 1800;
         this.facingRight = true;
         this.onGround = false;
+        this._groundPlatform = null;
         this.isClimbing = false;
         this._climbable = null;
         this.climbSpeed = (Config && Config.CLIMB_SPEED) || 260;
@@ -1021,6 +1022,15 @@ class Player {
 
         const wasOnGround = this.onGround;
         const prevRect = { x: this.x, y: this.y, width: this.width, height: this.height };
+        const support = this._groundPlatform;
+        if (wasOnGround && this.velocityY >= 0 && !this.isClimbing && !this.hookshotSwing &&
+            support && support.type === 'moving' && level.platforms.includes(support) &&
+            Math.abs(this.y + this.height - support.previousY) < 0.01 &&
+            this.x + this.width > support.previousX && this.x < support.previousX + support.width) {
+            this.x += support.dx;
+            this.y += support.dy;
+        }
+        this._groundPlatform = null;
         const upPressed = !!(this.keys['arrowup'] || this.keys['w'] || this.keys['keyw']);
         const downPressed = !!(this.keys['arrowdown'] || this.keys['s'] || this.keys['keys']);
         const climbable = level && typeof level.getClimbableAt === 'function' ? level.getClimbableAt(prevRect) : null;
@@ -1139,6 +1149,7 @@ class Player {
             this.y = collision.landingY;
             this.velocityY = 0;
             this.onGround = true;
+            this._groundPlatform = collision.platform;
             if (this.hookshotSwing) this.releaseHookshotSwing(false);
             if (this.isClimbing) this._stopClimbing();
             this.jumpsRemaining = this.maxJumps;

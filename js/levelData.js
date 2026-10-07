@@ -7,6 +7,8 @@
 /**
  * Level Configurations for Arcade Mode
  * Defines the stage progression: Forest -> City -> Dojo
+ * Moving platforms use axis ('x' or 'y'), range (pixels either side of x/y),
+ * speed (radians per gameplay second), and optional timeOffset (phase in radians).
  */
 
 const LEVEL_CONFIGS = [
@@ -52,12 +54,19 @@ const LEVEL_CONFIGS = [
             { x: 1180, y: 400, width: 80, height: 280, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 280, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 780, y: 540, width: 160, height: 24, type: 'static', tile: 'platform2_tile' },
 
-            // Gap 1 bridge
+            // Gap 1: broad stepping stones below an optional hookshot crossing.
             { x: 1540, y: 560, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 1710, y: 500, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 260, width: 48, height: 48, type: 'anchor' },
             { x: 1360, y: 310, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 1890, y: 410, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
+
+            // Optional bomb shortcut; the low ladder keeps it passable without ammo.
+            { x: 2210, y: 520, width: 64, height: 160, type: 'wall', material: 'rock' },
+            { x: 2168, y: 520, width: 36, height: 160, type: 'climb', style: 'ladder' },
+            { x: 2150, y: 520, width: 200, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // --- Section B: watchtower choke ---
             { x: 2750, y: 300, width: 90, height: 380, type: 'wall', material: 'rock' },
@@ -68,8 +77,9 @@ const LEVEL_CONFIGS = [
             { x: 3080, y: 310, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
 
-            // Gap 2 bridge
-            { x: 3340, y: 520, width: 130, height: 24, type: 'moving', axis: 'y', range: 72, speed: 1.55, tile: 'platform4_tile' },
+            // Gap 2: a slow, wide lift with a lower recovery step.
+            { x: 3260, y: 590, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
             { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 220, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -81,9 +91,9 @@ const LEVEL_CONFIGS = [
             { x: 5200, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
 
-            // Gap 3 bridge
-            { x: 5480, y: 560, width: 120, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 5650, y: 500, width: 120, height: 24, type: 'moving', axis: 'x', range: 70, speed: 2.0, tile: 'platform5_tile' },
+            // Gap 3: lower shuttle route and upper hookshot reward route.
+            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform5_tile' },
             { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
@@ -97,10 +107,13 @@ const LEVEL_CONFIGS = [
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 6340, y: 260, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
 
-            // Gap 4 bridge
+            // Gap 4: hook from the post-gate ledge or take the lower bridge.
+            { x: 7350, y: 500, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7850, y: 430, width: 150, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 7650, y: 160, width: 48, height: 48, type: 'anchor' },
 
             // --- Section E: final fortress wall run ---
             { x: 8940, y: 270, width: 110, height: 400, type: 'wall', material: 'vine' },
@@ -118,6 +131,8 @@ const LEVEL_CONFIGS = [
             { x: 4960, y: 210, width: 330, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5320, y: 165, width: 48, height: 48, type: 'anchor' },
             { x: 5590, y: 250, width: 230, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 5800, y: 150, width: 48, height: 48, type: 'anchor' },
+            { x: 5900, y: 270, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section F: ridge maze with dual gates (late-game expansion) ---
             { x: 10280, y: 300, width: 108, height: 370, type: 'wall', material: 'rock' },
@@ -134,7 +149,7 @@ const LEVEL_CONFIGS = [
             { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
             { x: 10980, y: 360, width: 460, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11480, y: 260, width: 260, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 11330, y: 210, width: 48, height: 48, type: 'anchor' },
+            { x: 11280, y: 180, width: 48, height: 48, type: 'anchor' },
 
             // --- Section G: final canopy run and exit approach ---
             { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform_tile' },
@@ -164,14 +179,19 @@ const LEVEL_CONFIGS = [
             { x: 11130, y: 320 }
         ],
         damageBoosts: [
-            { x: 5350, y: 260 },
+            { x: 5960, y: 230 },
             { x: 12190, y: 380 }
         ],
         skunkPowerups: [
+            { x: 1280, y: 360 },
             { x: 1750, y: 460 },
+            { x: 2070, y: 640 },
+            { x: 5590, y: 210 },
             { x: 6710, y: 440 },
+            { x: 7390, y: 460 },
             { x: 8400, y: 240 },
             { x: 10320, y: 260 },
+            { x: 11040, y: 320 },
             { x: 12680, y: 470 }
         ],
         enemyConfig: {

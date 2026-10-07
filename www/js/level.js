@@ -50,13 +50,25 @@ class Level {
         // Initialize platforms (static, moving, and climbable)
         // Accept partial data: if platforms is missing, keep existing platforms.
         const incomingPlatforms = Array.isArray(levelData.platforms) ? levelData.platforms : this.platforms;
-        this.platforms = (Array.isArray(incomingPlatforms) ? incomingPlatforms : []).map(p => ({
-            ...p,
-            // If it's a moving platform, set initial state
-            initialX: p.x,
-            initialY: p.y,
-            timeOffset: Math.random() * Math.PI * 2 // Randomize start phase
-        }));
+        this._motionTime = 0;
+        this.platforms = (Array.isArray(incomingPlatforms) ? incomingPlatforms : []).map(p => {
+            const platform = {
+                ...p,
+                initialX: p.x,
+                initialY: p.y,
+                timeOffset: typeof p.timeOffset === 'number' ? p.timeOffset : 0,
+                dx: 0,
+                dy: 0
+            };
+            if (platform.type === 'moving') {
+                const axis = platform.axis === 'y' ? 'y' : 'x';
+                const range = typeof platform.range === 'number' ? platform.range : 100;
+                platform[axis] += Math.sin(platform.timeOffset) * range;
+            }
+            platform.previousX = platform.x;
+            platform.previousY = platform.y;
+            return platform;
+        });
         // Optional enemy spawn points (array of { x: number|'left'|'right', y: number })
         this.spawnPoints = Array.isArray(levelData.spawnPoints) ? levelData.spawnPoints.slice() : null;
 
@@ -81,22 +93,25 @@ class Level {
      */
     update(deltaTime) {
         // Update moving platforms
-        const time = Date.now() / 1000;
+        this._motionTime += deltaTime;
+        const time = this._motionTime;
         
         this.platforms.forEach(plat => {
             if (plat.type === 'moving') {
                 // Simple Sine wave movement
-                const range = plat.range || 100;
-                const speed = plat.speed || 1;
+                const range = typeof plat.range === 'number' ? plat.range : 100;
+                const speed = typeof plat.speed === 'number' ? plat.speed : 1;
+                plat.previousX = plat.x;
+                plat.previousY = plat.y;
                 
                 if (plat.axis === 'y') {
                     plat.y = plat.initialY + Math.sin(time * speed + plat.timeOffset) * range;
-                    // Store velocity to move player with platform later if needed
-                    plat.dy = (Math.cos(time * speed + plat.timeOffset) * range * speed); 
                 } else {
                     plat.x = plat.initialX + Math.sin(time * speed + plat.timeOffset) * range;
-                    plat.dx = (Math.cos(time * speed + plat.timeOffset) * range * speed);
                 }
+                // Actual frame displacement keeps riders attached at direction changes.
+                plat.dx = plat.x - plat.previousX;
+                plat.dy = plat.y - plat.previousY;
             }
         });
 
@@ -157,7 +172,8 @@ class Level {
                 
                 // 2. Vertical "Crossed the Line" Check
                 // Did we exist ABOVE the platform in the last frame?
-                const wasAbove = prevBottom <= platform.y;
+                const previousY = platform.type === 'moving' ? platform.previousY : platform.y;
+                const wasAbove = prevBottom <= previousY;
                 // Are we BELOW (or ON) the platform in this frame?
                 const isBelow = rectBottom >= platform.y;
 
@@ -459,6 +475,7 @@ class Level {
         this.width = width;
         this.height = height;
         this.platforms = [];
+        this._motionTime = 0;
 
         // Level visuals & content
         this.backgroundName = 'bg_city';

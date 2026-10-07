@@ -2254,6 +2254,8 @@ class Game {
             this.movementFX.update(dt);
         }
 
+        this.level.update(dt);
+
         // Update player
         const prevOnGround = !!this.player.onGround;
         const prevVY = this.player.velocityY;
