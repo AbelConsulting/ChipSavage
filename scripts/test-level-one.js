@@ -163,7 +163,7 @@ test('the optional early rock shortcut has a usable ammo-free ladder route', () 
 });
 
 for (const [name, launchX, launchY, anchorX, landingX, jumpFrames] of [
-    ['first ravine', 1400, 310, 1770, 1960, 8],
+    ['first ravine', 1500, 310, 1770, 1960, 20],
     ['canopy reward', 5650, 250, 5800, 5900, 20],
     ['post-gate ravine', 7500, 500, 7650, 7850, 20],
     ['late vine wall', 11170, 360, 11280, 11480, 20]
@@ -176,6 +176,7 @@ for (const [name, launchX, launchY, anchorX, landingX, jumpFrames] of [
         player.selectGolfShot('hookshot');
         player.golfAmmo = 2;
         player.onGround = true;
+        if (name === 'first ravine') player.keys = { arrowright: true };
         player.jump();
         advance(player, level, jumpFrames);
         const target = player.findHookshotTarget(level);
@@ -199,6 +200,9 @@ for (const [name, launchX, launchY, anchorX, landingX, jumpFrames] of [
             if (!released && player.hookshotSwing && player.x > target.x - 140) {
                 player.releaseHookshotSwing(true);
                 released = true;
+            }
+            if (!released && !player.hookshotSwing) {
+                assert.fail(`Swing detached early at ${player.x},${player.y}; support=${player._groundPlatform?.x}`);
             }
             if (released && player.onGround && player._groundPlatform === landing) break;
         }

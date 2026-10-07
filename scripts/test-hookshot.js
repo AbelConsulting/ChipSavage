@@ -90,3 +90,74 @@ test('hookshot renderer draws a cable and hook head instead of a ball', () => {
     assert.ok(calls.stroke >= 3);
     assert.equal(calls.arc, 0);
 });
+
+function loadLevels() {
+    class Effect { update() {} }
+    const context = vm.createContext({
+        console,
+        SpeedTrailEffect: Effect,
+        HealthRegenEffect: Effect,
+        DamageBoostEffect: Effect,
+        __err(...args) { throw new Error(args.join(' ')); }
+    });
+    for (const name of ['config', 'utils', 'levelData', 'level', 'player']) {
+        vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', `${name}.js`), 'utf8'), context);
+    }
+    vm.runInContext(`
+        Player.prototype.loadSprites = function () { this.animations = {}; };
+        globalThis.levels = [...LEVEL_CONFIGS, SURVIVAL_ARENA_CONFIG];
+        globalThis.LevelClass = Level;
+        globalThis.PlayerClass = Player;
+    `, context);
+    return context;
+}
+
+const allLevels = loadLevels();
+for (const stage of allLevels.levels) {
+    for (const definition of stage.platforms.filter(p => p.type === 'anchor')) {
+        test(`${stage.id} anchor ${definition.x} is high, clear and reachable by a real hook`, () => {
+            assert.ok(definition.y >= 64 && definition.y <= 150);
+            const candidates = stage.platforms.filter(p =>
+                (p.type === 'static' || p.type === 'moving') &&
+                p.y >= definition.y + definition.height + 48 &&
+                p.x < definition.x + 600 && p.x + p.width > definition.x - 600
+            );
+            let attached = false;
+            for (const support of candidates) {
+                for (const side of [-1, 1]) {
+                    const level = new allLevels.LevelClass();
+                    level.loadLevel(stage);
+                    const anchor = level.platforms.find(p => p.type === 'anchor' && p.x === definition.x);
+                    assert.equal(level.getWallAt(anchor), null, 'Anchor must not be buried in a wall');
+                    const x = Math.max(support.x, Math.min(support.x + support.width - 64, anchor.x + side * 180));
+                    const player = new allLevels.PlayerClass(x, support.y - 64, null);
+                    player.level = level;
+                    player.onGround = true;
+                    player.facingRight = x + player.width / 2 <= anchor.x + anchor.width / 2;
+                    player.golfAmmo = 1;
+                    player.selectGolfShot('hookshot');
+                    player.jump();
+                    for (let frame = 0; frame < 20; frame++) {
+                        level.update(1 / 60);
+                        player.update(1 / 60, level);
+                    }
+                    if (player.findHookshotTarget(level) !== anchor) continue;
+                    player.shootGolfProjectile();
+                    for (let frame = 0; frame < 90 && player.golfProjectiles.length; frame++) {
+                        level.update(1 / 60);
+                        player.update(1 / 60, level);
+                        if (player.hookshotSwing) {
+                            attached = true;
+                            assert.equal(player.hookshotSwing.y, anchor.y + anchor.height / 2);
+                            assert.equal(player.golfAmmo, 0);
+                            break;
+                        }
+                    }
+                    if (attached) break;
+                }
+                if (attached) break;
+            }
+            assert.ok(attached, 'At least one nearby platform must provide a working launch');
+        });
+    }
+}
