@@ -55,16 +55,16 @@ const LEVEL_CONFIGS = [
             { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
-            { x: 1180, y: 400, width: 80, height: 280, type: 'wall', material: 'vine' },
-            { x: 1138, y: 400, width: 36, height: 280, type: 'climb', style: 'vine' },
+            { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
+            { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 780, y: 540, width: 160, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap 1: broad stepping stones below an optional hookshot crossing.
-            { x: 1540, y: 560, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            
             { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
             { x: 1770, y: 140, width: 48, height: 48, type: 'anchor' },
-            { x: 1360, y: 310, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 1360, y: 310, width: 180, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform6_tile' },
             { x: 1890, y: 410, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Optional bomb shortcut; the low ladder keeps it passable without ammo.
