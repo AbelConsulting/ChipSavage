@@ -352,11 +352,13 @@ const LEVEL_CONFIGS = [
             { x: 1178, y: 430, width: 34, height: 230, type: 'climb', style: 'ladder' },
             { x: 980, y: 430, width: 420, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 1420, y: 390, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 780, y: 540, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap A transition
             { x: 1690, y: 550, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 1840, y: 490, width: 120, height: 24, type: 'moving', axis: 'y', range: 90, speed: 1.9, tile: 'platform4_tile' },
+            { x: 1840, y: 490, width: 160, height: 24, type: 'moving', axis: 'y', range: 75, speed: 1.6, tile: 'platform4_tile' },
             { x: 1910, y: 130, width: 48, height: 48, type: 'anchor' },
+            { x: 2040, y: 410, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // District B: vine billboard with a climb-around route
             { x: 2930, y: 380, width: 100, height: 270, type: 'wall', material: 'vine' },
@@ -365,11 +367,16 @@ const LEVEL_CONFIGS = [
             { x: 2230, y: 300, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3260, y: 300, width: 250, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 3140, y: 470, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
+            // Billboard bonus: climb the vine tower, then clear the rooftop shock screen.
+            { x: 3000, y: 240, width: 64, height: 140, type: 'wall', material: 'shock' },
+            { x: 2958, y: 240, width: 36, height: 140, type: 'climb', style: 'ladder' },
+            { x: 2920, y: 240, width: 240, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap B transition
             { x: 3780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3960, y: 470, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4020, y: 90, width: 48, height: 48, type: 'anchor' },
+            { x: 4160, y: 390, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // District C: reinforced rock shaft
             { x: 5170, y: 400, width: 108, height: 270, type: 'wall', material: 'rock' },
@@ -377,11 +384,16 @@ const LEVEL_CONFIGS = [
             { x: 4860, y: 400, width: 520, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 5530, y: 320, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 5400, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            // Shaft cup: a second ascent or Stun shortcut above the rock gate.
+            { x: 5210, y: 270, width: 64, height: 130, type: 'wall', material: 'shock' },
+            { x: 5168, y: 270, width: 36, height: 130, type: 'climb', style: 'ladder' },
+            { x: 5120, y: 270, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Gap C transition
-            { x: 5960, y: 540, width: 120, height: 24, type: 'moving', axis: 'x', range: 90, speed: 2.0, tile: 'platform4_tile' },
+            { x: 5960, y: 540, width: 160, height: 24, type: 'moving', axis: 'x', range: 75, speed: 1.7, tile: 'platform4_tile' },
             { x: 6140, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 6200, y: 120, width: 48, height: 48, type: 'anchor' },
+            { x: 6380, y: 410, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // District D: overgrown alley split-rise
             { x: 7330, y: 360, width: 108, height: 300, type: 'wall', material: 'vine' },
@@ -390,10 +402,15 @@ const LEVEL_CONFIGS = [
             { x: 6580, y: 300, width: 250, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 7600, y: 290, width: 260, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 7460, y: 470, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
+            // Alley reward: optional fire shortcut with a climbable fallback.
+            { x: 7390, y: 220, width: 64, height: 140, type: 'wall', material: 'vine' },
+            { x: 7348, y: 220, width: 36, height: 140, type: 'climb', style: 'vine' },
+            { x: 7320, y: 220, width: 240, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap D transition
             { x: 8080, y: 540, width: 120, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 8230, y: 480, width: 120, height: 24, type: 'moving', axis: 'y', range: 80, speed: 2.2, tile: 'platform5_tile' },
+            { x: 8230, y: 480, width: 160, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.8, tile: 'platform5_tile' },
+            { x: 8420, y: 420, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // District E: final rock gate and upper reward route
             { x: 9380, y: 340, width: 116, height: 320, type: 'wall', material: 'rock' },
@@ -401,27 +418,35 @@ const LEVEL_CONFIGS = [
             { x: 9050, y: 340, width: 540, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 9800, y: 300, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 9620, y: 470, width: 190, height: 24, type: 'static', tile: 'platform4_tile' },
+            // Final cup alcove above the rock tower; never required for the exit.
+            { x: 9470, y: 210, width: 64, height: 130, type: 'wall', material: 'rock' },
+            { x: 9428, y: 210, width: 36, height: 130, type: 'climb', style: 'ladder' },
+            { x: 9400, y: 210, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Final approach to city boss gate
-            { x: 10820, y: 500, width: 720, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 10820, y: 500, width: 300, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 11200, y: 430, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 11620, y: 430, width: 240, height: 24, type: 'static', tile: 'platform5_tile' }
         ],
         idols: [
             { x: 1240, y: 390 },
-            { x: 5205, y: 360 },
-            { x: 9420, y: 300 }
+            { x: 5300, y: 230 },
+            { x: 9560, y: 170 }
         ],
         speedBoosts: [
-            { x: 2680, y: 340 },
-            { x: 7060, y: 320 }
+            { x: 3100, y: 200 },
+            { x: 7500, y: 180 }
         ],
         damageBoosts: [
             { x: 5590, y: 280 },
-            { x: 10940, y: 470 }
+            { x: 10940, y: 460 }
         ],
         skunkPowerups: [
-            { x: 850, y: 600 },
-            { x: 1870, y: 450 },
+            // Supply on stable approach ledges, not floating above moving lifts.
+            { x: 850, y: 500 },
+            { x: 1740, y: 510 },
+            { x: 4000, y: 430 },
+            { x: 4220, y: 350 },
             { x: 4900, y: 360 },
             { x: 7680, y: 250 }
         ],
@@ -462,32 +487,37 @@ const LEVEL_CONFIGS = [
             { x: 0, y: 660, width: 4000, height: 40, type: 'static', tile: 'ground3_tile' },
 
             // Left control tower (wider access lane)
-            { x: 540, y: 470, width: 80, height: 190, type: 'wall', tile: 'wall_tile' },
+            { x: 540, y: 470, width: 80, height: 190, type: 'wall', material: 'rock' },
             { x: 500, y: 470, width: 34, height: 190, type: 'climb', style: 'ladder' },
             { x: 240, y: 450, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 820, y: 380, width: 280, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Mid arena lanes (reduced choke and safer transfer)
-            { x: 1180, y: 410, width: 76, height: 250, type: 'wall', tile: 'wall_tile' },
+            { x: 1180, y: 410, width: 76, height: 250, type: 'wall', material: 'vine' },
             { x: 1138, y: 410, width: 34, height: 250, type: 'climb', style: 'vine' },
             { x: 980, y: 410, width: 420, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 1490, y: 350, width: 300, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 1920, y: 510, width: 190, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.4, tile: 'platform4_tile' },
             { x: 2140, y: 450, width: 230, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2040, y: 64, width: 48, height: 48, type: 'anchor' },
 
             // Right boss-side lane (single clean choke)
-            { x: 2710, y: 390, width: 86, height: 270, type: 'wall', tile: 'wall_tile' },
+            { x: 2710, y: 390, width: 86, height: 270, type: 'wall', material: 'rock' },
             { x: 2668, y: 390, width: 34, height: 270, type: 'climb', style: 'ladder' },
             { x: 2400, y: 390, width: 620, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 3070, y: 330, width: 290, height: 24, type: 'static', tile: 'platform5_tile' },
+            // Optional pre-fight power perch; the arena beyond x=3200 stays open.
+            { x: 2520, y: 270, width: 64, height: 120, type: 'wall', material: 'shock' },
+            { x: 2478, y: 270, width: 36, height: 120, type: 'climb', style: 'ladder' },
+            { x: 2440, y: 270, width: 240, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Boss gate catwalk near trigger/exit
             { x: 3320, y: 490, width: 380, height: 24, type: 'static', tile: 'platform4_tile' }
         ],
         idols: [],
         speedBoosts: [{ x: 900, y: 340 }],
-        damageBoosts: [{ x: 3000, y: 300 }],
-        skunkPowerups: [{ x: 1760, y: 320 }],
+        damageBoosts: [{ x: 2600, y: 230 }],
+        skunkPowerups: [{ x: 1720, y: 310 }],
         enemyConfig: {
             spawnInterval: 3.0,
             maxEnemies: 3,
