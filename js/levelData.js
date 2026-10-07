@@ -75,7 +75,7 @@ const LEVEL_CONFIGS = [
             { x: 2750, y: 300, width: 90, height: 380, type: 'wall', material: 'rock' },
             { x: 2708, y: 300, width: 36, height: 380, type: 'climb', style: 'ladder' },
             { x: 2490, y: 300, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 2280, y: 300, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
             // Watchtower bonus: spend Stun or climb the upper shock screen.
             { x: 2770, y: 80, width: 64, height: 110, type: 'wall', material: 'shock' },
             { x: 2728, y: 80, width: 36, height: 110, type: 'climb', style: 'ladder' },
