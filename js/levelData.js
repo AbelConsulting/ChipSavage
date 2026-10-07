@@ -84,7 +84,7 @@ const LEVEL_CONFIGS = [
 
             // Gap 2: a slow, wide lift with a lower recovery step.
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
-            { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3370, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 100, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
@@ -164,7 +164,7 @@ const LEVEL_CONFIGS = [
             { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.45, tile: 'platform3_tile' },
             { x: 11080, y: 450, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 11260, y: 360, width: 108, height: 310, type: 'wall', material: 'vine' },
+            { x: 11260, y: 360, width: 108, height:  310, type: 'wall', material: 'vine' },
             { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
             { x: 10980, y: 360, width: 460, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11000, y: 230, width: 160, height: 24, type: 'static', tile: 'platform6_tile' },
