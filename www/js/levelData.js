@@ -75,8 +75,7 @@ const LEVEL_CONFIGS = [
             { x: 2750, y: 300, width: 90, height: 380, type: 'wall', material: 'rock' },
             { x: 2708, y: 300, width: 36, height: 380, type: 'climb', style: 'ladder' },
             { x: 2490, y: 300, width: 420, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 2280, y: 300, width: 200, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 2480, y: 250, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 2280, y: 300, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
             // Watchtower bonus: spend Stun or climb the upper shock screen.
             { x: 2770, y: 80, width: 64, height: 110, type: 'wall', material: 'shock' },
             { x: 2728, y: 80, width: 36, height: 110, type: 'climb', style: 'ladder' },
@@ -84,7 +83,7 @@ const LEVEL_CONFIGS = [
 
             // Gap 2: a slow, wide lift with a lower recovery step.
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
-            { x: 3520, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3370, y: 470, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3575, y: 100, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
@@ -164,7 +163,7 @@ const LEVEL_CONFIGS = [
             { x: 10660, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10880, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.45, tile: 'platform3_tile' },
             { x: 11080, y: 450, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 11260, y: 360, width: 108, height: 310, type: 'wall', material: 'vine' },
+            { x: 11260, y: 360, width: 108, height:  310, type: 'wall', material: 'vine' },
             { x: 11216, y: 360, width: 36, height: 310, type: 'climb', style: 'vine' },
             { x: 10980, y: 360, width: 460, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11000, y: 230, width: 160, height: 24, type: 'static', tile: 'platform6_tile' },

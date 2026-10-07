@@ -3867,9 +3867,6 @@ class Game {
                 ctx.save();
                 // reset any transforms so we draw in canvas pixel space
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                ctx.fillRect(8, 8, 320, 110);
-                ctx.fillStyle = '#0f0';
                 ctx.font = '12px monospace';
                 const allowedTypesText = (this.enemyManager && Array.isArray(this.enemyManager.allowedEnemyTypes) && this.enemyManager.allowedEnemyTypes.length > 0)
                     ? this.enemyManager.allowedEnemyTypes.join(',')
@@ -3884,9 +3881,11 @@ class Game {
                         else if (e.enemyType === 'SECOND_BASIC') s++;
                     }
                 } catch (e) { __err('game', e); }
+                const p = this.player;
                 const lines = [
-                        `cameraX: ${this.cameraX.toFixed(1)}`,
-                    `player.x: ${this.player.x.toFixed(1)}`,
+                    `player x,y: ${Math.round(p.x)}, ${Math.round(p.y)}`,
+                    `feet x,y: ${Math.round(p.x + p.width / 2)}, ${Math.round(p.y + p.height)}`,
+                    `cameraX: ${this.cameraX.toFixed(1)}`,
                     `level.width: ${this.level.width}`,
                     `viewWidth: ${this.viewWidth}`,
                     `cameraMax: ${Math.max(0, this.level.width - (this.viewWidth || this.width)).toFixed(1)}`,
@@ -3895,6 +3894,9 @@ class Game {
                     `enemies B/F/S: ${b}/${f}/${s}`,
                     `levelVisuals: ${this.levelDebugVisuals ? 'ON' : 'OFF'}`
                 ];
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(8, 8, 320, 30 + lines.length * 16);
+                ctx.fillStyle = '#0f0';
                 for (let i = 0; i < lines.length; i++) {
                     ctx.fillText(lines[i], 16, 26 + i * 16);
                 }
