@@ -302,11 +302,18 @@ class Level {
         return null;
     }
 
+    getWallMaterial(wall) {
+        if (wall.material === 'solid') return 'solid';
+        const tileMaterials = { wall_tile_fire: 'vine', wall_tile_bomb: 'rock', wall_tile_shock: 'shock' };
+        return tileMaterials[wall.tile] || wall.material || 'solid';
+    }
+
     hitWall(wall, shotType) {
         if (!wall || wall.type !== 'wall') return { destroyed: false, material: null };
-        const material = wall.material || 'solid';
+        const material = this.getWallMaterial(wall);
         const destroysWall = (material === 'vine' && shotType === 'fireball') ||
-            (material === 'rock' && shotType === 'bomb');
+            (material === 'rock' && shotType === 'bomb') ||
+            (material === 'shock' && shotType === 'gold');
         if (!destroysWall) return { destroyed: false, material };
 
         const wallIndex = this.platforms.indexOf(wall);
@@ -560,7 +567,7 @@ class Level {
             return;
         }
 
-        if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock')) {
+        if (p.type === 'wall') {
             this.drawDestructibleWall(ctx, p);
             return;
         }
@@ -616,9 +623,20 @@ class Level {
            ctx.restore();
     }
 
-    drawDestructibleWall(ctx, wall) {
+    drawDestructibleWall(ctx, wall, tileScaleX = 1, tileScaleY = 1) {
+        const material = this.getWallMaterial(wall);
+        const wallTiles = { vine: 'wall_tile_fire', rock: 'wall_tile_bomb', shock: 'wall_tile_shock' };
+        const tileName = material === 'solid' ? 'wall_tile' : (wallTiles[material] || wall.tile || 'wall_tile');
+        const pattern = this.tileMode === 'tiles' ? this._createPattern(ctx, tileName) : null;
         ctx.save();
-        if (wall.material === 'vine') {
+        // Cache coordinates are compressed; retain world-space tiles and borders.
+        ctx.translate(wall.x, wall.y);
+        ctx.scale(tileScaleX, tileScaleY);
+        wall = { ...wall, x: 0, y: 0, width: wall.width / tileScaleX, height: wall.height / tileScaleY };
+        if (pattern) {
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, wall.width, wall.height);
+        } else if (material === 'vine') {
             const wallGradient = ctx.createLinearGradient(wall.x, wall.y, wall.x + wall.width, wall.y);
             wallGradient.addColorStop(0, '#123C20');
             wallGradient.addColorStop(0.5, '#267A34');
@@ -637,6 +655,13 @@ class Level {
             ctx.font = 'bold 18px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('🔥', wall.x + wall.width / 2, wall.y + 26);
+        } else if (material === 'shock') {
+            ctx.fillStyle = '#233B96';
+            ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            ctx.fillStyle = '#FFD54A';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚡', wall.x + wall.width / 2, wall.y + 26);
         } else {
             const stoneGradient = ctx.createLinearGradient(wall.x, wall.y, wall.x, wall.y + wall.height);
             stoneGradient.addColorStop(0, '#747A80');
@@ -651,7 +676,7 @@ class Level {
                 ctx.lineTo(wall.x + wall.width, y);
                 ctx.stroke();
             }
-            if (wall.material === 'rock') {
+            if (material === 'rock') {
                 ctx.fillStyle = '#FF9B32';
                 ctx.font = 'bold 18px Arial';
                 ctx.textAlign = 'center';
@@ -781,8 +806,8 @@ class Level {
                     continue;
                 }
 
-                if (p.type === 'wall' && (p.material === 'vine' || p.material === 'rock' || p.material === 'solid')) {
-                    this.drawDestructibleWall(c, scaled);
+                if (p.type === 'wall') {
+                    this.drawDestructibleWall(c, scaled, canvas.width / this.width, canvas.height / this.height);
                     continue;
                 }
 

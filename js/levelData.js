@@ -9,6 +9,8 @@
  * Defines the stage progression: Forest -> City -> Dojo
  * Moving platforms use axis ('x' or 'y'), range (pixels either side of x/y),
  * speed (radians per gameplay second), and optional timeOffset (phase in radians).
+ * Wall tiles bind to shots: wall_tile_fire -> fireball, wall_tile_bomb -> bomb,
+ * wall_tile_shock -> gold (Stun). Plain wall_tile/solid walls cannot be broken.
  */
 
 const LEVEL_CONFIGS = [
@@ -120,6 +122,10 @@ const LEVEL_CONFIGS = [
             { x: 8896, y: 270, width: 36, height: 400, type: 'climb', style: 'vine' },
             { x: 8670, y: 270, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
+            // Optional Stun shortcut with a ladder bypass for players without ammo.
+            { x: 8460, y: 510, width: 80, height: 160, type: 'wall', material: 'shock', tile: 'wall_tile_shock' },
+            { x: 8418, y: 510, width: 36, height: 160, type: 'climb', style: 'ladder' },
+            { x: 8350, y: 510, width: 250, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 9520, y: 470, width: 280, height: 24, type: 'static', tile: 'platform3_tile' },
 
             // --- Upper return lane: ties early and mid districts into looped traversal ---
@@ -190,6 +196,7 @@ const LEVEL_CONFIGS = [
             { x: 6710, y: 440 },
             { x: 7390, y: 460 },
             { x: 8400, y: 240 },
+            { x: 8270, y: 630 },
             { x: 10320, y: 260 },
             { x: 11040, y: 320 },
             { x: 12680, y: 470 }

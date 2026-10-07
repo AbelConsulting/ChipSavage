@@ -823,7 +823,7 @@
 
             <div id="shot-ability-tray" role="toolbar" aria-label="Golf shot abilities">
                 <div class="shot-ability-buttons">
-                    <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables rivals">⚡</button>
+                    <button class="shot-ability-btn" data-shot="gold" aria-label="Stun shot" title="Stun: disables rivals and breaks shock walls">⚡</button>
                     <button class="shot-ability-btn" data-shot="fireball" aria-label="Fireball shot" title="Fireball: burns rivals and vine walls">🔥</button>
                     <button class="shot-ability-btn" data-shot="hookshot" aria-label="Hookshot" title="Hookshot: grapple toward rivals and anchor rings">⚓</button>
                     <button class="shot-ability-btn" data-shot="bomb" aria-label="Bomb shot" title="Bomb: area damage and breaks rock walls">💣</button>
@@ -1006,7 +1006,7 @@
             const context = document.getElementById('shot-context');
             if (!context) return;
             const messages = {
-                gold: ['Stun • disables rivals', '#FFD54A'],
+                gold: ['Stun • breaks shock walls', '#FFD54A'],
                 fireball: ['Fireball • burns vines', '#FF5A1F'],
                 hookshot: ['Hookshot • grapple to anchor rings', '#D9E1E8'],
                 bomb: ['Bomb • breaks rock walls', '#FF9B32']

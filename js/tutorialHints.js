@@ -90,9 +90,11 @@ class TutorialHints {
                 id: 'golf_shot',
                 duration: 10,
                 kb:    ['Press C to fire • V changes shot!',
-                    'Hook anchors • Fire burns vines • Bomb breaks rock.'],
+                    'Hook anchors • Fire burns vines • Bomb breaks rock.',
+                    'Stun breaks shock walls.'],
                 touch: ['Tap ⛳ to fire • ability icon to change!',
-                    'Hook anchors • Fire burns vines • Bomb breaks rock.']
+                    'Hook anchors • Fire burns vines • Bomb breaks rock.',
+                    'Stun breaks shock walls.']
             },
             golden_idol: {
                 id: 'golden_idol',

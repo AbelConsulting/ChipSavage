@@ -293,6 +293,9 @@ class SpriteLoader {
             ['platform5_tile', 'assets/sprites/backgrounds/tiles/platform5_tile.png'],
             ['platform6_tile', 'assets/sprites/backgrounds/tiles/platform6_tile.png'],    
             ['wall_tile', 'assets/sprites/backgrounds/tiles/wall_tile.png'],
+            ['wall_tile_fire', 'assets/sprites/backgrounds/tiles/wall_tile_fire.png'],
+            ['wall_tile_bomb', 'assets/sprites/backgrounds/tiles/wall_tile_bomb.png'],
+            ['wall_tile_shock', 'assets/sprites/backgrounds/tiles/wall_tile_shock.png'],
 
             // Items / pickups
             ['health_regen_item', 'assets/sprites/items/health_regen_item.svg'],
@@ -356,7 +359,7 @@ class SpriteLoader {
                     }
             }
             // Ensure tile sprites are upscaled to 64x64 for consistent tiling
-            const tileNames = ['ground_tile', 'platform_tile', 'wall_tile'];
+            const tileNames = ['ground_tile', 'platform_tile', 'wall_tile', 'wall_tile_fire', 'wall_tile_bomb', 'wall_tile_shock'];
             for (const t of tileNames) {
                 const img = this.sprites[t];
                 if (!img) continue;

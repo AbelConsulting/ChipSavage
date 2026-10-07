@@ -655,6 +655,7 @@ class Player {
         const wallPalette = {
             vine: ['#97D76A', '#D8F4A5', '#5A7E46'],
             rock: ['#B8AFA1', '#EBE2D2', '#5A4D44'],
+            shock: ['#4169D8', '#FFD54A', '#233B96'],
             solid: ['#D3C5AF', '#F5E5CB', '#6A5B49']
         }[wallMaterial || 'solid'] || ['#D3C5AF', '#F5E5CB', '#6A5B49'];
         const spray = {

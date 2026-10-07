@@ -131,7 +131,7 @@ test('solid gate framing has no misleading shot-type icon', () => {
     const { level } = loadStage();
     const labels = [];
     const ctx = {
-        save() {}, restore() {}, fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {}, strokeRect() {},
+        save() {}, restore() {}, translate() {}, scale() {}, fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {}, strokeRect() {},
         createLinearGradient() { return { addColorStop() {} }; },
         fillText(text) { labels.push(text); }
     };

@@ -25,7 +25,7 @@ class LevelEditor {
 
         this.storageKey = 'chipsavage_level_tiles_v1';
 
-        this.availableTiles = ['ground_tile', 'platform_tile', 'wall_tile'];
+        this.availableTiles = ['ground_tile', 'platform_tile', 'wall_tile', 'wall_tile_fire', 'wall_tile_bomb', 'wall_tile_shock'];
 
         this.selectedPlatformIndex = null;
 
@@ -237,7 +237,16 @@ class LevelEditor {
         }
         const p = this.level.platforms[this.selectedPlatformIndex];
         if (!p) return;
+        if (tileName.startsWith('wall_tile_') && p.type !== 'wall') {
+            alert('Elemental wall tiles can only be assigned to walls.');
+            return;
+        }
+        if (tileName.startsWith('wall_tile_') && p.material === 'solid') {
+            alert('Solid blockers cannot use elemental wall tiles.');
+            return;
+        }
         p.tile = tileName;
+        this.level._staticNeedsUpdate = true;
         // update badge
         const badge = document.getElementById(`platform-tile-${this.selectedPlatformIndex}`);
         if (badge) badge.textContent = tileName;
@@ -259,6 +268,7 @@ class LevelEditor {
             for (let i = 0; i < (this.level.platforms || []).length; i++) {
                 if (map[i]) this.level.platforms[i].tile = map[i];
             }
+            this.level._staticNeedsUpdate = true;
             this.refreshPlatformList();
         } catch (e) {
             console.warn('Failed to load assignments', e);
@@ -280,6 +290,7 @@ class LevelEditor {
             for (let i = 0; i < (this.level.platforms || []).length; i++) {
                 this.level.platforms[i].tile = map[i] || null;
             }
+            this.level._staticNeedsUpdate = true;
             this.refreshPlatformList();
             this.game.render();
             alert('Imported assignments.');
