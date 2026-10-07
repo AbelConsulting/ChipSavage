@@ -30,7 +30,10 @@ const SkinManager = (() => {
     }
 
     function hasAnyUnlockedSkin() {
-        return window.PLATFORM === 'steam' || readPreference('chipsavage.adFree') === '1';
+        if (window.PurchaseManager && typeof PurchaseManager.hasSkinPack === 'function') {
+            return PurchaseManager.hasSkinPack();
+        }
+        return window.PLATFORM === 'steam' || readPreference('chipsavage.skinPackOwned') === '1';
     }
 
     function isSkinUnlocked(id) {

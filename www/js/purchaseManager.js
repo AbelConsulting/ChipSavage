@@ -1,27 +1,25 @@
 /**
- * purchaseManager.js — In-App Purchase manager for "Remove Ads + Skins" ($1.99).
+ * purchaseManager.js — In-App Purchase manager for the cosmetic Skin Pack.
  *
  * Strategy:
  *   • Android (Capacitor native): uses cordova-plugin-purchase (CdvPurchase) v13+
  *     with Google Play Billing v6+. Plugin is OPTIONAL — module degrades gracefully
  *     if the plugin isn't installed or running on web.
- *   • Web: uses a localStorage flag for now. Hook up Stripe/Paddle later if we
- *     want to monetize the web build directly. For now web is "Coming soon".
+ *   • Web: purchases are unsupported; saved skin entitlements can be read offline.
  *
  * What the purchase grants:
- *   • Removes banner + between-stage interstitial ads (rewarded ads stay opt-in).
  *   • Unlocks the Sapphire, Amethyst, and Steel ninja skins (SkinManager.isSkinUnlocked).
  *
- * Entitlement is mirrored to localStorage so AdManager and SkinManager can
- * synchronously gate calls without awaiting the plugin on every check.
+ * Entitlement is mirrored to localStorage so SkinManager can check ownership
+ * without awaiting the plugin on every check. Purchases never affect gameplay.
  *
  * SETUP (Android, one-time):
  *   1. npm install cordova-plugin-purchase
  *   2. Create managed products in Google Play Console:
  *
  *      PRIMARY REVENUE PRODUCT (main IAP — always active):
- *        Product ID: remove_ads      | Type: One-time (managed) | Price: $1.99
- *        Grants: ad-free gameplay + Sapphire, Amethyst, Steel ninja skins.
+ *        Product ID: skin_pack      | Type: One-time (managed) | Price: $1.99
+ *        Grants: Sapphire, Amethyst, Steel ninja skins only.
  *   3. npx cap sync android
  *   4. Upload a signed bundle to a Play Console internal testing track and add
  *      yourself as a license tester so the purchase flow works in test mode.
@@ -30,8 +28,8 @@
 const PurchaseManager = (() => {
     'use strict';
 
-    const PRODUCT_ID_REMOVE_ADS    = 'remove_ads';
-    const STORAGE_KEY_AD_FREE      = 'chipsavage.adFree';
+    const PRODUCT_ID_SKIN_PACK     = 'skin_pack';
+    const STORAGE_KEY_SKIN_PACK    = 'chipsavage.skinPackOwned';
     const STORAGE_KEY_PENDING_IAP  = 'chipsavage.pendingIapPurchases';
 
     let _store         = null;     // CdvPurchase.store reference
@@ -40,13 +38,13 @@ const PurchaseManager = (() => {
     let _ready         = false;    // True after initialize() resolves (success OR no-store)
     let _readyMode     = 'not-ready'; // How _markReady was reached: 'store-init'|'init-error'|'watchdog'|'no-store'
     let _storeInitError = null;    // Error message if store.initialize() threw/timed-out
-    let _adFree        = _readEntitlementFromStorage();
-    let _product       = null;     // CdvPurchase.Product (remove_ads)
+    let _skinPackOwned = _readEntitlementFromStorage();
+    let _product       = null;     // CdvPurchase.Product (skin_pack)
     // Last seen Google Play purchase token, keyed by SKU. Captured in
     // .approved() / .finished() so we can forward it to the server-side
     // entitlement endpoint for receipt verification.
     const _lastPurchaseToken = Object.create(null);
-    // Last order error string (code + message) for Remove Ads — shown in the
+    // Last order error string (code + message) for the Skin Pack — shown in the
     // in-app diagnostic panel without needing Chrome DevTools.
     let _lastOrderError = 'none';
     let _lastRemotePushStatus = 'none';
@@ -111,7 +109,7 @@ const PurchaseManager = (() => {
             const token = _extractPurchaseToken(tx);
             if (!token || !tx || !Array.isArray(tx.products)) return;
             for (const p of tx.products) {
-                if (p && p.id === PRODUCT_ID_REMOVE_ADS) {
+                if (p && p.id === PRODUCT_ID_SKIN_PACK) {
                     _lastPurchaseToken[p.id] = token;
                     _rememberPendingPurchase(p.id, token, p.id);
                 }
@@ -125,8 +123,8 @@ const PurchaseManager = (() => {
         if (_ready) return;
         _ready = true;
         _readyMode = reason;
-        _log('Ready (' + reason + '). Ad-free=' + _adFree);
-        _readyListeners.forEach(fn => { try { fn(_adFree); } catch(e) {} });
+        _log('Ready (' + reason + '). Skin Pack owned=' + _skinPackOwned);
+        _readyListeners.forEach(fn => { try { fn(_skinPackOwned); } catch(e) { _warn('Ready listener failed:', e); } });
         _readyListeners.clear();
     }
 
@@ -192,13 +190,13 @@ const PurchaseManager = (() => {
             // Only ever mirror remote -> local TRUE values; we never revoke
             // a local entitlement based on a missing server record (avoids
             // first-launch-after-offline-purchase regressions).
-            if (remote.adFree && !_adFree) {
-                _log('Restored ad-free from server (player ' + pid.slice(0, 6) + '…)');
-                _setAdFree(true, 'remote-restore');
+            if (remote.skinPackOwned && !_skinPackOwned) {
+                _log('Restored Skin Pack from server (player ' + pid.slice(0, 6) + '…)');
+                _setSkinPackOwned(true, 'remote-restore');
             }
             // If we own something locally that the server doesn't, push it up
             // so a fresh device gets it next time.
-            if (_adFree && !remote.adFree) _pushEntitlementRemote(PRODUCT_ID_REMOVE_ADS);
+            if (_skinPackOwned && !remote.skinPackOwned) _pushEntitlementRemote(PRODUCT_ID_SKIN_PACK);
         } catch (e) {
             _warn('Remote entitlement pull failed:', e);
         }
@@ -214,39 +212,33 @@ const PurchaseManager = (() => {
     } catch (_) {}
 
     function _readEntitlementFromStorage() {
-        try { return localStorage.getItem(STORAGE_KEY_AD_FREE) === '1'; } catch (e) { return false; }
+        try { return localStorage.getItem(STORAGE_KEY_SKIN_PACK) === '1'; } catch (e) { _warn('Reading skin entitlement failed:', e); return false; }
     }
 
     function _writeEntitlement(v) {
-        try { localStorage.setItem(STORAGE_KEY_AD_FREE, v ? '1' : '0'); } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEY_SKIN_PACK, v ? '1' : '0'); } catch (e) { _warn('Saving skin entitlement failed:', e); }
     }
 
-    function _setAdFree(v, source) {
-        const prev = _adFree;
-        _adFree = !!v;
-        _writeEntitlement(_adFree);
-        if (prev !== _adFree) {
-            _log('Ad-free entitlement changed →', _adFree, '(source:', source + ')');
-            // Tell AdManager to reconcile (skip interstitial, etc.)
-            try {
-                if (window.AdManager && _adFree) {
-                    // No banner to remove; interstitial is gated by _isAdFree() in onStageComplete.
-                }
-            } catch (e) { _warn('AdManager reconcile failed:', e); }
+    function _setSkinPackOwned(v, source) {
+        const prev = _skinPackOwned;
+        _skinPackOwned = !!v;
+        _writeEntitlement(_skinPackOwned);
+        if (prev !== _skinPackOwned) {
+            _log('Skin Pack entitlement changed →', _skinPackOwned, '(source:', source + ')');
             // Mirror to server (skip if this flip CAME from the server).
-            if (_adFree && source !== 'remote-restore' && source !== 'storage') {
-                _pushEntitlementRemote(PRODUCT_ID_REMOVE_ADS);
+            if (_skinPackOwned && source !== 'remote-restore' && source !== 'storage') {
+                _pushEntitlementRemote(PRODUCT_ID_SKIN_PACK);
             }
             // Notify subscribers
-            _listeners.forEach(fn => { try { fn(_adFree); } catch(e) {} });
+            _listeners.forEach(fn => { try { fn(_skinPackOwned); } catch(e) { _warn('Skin listener failed:', e); } });
             // Analytics
             try { if (window.Analytics && Analytics.trackPurchase) {
-                Analytics.trackPurchase({ product: PRODUCT_ID_REMOVE_ADS, source });
+                Analytics.trackPurchase({ product: PRODUCT_ID_SKIN_PACK, source });
             } } catch (e) {}
         }
     }
 
-    function isAdFree() { return _adFree; }
+    function hasSkinPack() { return _skinPackOwned || window.PLATFORM === 'steam'; }
 
     function onChange(fn) {
         if (typeof fn === 'function') _listeners.add(fn);
@@ -266,7 +258,7 @@ const PurchaseManager = (() => {
      * runs from main.js as soon as the game is ready, which is often a few
      * hundred ms BEFORE deviceready fires on Android. Without a wait we'd
      * hit a transient `null` and permanently degrade to the web fallback,
-     * leaving the Remove-Ads modal stuck on “Checking purchases…” for users
+     * leaving the Skin Pack modal stuck on “Checking purchases…” for users
      * who happen to open it during that race window.
      *
      * So if we don't see the global, poll for it up to ~8s before giving up.
@@ -302,15 +294,12 @@ const PurchaseManager = (() => {
         _initialized = true;
 
         // Steam build: everything is included with the game purchase.
-        // Mark ad-free as owned, skip all IAP initialisation.
+        // Skins are included; skip all IAP initialisation.
         if (window.PLATFORM === 'steam') {
-            _adFree = true;
+            _skinPackOwned = true;
             _markReady('steam');
             return;
         }
-
-        // Sync localStorage entitlement → DOM (web ad rail) immediately on boot.
-        if (_adFree) _setAdFree(true, 'storage');
 
         // Hard watchdog: no matter what happens below (plugin hang, native
         // crash, exception in third-party code, etc.) the UI must NEVER be
@@ -328,7 +317,7 @@ const PurchaseManager = (() => {
                         Analytics.trackEvent('iap_init_watchdog_fired', {
                             isNative: isNative(),
                             hasPlugin: !!(window.CdvPurchase && window.CdvPurchase.store),
-                            adFree: _adFree
+                            skinPackOwned: _skinPackOwned
                         });
                     }
                 } catch (_) {}
@@ -338,7 +327,7 @@ const PurchaseManager = (() => {
 
         const store = await _getStore();
         if (!store) {
-            _log('Native store unavailable. Web fallback active. Ad-free=' + _adFree);
+            _log('Native store unavailable. Skin Pack owned=' + _skinPackOwned);
             clearTimeout(_watchdog);
             _markReady('no-store');
             return;
@@ -357,7 +346,7 @@ const PurchaseManager = (() => {
 
             store.register([
                 {
-                    id:       PRODUCT_ID_REMOVE_ADS,
+                    id:       PRODUCT_ID_SKIN_PACK,
                     type:     ProductType.NON_CONSUMABLE,
                     platform: Platform.GOOGLE_PLAY,
                 }
@@ -366,14 +355,14 @@ const PurchaseManager = (() => {
             store.when()
                 .productUpdated((p) => {
                     if (!p) return;
-                    if (p.id === PRODUCT_ID_REMOVE_ADS) {
+                    if (p.id === PRODUCT_ID_SKIN_PACK) {
                         const wasLoaded = !!(_product && _product.pricing);
                         _product = p;
                         _log('Product loaded:', p.id, p.pricing && p.pricing.price);
                         // Re-notify UI subscribers so a disabled "Loading…" button re-enables
                         // now that the product details have arrived from Google Play.
                         if (!wasLoaded && p.pricing) {
-                            _listeners.forEach(fn => { try { fn(_adFree); } catch(e) {} });
+                            _listeners.forEach(fn => { try { fn(_skinPackOwned); } catch(e) { _warn('Product listener failed:', e); } });
                         }
                     }
                 })
@@ -386,19 +375,18 @@ const PurchaseManager = (() => {
                     // with a .catch that swallowed errors — if verify() rejected for
                     // any reason, finish() was never called, leaving the purchase
                     // un-acknowledged. Google Play auto-refunds unacknowledged
-                    // purchases after 3 days, which is the exact symptom users
-                    // reported ("I paid but ads are still showing"). Server-side
+                    // purchases after 3 days. Server-side
                     // receipt verification still happens via _pushEntitlementRemote()
                     // → verifyPurchase Cloud Function (see functions/index.js).
                     //
                     // Belt-and-suspenders: also flip the local entitlement here.
-                    // .finished() will run it again (idempotent in _setAdFree)
+                    // .finished() will run it again (idempotent in _setSkinPackOwned)
                     // but if .finished() somehow doesn't fire on this device,
                     // the player has still been charged and deserves the unlock.
                     try {
                         if (tx && Array.isArray(tx.products)) {
-                            if (tx.products.some(p => p && p.id === PRODUCT_ID_REMOVE_ADS)) {
-                                _setAdFree(true, 'approved');
+                            if (tx.products.some(p => p && p.id === PRODUCT_ID_SKIN_PACK)) {
+                                _setSkinPackOwned(true, 'approved');
                             }
                         }
                     } catch (e) { _warn('entitlement flip in approved failed', e); }
@@ -416,31 +404,22 @@ const PurchaseManager = (() => {
                     _log('Transaction finished:', tx);
                     _captureToken(tx);
                     if (tx && tx.products) {
-                        if (tx.products.some(p => p.id === PRODUCT_ID_REMOVE_ADS)) {
-                            _setAdFree(true, 'purchase');
+                        if (tx.products.some(p => p.id === PRODUCT_ID_SKIN_PACK)) {
+                            _setSkinPackOwned(true, 'purchase');
                         }
-                        // Google Ads conversion — only fires on web (gtag script not loaded in Capacitor native).
-                        try {
-                            if (typeof gtag === 'function') {
-                                gtag('event', 'conversion', {
-                                    'send_to': 'AW-18170482905/sLK9CNfb864cENmhrthD',
-                                    'transaction_id': (tx.transactionId || tx.nativeTransactionId || tx.id || '')
-                                });
-                            }
-                        } catch (e) {}
                     }
                 })
                 .receiptUpdated((r) => {
                     // Reconcile owned products on each receipt update (handles restore).
                     try {
-                        if (store.owned(PRODUCT_ID_REMOVE_ADS))   _setAdFree(true, 'restore');
+                        if (store.owned(PRODUCT_ID_SKIN_PACK))   _setSkinPackOwned(true, 'restore');
                     } catch (e) {}
                 });
 
             // Race store.initialize() against a hard timeout. Google Play
             // Billing can occasionally hang on the first connection (license-
             // tester accounts, transient Play services restarts, no network).
-            // Without this cap, _markReady() never fires and the Remove-Ads
+            // Without this cap, _markReady() never fires and the Skin Pack
             // modal stays stuck on “Checking purchases…” forever (the exact
             // symptom early users reported). 12s is well past any healthy
             // init and below the patience threshold of someone tapping Buy.
@@ -462,7 +441,7 @@ const PurchaseManager = (() => {
 
             // Cross-check ownership on init.
             try {
-                if (store.owned(PRODUCT_ID_REMOVE_ADS))   _setAdFree(true, 'init-owned');
+                if (store.owned(PRODUCT_ID_SKIN_PACK))   _setSkinPackOwned(true, 'init-owned');
             } catch (e) {}
 
             // Mark the manager as ready BEFORE the auto-restore probe so
@@ -478,9 +457,9 @@ const PurchaseManager = (() => {
             // flag) and only if we don't already see the entitlement, so
             // returning users never get an extra Play Billing round-trip.
             try {
-                const RESTORED_KEY = 'chipsavage.iapAutoRestoreTriedAt';
+                const RESTORED_KEY = 'chipsavage.skinPackAutoRestoreTriedAt';
                 const alreadyTried = !!localStorage.getItem(RESTORED_KEY);
-                if (!_adFree && !alreadyTried && typeof store.restorePurchases === 'function') {
+                if (!_skinPackOwned && !alreadyTried && typeof store.restorePurchases === 'function') {
                     _log('First-launch auto-restore probe (no local entitlement).');
                     try { localStorage.setItem(RESTORED_KEY, String(Date.now())); } catch (_) {}
                     // Fire-and-forget; receiptUpdated() above will flip the
@@ -551,11 +530,11 @@ const PurchaseManager = (() => {
     }
 
     /**
-     * Initiate purchase of the Remove Ads product.
+     * Initiate purchase of the cosmetic Skin Pack.
      * @returns {Promise<{ok:boolean, reason?:string}>}
      */
-    async function purchaseRemoveAds() {
-        if (_adFree) return { ok: true, reason: 'already-owned' };
+    async function purchaseSkinPack() {
+        if (hasSkinPack()) return { ok: true, reason: 'already-owned' };
 
         const store = await _getStore();
         if (!store) {
@@ -570,10 +549,10 @@ const PurchaseManager = (() => {
         // Self-heal: if Play Billing never delivered pricing for this SKU
         // (the root cause of the "indefinitely loading" reports), force a
         // fresh catalogue fetch and wait up to ~6s for productUpdated().
-        let product = store.get(PRODUCT_ID_REMOVE_ADS) || _product;
+        let product = store.get(PRODUCT_ID_SKIN_PACK) || _product;
         if (!product || !product.pricing) {
-            _log('remove_ads not in catalogue — forcing refresh before order.');
-            product = await _refreshProduct(PRODUCT_ID_REMOVE_ADS);
+            _log('skin_pack not in catalogue — forcing refresh before order.');
+            product = await _refreshProduct(PRODUCT_ID_SKIN_PACK);
         }
         if (!product) return { ok: false, reason: 'product-not-loaded' };
 
@@ -598,11 +577,11 @@ const PurchaseManager = (() => {
                 const errMsg  = orderErr.message || '';
                 const reason  = (errCode === '1') ? 'user-cancelled'
                               : (errMsg || ('error-' + (errCode || 'unknown')));
-                _lastOrderError = '[' + PRODUCT_ID_REMOVE_ADS + '] code=' + (errCode || '?') + ' msg=' + (errMsg || reason);
+                _lastOrderError = '[' + PRODUCT_ID_SKIN_PACK + '] code=' + (errCode || '?') + ' msg=' + (errMsg || reason);
                 return { ok: false, reason };
             }
             // The actual entitlement flip happens in the .finished()/receiptUpdated()
-            // handler asynchronously. Caller can poll `isAdFree()` or subscribe via onChange().
+            // handler asynchronously. Caller can poll `hasSkinPack()` or subscribe via onChange().
             return { ok: true, reason: 'pending' };
         } catch (e) {
             _warn('Purchase failed:', e);
@@ -630,7 +609,7 @@ const PurchaseManager = (() => {
      */
     function getPriceString() {
         try {
-            const p = (_store && _store.get && _store.get(PRODUCT_ID_REMOVE_ADS)) || _product;
+            const p = (_store && _store.get && _store.get(PRODUCT_ID_SKIN_PACK)) || _product;
             if (p && p.pricing && p.pricing.price) return p.pricing.price;
         } catch (e) {}
         // Fallback so the Buy button never reads as blank/null while the Play
@@ -643,11 +622,11 @@ const PurchaseManager = (() => {
      *  have returned pricing data, but that fetch can stall indefinitely (new SKU
      *  propagation delay, Play Services hiccup) leaving the UI stuck on
      *  "Loading product…" forever. Instead we unblock the button as soon as
-     *  _ready is true and let purchaseRemoveAds() surface any real error
+     *  _ready is true and let purchaseSkinPack() surface any real error
      *  ("product-not-loaded", "store-unavailable", etc.) on the actual tap.
      *  getPriceString() already returns the $1.99 fallback so the label is never
      *  blank. */
-    function isRemoveAdsProductLoaded() {
+    function isSkinPackProductLoaded() {
         return _ready;
     }
 
@@ -675,8 +654,8 @@ const PurchaseManager = (() => {
             readyMode: _readyMode,
             storeInitError: _storeInitError || 'none',
             storePollDone: _storePollDone,
-            adFree_localStorage: _readEntitlementFromStorage(),
-            adFree_runtime: _adFree,
+            skinPackOwned_localStorage: _readEntitlementFromStorage(),
+            skinPackOwned_runtime: hasSkinPack(),
             lastPurchaseTokens: Object.assign({}, _lastPurchaseToken),
             pendingIapPurchases: _readPendingPurchases(),
             lastRemotePushStatus: _lastRemotePushStatus,
@@ -686,7 +665,7 @@ const PurchaseManager = (() => {
         if (store) {
             try {
                 out.products = {
-                    remove_ads:   store.get ? store.get(PRODUCT_ID_REMOVE_ADS)  : _product,
+                    skin_pack: store.get ? store.get(PRODUCT_ID_SKIN_PACK) : _product,
                 };
             } catch (e) { out.products_error = String(e); }
             // receipts — shows what Google Play has reported as owned
@@ -703,24 +682,24 @@ const PurchaseManager = (() => {
 
     return {
         initialize,
-        isAdFree,
+        hasSkinPack,
         isReady: () => _ready,
         onReady: (fn) => {
             if (typeof fn !== 'function') return () => {};
-            if (_ready) { try { fn(_adFree); } catch (e) {} return () => {}; }
+            if (_ready) { try { fn(_skinPackOwned); } catch (e) { _warn('Ready listener failed:', e); } return () => {}; }
             _readyListeners.add(fn);
             return () => _readyListeners.delete(fn);
         },
         onChange,
-        purchaseRemoveAds,
+        purchaseSkinPack,
         restorePurchases,
         getPriceString,
-        isRemoveAdsProductLoaded,
+        isSkinPackProductLoaded,
         // Cross-device sync: pulls server-side entitlements for the current
         // signed-in Play Games player and mirrors any owned SKUs locally.
         // Safe to call repeatedly; no-op until the player ID is known.
         syncRemoteEntitlements: (force = false) => _pullEntitlementsRemote(!!force),
-        PRODUCT_ID_REMOVE_ADS,
+        PRODUCT_ID_SKIN_PACK,
         /** Diagnostic dump. Call from Chrome Remote DevTools: PurchaseManager.diagnose() */
         diagnose,
     };
@@ -732,7 +711,7 @@ window.PurchaseManager = PurchaseManager;
 // Self-initialize. Previously initialize() was only invoked from deep inside
 // the game-init chain in js/main.js; if anything upstream threw on a user's
 // device, initialize() was never called and isReady() stayed false forever,
-// permanently freezing the Remove Ads card on "Checking purchases…". Kick
+// permanently freezing the Skin Pack card on "Checking purchases…". Kick
 // off init from the module itself so the IAP store path is independent of
 // game readiness. initialize() is idempotent (guarded by _initialized) so
 // the existing call from main.js remains a harmless no-op.
