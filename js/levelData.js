@@ -84,22 +84,21 @@ const LEVEL_CONFIGS = [
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
             { x: 3370, y: 330, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3675, y: 100, width: 48, height: 48, type: 'anchor' },
-            { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3810, y: 410, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---
             { x: 4580, y: 320, width: 90, height: 340, type: 'wall', material: 'vine' },
             { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
             { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
-            // Cup alcove: jump off the ravine roof, then burn or climb the vine screen.
+            // Cup alcove: jump off the ravine roof, then burn or climb the vine.
             { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4800, y: 160, width: 64, height: 160, type: 'wall', material: 'vine' },
             { x: 4758, y: 160, width: 36, height: 160, type: 'climb', style: 'vine' },
-            { x: 4750, y: 160, width: 210, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
             { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform5_tile' },
+            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
             { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
@@ -144,7 +143,6 @@ const LEVEL_CONFIGS = [
             { x: 4960, y: 210, width: 330, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5320, y: 64, width: 48, height: 48, type: 'anchor' },
             { x: 5590, y: 250, width: 230, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 5800, y: 64, width: 48, height: 48, type: 'anchor' },
             { x: 5900, y: 270, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section F: ridge maze with dual gates (late-game expansion) ---
@@ -191,14 +189,14 @@ const LEVEL_CONFIGS = [
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
-            { x: 1210, y: 360 },
-            { x: 4890, y: 120 },
+            { x: 2900, y: 625 },
+            { x: 5525, y: 550 },
             { x: 9030, y: 130 },
             { x: 10750, y: 200 },
             { x: 12500, y: 120 }
         ],
         speedBoosts: [
-            // Upper shock screen, mandatory fire passage, late rooftop jump.
+             // Upper shock screen, mandatory fire passage, late rooftop jump.
             { x: 2820, y: 40 },
             { x: 7090, y: 440 },
             { x: 11060, y: 190 }
