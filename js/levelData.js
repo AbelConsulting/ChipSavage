@@ -55,6 +55,8 @@ const LEVEL_CONFIGS = [
             { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
+             { x: 0, y: 280, width: 15, height: 20, type: 'static', tile: 'platform5_tile' },
+             {x:0, y:150,width: 20, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -99,7 +101,7 @@ const LEVEL_CONFIGS = [
             // Gap 3: lower shuttle route and upper hookshot reward route.
             { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
-            { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
             // The solid cap blocks the upper lane; the base extends below the fall-death line.
