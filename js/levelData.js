@@ -114,7 +114,6 @@ const LEVEL_CONFIGS = [
             { x: 8940, y: 270, width: 110, height: 400, type: 'wall', material: 'vine' },
             { x: 8896, y: 270, width: 36, height: 400, type: 'climb', style: 'vine' },
             { x: 8670, y: 270, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 8970, y: 170, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
             // Staggered ammo shelves require two distinct jumps, not a ground pickup.
             { x: 8230, y: 430, width: 150, height: 24, type: 'static', tile: 'platform6_tile' },
