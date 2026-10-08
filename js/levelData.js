@@ -149,7 +149,7 @@ const LEVEL_CONFIGS = [
             { x: 10280, y: 300, width: 108, height: 370, type: 'wall', material: 'rock' },
             { x: 10236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 9890, y: 560, width: 130, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 48, speed: 1.45, tile: 'platform3_tile' },
+            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'y', range: 48, speed: 1.45, tile: 'platform3_tile' },
             { x: 9980, y: 300, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             // Ridge cup: a bomb shortcut or short climb above the landing ledge.
@@ -168,12 +168,12 @@ const LEVEL_CONFIGS = [
             { x: 11280, y: 64, width: 48, height: 48, type: 'anchor' },
 
             // --- Section G: final canopy run and exit approach ---
-            { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform_tile' },
-            { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform2_tile' },
+            { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform_tile' },
-            { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform2_tile' },
+            { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12280, y: 300, width: 90, height: 370, type: 'wall', material: 'rock' },
             { x: 12236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 12070, y: 300, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -262,8 +262,8 @@ const LEVEL_CONFIGS = [
             { x: 0, y: 680, width: 5200, height: 40, type: 'static', tile: 'ground_tile' },
 
             // Entry quarter: low-intensity warm-up loop
-            { x: 300, y: 560, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 720, y: 470, width: 230, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 300, y: 560, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 720, y: 470, width: 230, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 1130, y: 380, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 1470, y: 460, width: 90, height: 220, type: 'wall', material: 'vine' },
             { x: 1428, y: 460, width: 34, height: 220, type: 'climb', style: 'vine' },
@@ -287,12 +287,11 @@ const LEVEL_CONFIGS = [
             { x: 3250, y: 360, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3820, y: 290, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4090, y: 500, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 4210, y: 450, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4310, y: 390, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4510, y: 140, width: 48, height: 48, type: 'anchor' },
 
             // Boss arena scaffolding near trigger/exit
-            { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4700, y: 470, width: 210, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4920, y: 400, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4780, y: 320, width: 160, height: 24, type: 'static', tile: 'platform2_tile' }
