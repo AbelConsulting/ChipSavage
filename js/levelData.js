@@ -4,16 +4,6 @@
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
-/**
- * Level Configurations for Arcade Mode
- * Defines the stage progression: Forest -> City -> Dojo
- * Moving platforms use axis ('x' or 'y'), range (pixels either side of x/y),
- * speed (radians per gameplay second), and optional timeOffset (phase in radians).
- * Wall tiles bind to shots: wall_tile_fire -> fireball, wall_tile_bomb -> bomb,
- * wall_tile_shock -> gold (Stun). Plain wall_tile/solid walls cannot be broken.
- * Hookshot anchors occupy the upper band (y=64..150) for higher swing routes.
- * Boss spritePrefix optionally selects artwork without changing the boss type or AI.
- */
 
 const LEVEL_CONFIGS = [
     // =========================================================
@@ -27,7 +17,6 @@ const LEVEL_CONFIGS = [
         background: 'bg_1',
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [ 
-            { x: 600, y: 300 },
             { x: 1200, y: 300 },
             { x: 1900, y: 300 },
             { x: 2600, y: 300 },
@@ -57,6 +46,7 @@ const LEVEL_CONFIGS = [
             // --- Section A: first wall gate ---
              { x: 8, y: 280, width: 25, height: 20, type: 'static', tile: 'platform5_tile' },
              {x: 8, y: 150, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
+             { x: 15, y: 45, width: 48, height: 48, type: 'anchor' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
