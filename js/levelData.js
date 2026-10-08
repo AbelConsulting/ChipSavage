@@ -294,7 +294,6 @@ const LEVEL_CONFIGS = [
             { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4700, y: 470, width: 210, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4920, y: 400, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 4780, y: 320, width: 160, height: 24, type: 'static', tile: 'platform2_tile' }
         ],
         idols: [],
         speedBoosts: [{ x: 900, y: 430 }, { x: 3340, y: 320 }],

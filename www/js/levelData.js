@@ -55,6 +55,8 @@ const LEVEL_CONFIGS = [
             { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
+             { x: 8, y: 280, width: 25, height: 20, type: 'static', tile: 'platform5_tile' },
+             {x: 8, y: 150, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -84,23 +86,21 @@ const LEVEL_CONFIGS = [
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
             { x: 3370, y: 330, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 3675, y: 100, width: 48, height: 48, type: 'anchor' },
-            { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 3810, y: 410, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---
             { x: 4580, y: 320, width: 90, height: 340, type: 'wall', material: 'vine' },
             { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
             { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 4860, y: 250, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
-            // Cup alcove: jump off the ravine roof, then burn or climb the vine screen.
+            // Cup alcove: jump off the ravine roof, then burn or climb the vine.
             { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4800, y: 160, width: 64, height: 160, type: 'wall', material: 'vine' },
             { x: 4758, y: 160, width: 36, height: 160, type: 'climb', style: 'vine' },
-            { x: 4750, y: 160, width: 210, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
-            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform5_tile' },
-            { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5480, y: 560, width: 50, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
             // The solid cap blocks the upper lane; the base extends below the fall-death line.
@@ -109,14 +109,13 @@ const LEVEL_CONFIGS = [
             { x: 6880, y: 480, width: 95, height: 420, type: 'wall', material: 'solid' },
             { x: 6836, y: 480, width: 36, height: 200, type: 'climb', style: 'ladder' },
             { x: 6620, y: 480, width: 260, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 6975, y: 480, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 6340, y: 260, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Gap 4: hook from the post-gate ledge or take the lower bridge.
             { x: 7350, y: 500, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4tile' },
             { x: 7850, y: 430, width: 150, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 7650, y: 64, width: 48, height: 48, type: 'anchor' },
@@ -144,14 +143,13 @@ const LEVEL_CONFIGS = [
             { x: 4960, y: 210, width: 330, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5320, y: 64, width: 48, height: 48, type: 'anchor' },
             { x: 5590, y: 250, width: 230, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 5800, y: 64, width: 48, height: 48, type: 'anchor' },
             { x: 5900, y: 270, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // --- Section F: ridge maze with dual gates (late-game expansion) ---
             { x: 10280, y: 300, width: 108, height: 370, type: 'wall', material: 'rock' },
             { x: 10236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 9890, y: 560, width: 130, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'x', range: 48, speed: 1.45, tile: 'platform3_tile' },
+            { x: 10060, y: 500, width: 130, height: 24, type: 'moving', axis: 'y', range: 48, speed: 1.45, tile: 'platform3_tile' },
             { x: 9980, y: 300, width: 500, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10610, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             // Ridge cup: a bomb shortcut or short climb above the landing ledge.
@@ -170,12 +168,12 @@ const LEVEL_CONFIGS = [
             { x: 11280, y: 64, width: 48, height: 48, type: 'anchor' },
 
             // --- Section G: final canopy run and exit approach ---
-            { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform_tile' },
-            { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
+            { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform2_tile' },
+            { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform_tile' },
-            { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform2_tile' },
+            { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12280, y: 300, width: 90, height: 370, type: 'wall', material: 'rock' },
             { x: 12236, y: 300, width: 36, height: 370, type: 'climb', style: 'ladder' },
             { x: 12070, y: 300, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -191,14 +189,14 @@ const LEVEL_CONFIGS = [
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
-            { x: 1210, y: 360 },
-            { x: 4890, y: 120 },
+            { x: 2900, y: 625 },
+            { x: 4750, y: 570 },
             { x: 9030, y: 130 },
             { x: 10750, y: 200 },
             { x: 12500, y: 120 }
         ],
         speedBoosts: [
-            // Upper shock screen, mandatory fire passage, late rooftop jump.
+             // Upper shock screen, mandatory fire passage, late rooftop jump.
             { x: 2820, y: 40 },
             { x: 7090, y: 440 },
             { x: 11060, y: 190 }
@@ -264,8 +262,8 @@ const LEVEL_CONFIGS = [
             { x: 0, y: 680, width: 5200, height: 40, type: 'static', tile: 'ground_tile' },
 
             // Entry quarter: low-intensity warm-up loop
-            { x: 300, y: 560, width: 260, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 720, y: 470, width: 230, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 300, y: 560, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 720, y: 470, width: 230, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 1130, y: 380, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 1470, y: 460, width: 90, height: 220, type: 'wall', material: 'vine' },
             { x: 1428, y: 460, width: 34, height: 220, type: 'climb', style: 'vine' },
@@ -289,15 +287,13 @@ const LEVEL_CONFIGS = [
             { x: 3250, y: 360, width: 500, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 3820, y: 290, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4090, y: 500, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 4210, y: 450, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4310, y: 390, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4510, y: 140, width: 48, height: 48, type: 'anchor' },
 
             // Boss arena scaffolding near trigger/exit
-            { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4460, y: 610, width: 620, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 4700, y: 470, width: 210, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 4920, y: 400, width: 170, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 4780, y: 320, width: 160, height: 24, type: 'static', tile: 'platform2_tile' }
         ],
         idols: [],
         speedBoosts: [{ x: 900, y: 430 }, { x: 3340, y: 320 }],
