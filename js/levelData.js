@@ -55,8 +55,8 @@ const LEVEL_CONFIGS = [
             { x: 10220, y: 670, width: 2980, height: 40, type: 'static', tile: 'ground_tile' },
 
             // --- Section A: first wall gate ---
-             { x: 0, y: 280, width: 15, height: 20, type: 'static', tile: 'platform5_tile' },
-             {x:0, y:150,width: 20, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
+             { x: 8, y: 280, width: 25, height: 20, type: 'static', tile: 'platform5_tile' },
+             {x: 8, y: 150, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -99,9 +99,8 @@ const LEVEL_CONFIGS = [
             { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
-            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5480, y: 560, width: 50, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
-            { x: 5890, y: 440, width: 190, height: 24, type: 'static', tile: 'platform_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
             // The solid cap blocks the upper lane; the base extends below the fall-death line.
@@ -110,14 +109,13 @@ const LEVEL_CONFIGS = [
             { x: 6880, y: 480, width: 95, height: 420, type: 'wall', material: 'solid' },
             { x: 6836, y: 480, width: 36, height: 200, type: 'climb', style: 'ladder' },
             { x: 6620, y: 480, width: 260, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 6975, y: 480, width: 230, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 6060, y: 320, width: 240, height: 24, type: 'static', tile: 'platform6_tile' },
             { x: 6340, y: 260, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
 
             // Gap 4: hook from the post-gate ledge or take the lower bridge.
             { x: 7350, y: 500, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4tile' },
             { x: 7850, y: 430, width: 150, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 7650, y: 64, width: 48, height: 48, type: 'anchor' },
@@ -192,7 +190,7 @@ const LEVEL_CONFIGS = [
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
             { x: 2900, y: 625 },
-            { x: 5525, y: 550 },
+            { x: 4750, y: 570 },
             { x: 9030, y: 130 },
             { x: 10750, y: 200 },
             { x: 12500, y: 120 }
