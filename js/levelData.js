@@ -46,7 +46,7 @@ const LEVEL_CONFIGS = [
             // --- Section A: first wall gate ---
              { x: 8, y: 280, width: 25, height: 20, type: 'static', tile: 'platform5_tile' },
              {x: 8, y: 150, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
-             { x: 105, y: 45, width: 48, height: 48, type: 'anchor' },
+             { x: 225, y: 45, width: 48, height: 48, type: 'anchor' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
