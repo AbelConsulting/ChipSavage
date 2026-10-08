@@ -22,9 +22,10 @@ class Control extends EventTarget {
     releasePointerCapture(pointer) { this.captures.delete(pointer); }
 }
 
-function setup() {
-    const controls = Object.fromEntries(['move-stick', 'btn-jump', 'btn-attack', 'btn-special', 'btn-skunk']
-        .map(id => [id, new Control()]));
+function setup({ withZone = false } = {}) {
+    const ids = ['move-stick', 'btn-jump', 'btn-attack', 'btn-special', 'btn-skunk'];
+    if (withZone) ids.push('d-pad');
+    const controls = Object.fromEntries(ids.map(id => [id, new Control()]));
     const window = new EventTarget();
     const document = new EventTarget();
     document.getElementById = id => controls[id];
@@ -47,6 +48,29 @@ function setup() {
     };
     return { controls, window, document, keys, game, send };
 }
+
+test('angle sectors keep a slightly tilted thumb on the horizontal axis', () => {
+    const { send, keys } = setup();
+    // ~30° above horizontal while running: no accidental ladder grab.
+    send('move-stick', 'pointerdown', { clientX: 100, clientY: 31 });
+    assert.deepEqual([...keys], ['ArrowRight']);
+    // ~75° from horizontal: pure climb, so the player can leave a ladder cleanly.
+    send('move-stick', 'pointermove', { clientX: 66, clientY: 16 });
+    assert.deepEqual([...keys], ['ArrowUp']);
+    // Inside the dead zone: neutral.
+    send('move-stick', 'pointermove', { clientX: 66, clientY: 56 });
+    assert.equal(keys.size, 0);
+});
+
+test('padded d-pad zone accepts touches that land just outside the ring', () => {
+    const { send, keys, controls } = setup({ withZone: true });
+    send('d-pad', 'pointerdown', { clientX: 130, clientY: 56 });
+    assert.deepEqual([...keys], ['ArrowRight']);
+    assert.ok(controls['move-stick'].classes.has('is-pressed'));
+    send('d-pad', 'pointerup');
+    assert.equal(keys.size, 0);
+    assert.equal(controls['d-pad'].captures.size, 0);
+});
 
 test('thumb pad changes direction, supports diagonals, and has a neutral center', () => {
     const { send, keys } = setup();

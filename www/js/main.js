@@ -1346,16 +1346,8 @@ class GameApp {
             const debouncedAdjust = this.debounce(() => this.adjustCanvasForMobile(), 150);
             window.addEventListener('resize', debouncedAdjust);
 
-            // Create on-screen touch UI if available. Don't instantiate the
-            // TouchControls class if there's already a declared `#touch-controls`
-            // element (index.html may have inserted a static one to avoid race
-            // conditions during load). This prevents duplicate elements and
-            // broken event wiring on mobile.
+            // Touch UI lives in index.html (#touch-controls + initTouchControls).
             try {
-                if (this.isMobile && window.TouchControls && !document.getElementById('touch-controls')) {
-                    this.touchControls = new TouchControls({ enabled: true, sensitivity: Config.TOUCH_UI.sensitivity });
-                }
-
                 // Apply sensitivity changes globally when available
                 window.addEventListener('touchSensitivityChanged', (e) => {
                     const s = e.detail && e.detail.sensitivity ? e.detail.sensitivity : 1.0;
@@ -1364,7 +1356,7 @@ class GameApp {
                     window.dispatchEvent(new CustomEvent('globalTouchSensitivity', { detail: { sensitivity: s } }));
                 });
             } catch (e) {
-                if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('TouchControls init failed', e);
+                if (typeof Config !== 'undefined' && Config.DEBUG) console.warn('Touch sensitivity listener failed', e);
             }
 
             // Pause the main loop when page hidden to save battery/CPU

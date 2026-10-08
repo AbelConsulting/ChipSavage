@@ -83,7 +83,7 @@ const LEVEL_CONFIGS = [
             // Gap 2: a slow, wide lift reached from the ground, with an upper ledge above its travel.
             { x: 3340, y: 520, width: 170, height: 24, type: 'moving', axis: 'y', range: 56, speed: 1.2, tile: 'platform4_tile' },
             { x: 3370, y: 330, width: 130, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 3575, y: 100, width: 48, height: 48, type: 'anchor' },
+            { x: 3675, y: 100, width: 48, height: 48, type: 'anchor' },
             { x: 3810, y: 410, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // --- Section C: ravine wall and upper branch ---

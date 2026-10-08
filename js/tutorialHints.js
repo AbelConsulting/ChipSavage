@@ -248,8 +248,7 @@ class TutorialHints {
         try { seen = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { seen = {}; }
 
         const map = [
-            { id: 'btn-left',   label: 'MOVE',   actions: ['left'] },
-            { id: 'btn-right',  label: 'MOVE',   actions: ['right'] },
+            { id: 'move-stick', label: 'MOVE',   actions: ['left', 'right'] },
             { id: 'btn-jump',   label: 'JUMP',   actions: ['jump'] },
             { id: 'btn-attack', label: 'ATTACK', actions: ['attack'] }
         ];
@@ -279,8 +278,7 @@ class TutorialHints {
             try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch (_) {}
         };
 
-        // Attach a one-shot direct press listener per button. This works for
-        // both the TouchControls class and the static HTML fallback.
+        // Attach a one-shot direct press listener per button.
         const perBtnHandlers = [];
         for (const entry of applyTo) {
             const handler = () => clearOne(entry);

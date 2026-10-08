@@ -45,8 +45,11 @@
             width: 100%; height: 100%;
             background-color: #000;
             overflow: hidden;
+            overscroll-behavior: none;
             -webkit-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
         html { background-color: #000; }
 
@@ -154,9 +157,13 @@
             padding: 0;
         }
         #d-pad {
-            left: max(12px, var(--safe-left));
-            padding: 0;
+            /* Padding enlarges the touch target around the ring while the
+               ring itself stays 12px from the screen edge. */
+            left: max(0px, calc(var(--safe-left) - 12px));
+            bottom: 0;
+            padding: 28px 28px 12px 12px;
             background: none;
+            touch-action: none;
         }
         #move-stick {
             position: relative;
@@ -317,6 +324,19 @@
         @media (max-width: 360px) {
             #move-stick { width: 104px; height: 104px; }
             #actions { width: 164px; }
+        }
+        /* Landscape phone browsers with the address bar showing (~300px tall):
+           shrink the cluster so it doesn't cover half the playfield. */
+        @media (max-height: 340px) and (pointer: coarse), (max-height: 340px) and (max-width: 1100px) {
+            #touch-controls { height: 128px; }
+            #d-pad { padding: 20px 20px 8px 8px; }
+            #move-stick { width: 100px; height: 100px; }
+            .stick-thumb { width: 44px; height: 44px; }
+            #actions { width: 156px; height: 118px; bottom: 8px; }
+            #btn-attack { width: 54px; height: 54px; left: 6px; top: 6px; }
+            #btn-jump { width: 64px; height: 64px; font-size: 28px; }
+            #btn-special { width: 44px; height: 44px; font-size: 18px; }
+            #btn-skunk { width: 50px; height: 50px; font-size: 21px; }
         }
 
         /* ── Pause button ── */
@@ -876,7 +896,6 @@
     <script src="js/enemy.js?v=1.0.0"></script>
     <script src="js/enemyManager.js?v=1.0.0"></script>
     <script src="js/itemManager.js?v=1.0.0"></script>
-    <script src="js/touchControls.js?v=1.0.0"></script>
     <script src="js/ui.js?v=1.0.0"></script>
     <script src="js/achievements.js?v=1.0.0"></script>
     <script src="js/tutorialHints.js?v=1.0.0"></script>
@@ -916,6 +935,10 @@
         const releases = [];
         const stick = document.getElementById('move-stick');
         if (stick) {
+            // The padded #d-pad wrapper is the touch target so a thumb that
+            // lands just outside the ring still steers; offsets are always
+            // measured from the ring's centre.
+            const zone = document.getElementById('d-pad') || stick;
             let activePointer = null;
             const heldKeys = new Set();
             const updateStick = (event) => {
@@ -924,15 +947,22 @@
                 const deltaX = event.clientX - bounds.left - radius;
                 const deltaY = event.clientY - bounds.top - radius;
                 const distance = Math.hypot(deltaX, deltaY);
-                const travel = Math.min(1, (radius - 25) / (distance || 1));
+                const thumb = stick.querySelector ? stick.querySelector('.stick-thumb') : null;
+                const thumbHalf = thumb && thumb.offsetWidth ? thumb.offsetWidth / 2 : 25;
+                const travel = Math.min(1, (radius - thumbHalf) / (distance || 1));
                 stick.style.setProperty('--stick-x', `${deltaX * travel}px`);
                 stick.style.setProperty('--stick-y', `${deltaY * travel}px`);
                 const nextKeys = new Set();
-                const threshold = radius * 0.25;
-                if (deltaX < -threshold) nextKeys.add('ArrowLeft');
-                if (deltaX > threshold) nextKeys.add('ArrowRight');
-                if (deltaY < -threshold) nextKeys.add('ArrowUp');
-                if (deltaY > threshold) nextKeys.add('ArrowDown');
+                if (distance > radius * 0.25) {
+                    // Angle sectors instead of per-axis thresholds: horizontal
+                    // holds up to ~60° off the axis and vertical needs ≥45°, so
+                    // a thumb drifting while running doesn't grab ladders or
+                    // keep the player stuck on one.
+                    const absX = Math.abs(deltaX);
+                    const absY = Math.abs(deltaY);
+                    if (absX >= absY * 0.58) nextKeys.add(deltaX < 0 ? 'ArrowLeft' : 'ArrowRight');
+                    if (absY >= absX) nextKeys.add(deltaY < 0 ? 'ArrowUp' : 'ArrowDown');
+                }
                 for (const key of heldKeys) {
                     if (!nextKeys.has(key)) triggerKeyEvent(key, 'keyup');
                 }
@@ -950,21 +980,22 @@
                 stick.classList.remove('is-pressed');
                 stick.style.removeProperty('--stick-x');
                 stick.style.removeProperty('--stick-y');
-                if (pointer !== null && stick.hasPointerCapture(pointer)) stick.releasePointerCapture(pointer);
+                try { if (pointer !== null && zone.hasPointerCapture(pointer)) zone.releasePointerCapture(pointer); } catch (_) {}
             };
-            stick.addEventListener('pointerdown', (event) => {
+            zone.oncontextmenu = (e) => { e.preventDefault(); return false; };
+            zone.addEventListener('pointerdown', (event) => {
                 if (activePointer !== null || !window.game || game.state !== 'PLAYING') return;
                 event.preventDefault();
                 activePointer = event.pointerId;
-                stick.setPointerCapture(activePointer);
+                try { zone.setPointerCapture(activePointer); } catch (_) {}
                 stick.classList.add('is-pressed');
                 updateStick(event);
             });
-            stick.addEventListener('pointermove', (event) => {
+            zone.addEventListener('pointermove', (event) => {
                 if (event.pointerId === activePointer) updateStick(event);
             });
             for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-                stick.addEventListener(type, (event) => {
+                zone.addEventListener(type, (event) => {
                     if (event.pointerId === activePointer) releaseStick();
                 });
             }
@@ -980,7 +1011,7 @@
                 if (btn.classList.contains('disabled')) return;
                 event.preventDefault();
                 activePointer = event.pointerId;
-                btn.setPointerCapture(activePointer);
+                try { btn.setPointerCapture(activePointer); } catch (_) {}
                 btn.classList.add('is-pressed');
                 try { if (navigator.vibrate) navigator.vibrate(10); } catch(_){}
                 triggerKeyEvent(key, 'keydown');
@@ -991,7 +1022,7 @@
                 activePointer = null;
                 btn.classList.remove('is-pressed');
                 triggerKeyEvent(key, 'keyup');
-                if (pointer !== null && btn.hasPointerCapture(pointer)) btn.releasePointerCapture(pointer);
+                try { if (pointer !== null && btn.hasPointerCapture(pointer)) btn.releasePointerCapture(pointer); } catch (_) {}
             };
             btn.addEventListener('pointerdown', down);
             btn.addEventListener('pointerup',   up);
@@ -1071,6 +1102,34 @@
     };
     initTouchControls();
     initShotAbilityTray();
+
+    // ── MOBILE BROWSER FULLSCREEN ────────────────────────────────────────────
+    // Landscape browsers lose ~60px to the address bar. Starting a run is a
+    // user gesture, so request fullscreen + landscape lock then. The native
+    // Android app already runs immersive, so it's skipped there.
+    function requestMobileFullscreen() {
+        try {
+            if (!isMobile()) return;
+            if (window.Capacitor && typeof Capacitor.isNativePlatform === 'function' && Capacitor.isNativePlatform()) return;
+            if (document.fullscreenElement || document.webkitFullscreenElement) return;
+            const el = document.documentElement;
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (!req) return;
+            const lock = () => {
+                try {
+                    const o = screen.orientation;
+                    if (o && typeof o.lock === 'function') o.lock('landscape').catch(() => {});
+                } catch (_) {}
+            };
+            const result = req.call(el, { navigationUI: 'hide' });
+            if (result && typeof result.then === 'function') result.then(lock).catch(() => {});
+            else lock();
+        } catch (_) {}
+    }
+    ['menu-play-btn', 'menu-survival-btn', 'rotate-play-btn', 'resume-btn'].forEach((id) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('click', requestMobileFullscreen, true);
+    });
 
     // ── GOLF SHOT BUTTON AVAILABILITY ────────────────────────────────────────
     setInterval(() => {
