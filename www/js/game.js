@@ -209,30 +209,6 @@ class Game {
                             this.itemManager.spawnGoldenIdol(spawn.x, spawn.y, idx, this.currentLevelId);
                         }
                     });
-                    
-                    // Spawn speed boost power-ups
-                    const speedBoostSpawns = Array.isArray(config.speedBoosts) ? config.speedBoosts : [];
-                    speedBoostSpawns.forEach((spawn) => {
-                        if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                            this.itemManager.spawnSpeedBoost(spawn.x, spawn.y);
-                        }
-                    });
-                    
-                    // Spawn damage boost power-ups
-                    const damageBoostSpawns = Array.isArray(config.damageBoosts) ? config.damageBoosts : [];
-                    damageBoostSpawns.forEach((spawn) => {
-                        if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                            this.itemManager.spawnDamageBoost(spawn.x, spawn.y);
-                        }
-                    });
-                    
-                    // Spawn skunk power-ups
-                    const skunkPowerupSpawns = Array.isArray(config.skunkPowerups) ? config.skunkPowerups : [];
-                    skunkPowerupSpawns.forEach((spawn) => {
-                        if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                            this.itemManager.spawnSkunkPowerup(spawn.x, spawn.y);
-                        }
-                    });
                 }
             }
         } catch (e) { __err('game', e); }
@@ -433,7 +409,6 @@ class Game {
                     } catch (e) { __err('game', e); }
                 }
             });
-
             // If the window loses focus, keyup events may never fire.
             // Clear input to avoid stuck movement when returning.
             window.addEventListener('blur', () => {
@@ -1176,29 +1151,6 @@ class Game {
                     }
                 });
                 
-                // Spawn speed boost power-ups
-                const speedBoostSpawns = Array.isArray(config.speedBoosts) ? config.speedBoosts : [];
-                speedBoostSpawns.forEach((spawn) => {
-                    if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                        this.itemManager.spawnSpeedBoost(spawn.x, spawn.y);
-                    }
-                });
-                
-                // Spawn damage boost power-ups
-                const damageBoostSpawns = Array.isArray(config.damageBoosts) ? config.damageBoosts : [];
-                damageBoostSpawns.forEach((spawn) => {
-                    if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                        this.itemManager.spawnDamageBoost(spawn.x, spawn.y);
-                    }
-                });
-                
-                // Spawn skunk power-ups
-                const skunkPowerupSpawns = Array.isArray(config.skunkPowerups) ? config.skunkPowerups : [];
-                skunkPowerupSpawns.forEach((spawn) => {
-                    if (spawn && typeof spawn.x === 'number' && typeof spawn.y === 'number') {
-                        this.itemManager.spawnSkunkPowerup(spawn.x, spawn.y);
-                    }
-                });
             }
 
             // Boss state is per-level; always reset when loading a new level.
@@ -1806,7 +1758,11 @@ class Game {
             }
         }
         for (const drop of this.level.pendingPowerupDrops) {
-            this.itemManager.spawnRandomPowerup(drop.x, drop.y);
+            const item = drop.powerupType
+                ? this.itemManager.spawnPowerup(drop.powerupType, drop.x, drop.y)
+                : this.itemManager.spawnRandomPowerup(drop.x, drop.y);
+            item.sourceX = drop.sourceX;
+            item.sourceY = drop.sourceY;
         }
         this.level.pendingPowerupDrops.length = 0;
     }

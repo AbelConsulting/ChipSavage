@@ -70,6 +70,15 @@ class Level {
             platform.previousY = platform.y;
             return platform;
         });
+        for (const [field, powerupType] of [
+            ['speedBoosts', 'SPEED_BOOST'],
+            ['damageBoosts', 'DAMAGE_BOOST'],
+            ['skunkPowerups', 'SKUNK_POWERUP']
+        ]) {
+            for (const spawn of levelData[field] || []) {
+                this.spawnPowerupShield(spawn, powerupType);
+            }
+        }
         // Optional enemy spawn points (array of { x: number|'left'|'right', y: number })
         this.spawnPoints = Array.isArray(levelData.spawnPoints) ? levelData.spawnPoints.slice() : null;
 
@@ -116,6 +125,12 @@ class Level {
             }
         });
 
+        for (const shield of this.platforms) {
+            if (!shield.supportPlatform || shield.supportPlatform.type !== 'moving') continue;
+            shield.x = shield.supportPlatform.x + shield.supportOffsetX;
+            shield.y = shield.supportPlatform.y - shield.height - 25;
+        }
+
         // Update moving hazards (if any)
         if (this.hazards && this.hazards.length > 0) {
             this.hazards.forEach(h => {
@@ -136,7 +151,7 @@ class Level {
     }
 
     /**
-     * Restock configured wall-side pickups only when out of ammo and the gate is intact.
+     * Restock configured wall-side ammo shields only when out of ammo and the gate is intact.
      * Wall ammoRefill coordinates must match a skunkPowerups entry in the level data.
      */
     updateProgressionPickups(player, itemManager) {
@@ -145,10 +160,63 @@ class Level {
             if (wall.type !== 'wall' || !wall.ammoRefill) continue;
             const { x, y } = wall.ammoRefill;
             const hasPickup = itemManager.items.some(item =>
-                !item.collected && item.type === 'SKUNK_POWERUP' && item.x === x && item.baseY === y
+                !item.collected && item.type === 'SKUNK_POWERUP' &&
+                ((item.sourceX === x && item.sourceY === y) || (item.x === x && item.baseY === y))
             );
-            if (!hasPickup) itemManager.spawnSkunkPowerup(x, y);
+            const hasShield = this.platforms.some(platform =>
+                this.isShieldTile(platform) && platform.powerupType === 'SKUNK_POWERUP' &&
+                platform.sourceX === x && platform.sourceY === y
+            );
+            const hasPendingDrop = this.pendingPowerupDrops.some(drop =>
+                drop.powerupType === 'SKUNK_POWERUP' && drop.sourceX === x && drop.sourceY === y
+            );
+            if (!hasPickup && !hasShield && !hasPendingDrop) {
+                this.spawnPowerupShield({ x, y }, 'SKUNK_POWERUP');
+                this._staticNeedsUpdate = true;
+            }
         }
+    }
+
+    spawnPowerupShield(spawn, powerupType) {
+        if (!spawn || !Number.isFinite(spawn.x) || !Number.isFinite(spawn.y)) {
+            throw new Error('Powerup shield requires finite spawn coordinates.');
+        }
+        const surfaces = this.platforms.filter(platform =>
+            !this.isShieldTile(platform) &&
+            ['static', 'moving', 'wall'].includes(platform.type) && platform.y >= 0
+        );
+        if (!surfaces.length) throw new Error('Powerup shield requires a supporting surface.');
+        let support = surfaces.filter(platform =>
+            spawn.x >= platform.x && spawn.x <= platform.x + platform.width && platform.y >= spawn.y
+        ).sort((a, b) => a.y - b.y)[0];
+        let centerX = spawn.x;
+        if (!support) {
+            const nearestCenterX = platform => platform.width < 48
+                ? platform.x + platform.width / 2
+                : Utils.clamp(spawn.x, platform.x + 24, platform.x + platform.width - 24);
+            const distance = platform => (nearestCenterX(platform) - spawn.x) ** 2 +
+                (platform.y - 49 - spawn.y) ** 2;
+            support = surfaces.reduce((nearest, platform) =>
+                distance(platform) < distance(nearest) ? platform : nearest
+            );
+            centerX = nearestCenterX(support);
+        }
+        const shield = {
+            x: centerX - 24,
+            y: support.y - 48 - 25,
+            width: 48, height: 48, type: 'wall', tile: 'shield_tile',
+            powerupType, sourceX: spawn.x, sourceY: spawn.y
+        };
+        if (support.type === 'moving') {
+            shield.supportPlatform = support;
+            shield.supportOffsetX = shield.x - support.x;
+        }
+        this.platforms.push(shield);
+        return shield;
+    }
+
+    isDynamicPlatform(platform) {
+        return platform.type === 'moving' || !!platform.supportPlatform;
     }
 
     /**
@@ -208,6 +276,8 @@ class Level {
 
         for (const platform of this.platforms) {
             if (platform.type !== 'wall') continue;
+            // Pickup containers must not obstruct the routes their loose balls occupied.
+            if (this.isShieldTile(platform) && platform.powerupType) continue;
 
             const overlaps = (
                 outX < platform.x + platform.width &&
@@ -346,7 +416,12 @@ class Level {
             this.renderStaticLayer();
         }
         const result = { destroyed: true, material, x: wall.x + wall.width / 2, y: wall.y + wall.height / 2 };
-        if (material === 'shield') this.pendingPowerupDrops.push({ x: result.x, y: result.y });
+        if (material === 'shield') {
+            this.pendingPowerupDrops.push({
+                x: result.x, y: result.y, powerupType: wall.powerupType,
+                sourceX: wall.sourceX, sourceY: wall.sourceY
+            });
+        }
         return result;
     }
 
@@ -475,18 +550,18 @@ class Level {
             } catch (e) {
                 // fallback to per-platform draw
                 for (const platform of this.platforms) {
-                    if (platform.type !== 'moving') this.drawPlatform(ctx, platform);
+                    if (!this.isDynamicPlatform(platform)) this.drawPlatform(ctx, platform);
                 }
             }
         } else {
             for (const platform of this.platforms) {
-                if (platform.type !== 'moving') this.drawPlatform(ctx, platform);
+                if (!this.isDynamicPlatform(platform)) this.drawPlatform(ctx, platform);
             }
         }
 
         // Always draw moving platforms on top
         for (const platform of this.platforms) {
-            if (platform.type === 'moving') this.drawPlatform(ctx, platform);
+            if (this.isDynamicPlatform(platform)) this.drawPlatform(ctx, platform);
         }
 
         // 3. Hazards are not supported in this build; legacy hazard data is ignored.
@@ -824,7 +899,7 @@ class Level {
 
             // Draw static (non-moving) platforms into the static canvas
             for (const p of this.platforms) {
-                if (p.type === 'moving') continue; // skip moving platforms
+                if (this.isDynamicPlatform(p)) continue;
 
                 const sx = Math.floor((p.x / this.width) * canvas.width);
                 const sy = Math.floor((p.y / this.height) * canvas.height);

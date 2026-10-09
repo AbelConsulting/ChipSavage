@@ -78,17 +78,22 @@ for (const kick of [false, true]) {
 }
 
 for (const action of ['attack', 'specialAttack']) {
-    test(`a real ${action} breaks and collects each first-level shield from the ground`, () => {
-        const { player, level, game, items, stage } = setup();
-        for (const definition of stage.platforms.filter(p => p.tile === 'shield_tile')) {
-            level.loadLevel(stage);
+    test(`a real ${action} breaks a hovering shield from its supporting platform`, () => {
+        const { player, level, game, items } = setup();
+        const data = {
+            platforms: [{ x: 0, y: 500, width: 1000, height: 24, type: 'static' }],
+            speedBoosts: [{ x: 350, y: 460 }]
+        };
+        for (const facingRight of [true, false]) {
+            level.loadLevel(data);
+            const definition = level.platforms.find(p => level.isShieldTile(p));
             items.items.length = 0;
-            player.x = definition.x - player.width;
-            player.y = definition.y + definition.height - player.height;
+            player.x = facingRight ? definition.x - player.width : definition.x + definition.width;
+            player.y = 500 - player.height;
             player.velocityX = 0;
             player.velocityY = 0;
             player.onGround = true;
-            player.facingRight = true;
+            player.facingRight = facingRight;
             player.attackCooldownTimer = 0;
             player[action]();
             for (let frame = 0; frame < 30 && !items.items.length; frame++) {
@@ -195,14 +200,7 @@ test('shield art is drawn as one scaled sprite in both direct and cached renderi
     assert.equal(context.level._staticNeedsUpdate, false);
 });
 
-test('first-level shields sit on reachable ground and sprite is preloaded and packaged', () => {
-    const { stage, level } = setup();
-    const shields = stage.platforms.filter(tile => level.isShieldTile(tile));
-    assert.equal(shields.length, 3);
-    for (const tile of shields) {
-        assert.ok(stage.platforms.some(p => p.type === 'static' &&
-            p.y === tile.y + tile.height && p.x <= tile.x && p.x + p.width >= tile.x + tile.width));
-    }
+test('shield sprite is preloaded and packaged', () => {
     const loader = fs.readFileSync(path.join(root, 'js', 'spriteLoader.js'), 'utf8');
     assert.ok(loader.includes("['shield_tile', 'assets/sprites/backgrounds/tiles/shield_tile.png']"));
     const asset = path.join('assets', 'sprites', 'backgrounds', 'tiles', 'shield_tile.png');
@@ -211,6 +209,165 @@ test('first-level shields sit on reachable ground and sprite is preloaded and pa
         assert.equal(fs.readFileSync(path.join(root, 'js', `${name}.js`), 'utf8'),
             fs.readFileSync(path.join(root, 'www', 'js', `${name}.js`), 'utf8'));
     }
+});
+
+test('every configured ball becomes exactly one shield with the original powerup type', () => {
+    const context = setup();
+    vm.runInContext('globalThis.stages = LEVEL_CONFIGS;', context);
+    const { level, game, items, stages } = context;
+    let count = 0;
+    for (const stage of stages) {
+        level.loadLevel(stage);
+        const shields = level.platforms.filter(p => level.isShieldTile(p));
+        const expected = [
+            ...(stage.speedBoosts || []).map(spawn => ({ ...spawn, type: 'SPEED_BOOST' })),
+            ...(stage.damageBoosts || []).map(spawn => ({ ...spawn, type: 'DAMAGE_BOOST' })),
+            ...(stage.skunkPowerups || []).map(spawn => ({ ...spawn, type: 'SKUNK_POWERUP' }))
+        ];
+        assert.equal(shields.length, expected.length, stage.id);
+        for (const spawn of expected) {
+            const tile = shields.find(p => p.sourceX === spawn.x && p.sourceY === spawn.y && p.powerupType === spawn.type);
+            assert.ok(tile, `${stage.id}: ${spawn.type} at ${spawn.x},${spawn.y}`);
+            const support = level.platforms.filter(p =>
+                !level.isShieldTile(p) && ['static', 'moving', 'wall'].includes(p.type) &&
+                spawn.x >= p.x && spawn.x <= p.x + p.width && p.y >= spawn.y
+            ).sort((a, b) => a.y - b.y)[0];
+            if (support) {
+                assert.equal(tile.x + tile.width / 2, spawn.x);
+                assert.equal(support.y - tile.y - tile.height, 25);
+            } else {
+                assert.ok(level.platforms.some(p => !level.isShieldTile(p) &&
+                    ['static', 'moving', 'wall'].includes(p.type) &&
+                    p.y - tile.y - tile.height === 25 &&
+                    tile.x + tile.width / 2 >= p.x && tile.x + tile.width / 2 <= p.x + p.width));
+            }
+            items.items.length = 0;
+            level.hitWall(tile, 'melee');
+            game.updateShieldTiles();
+            game.updateShieldTiles();
+            assert.equal(items.items.length, 1);
+            assert.equal(items.items[0].type, spawn.type);
+            count++;
+        }
+        level.loadLevel(stage);
+        assert.equal(level.platforms.filter(p => level.isShieldTile(p)).length, expected.length);
+    }
+    assert.ok(count > 100);
+});
+
+test('shields on moving supports track both axes while retaining the 25px gap', () => {
+    for (const axis of ['x', 'y']) {
+        const { level } = setup([]);
+        level.loadLevel({
+            platforms: [{ x: 300, y: 500, width: 200, height: 24, type: 'moving', axis, range: 60, speed: 1 }],
+            damageBoosts: [{ x: 350, y: 460 }]
+        });
+        const tile = level.platforms.find(p => level.isShieldTile(p));
+        const support = tile.supportPlatform;
+        const offset = tile.x - support.x;
+        assert.equal(level.isDynamicPlatform(tile), true);
+        for (let frame = 0; frame < 180; frame++) {
+            level.update(1 / 60);
+            assert.equal(support.y - tile.y - tile.height, 25);
+            assert.equal(tile.x - support.x, offset);
+        }
+    }
+});
+
+test('placed pickup shields do not block player traversal and ordinary loose drops remain unchanged', () => {
+    const { level, items } = setup([]);
+    level.loadLevel({
+        platforms: [{ x: 0, y: 500, width: 1000, height: 24, type: 'static' }],
+        skunkPowerups: [{ x: 350, y: 460 }]
+    });
+    const tile = level.platforms.find(p => level.isShieldTile(p));
+    const rect = { x: tile.x, y: tile.y, width: 64, height: 64 };
+    assert.equal(level.resolveSolidCollision(rect, { ...rect, x: rect.x - 64 }).collidedX, false);
+    assert.equal(level.resolveSolidCollision(rect, { ...rect, y: rect.y - 64 }).collidedY, false);
+    const loose = items.spawnSkunkPowerup(350, 460);
+    assert.equal(loose.popAge, undefined);
+    assert.equal(loose.sourceX, undefined);
+    assert.equal(level.platforms.filter(p => level.isShieldTile(p)).length, 1);
+});
+
+test('game level loading spawns only idols directly, restores shields, and clears old balls', () => {
+    const context = setup([]);
+    const { level, items, game, stage } = context;
+    context.ExitPortal = class {};
+    game.gameStats = {};
+    game._clearAllInput = () => {};
+    game.loadLevel(0, { skipMusic: true });
+    assert.equal(items.items.every(item => item.type === 'GOLDEN_IDOL'), true);
+    const shields = level.platforms.filter(p => level.isShieldTile(p));
+    assert.equal(shields.length, stage.speedBoosts.length + stage.damageBoosts.length + stage.skunkPowerups.length);
+    level.hitWall(shields[0], 'melee');
+    game.updateShieldTiles();
+    assert.ok(items.items.some(item => item.type === shields[0].powerupType));
+    game.loadLevel(0, { skipMusic: true });
+    assert.equal(items.items.every(item => item.type === 'GOLDEN_IDOL'), true);
+    assert.equal(level.platforms.filter(p => level.isShieldTile(p)).length, shields.length);
+});
+
+test('ammo refills respawn shields, not loose balls, without duplicating pending or uncollected drops', () => {
+    const { level, player, items, game, stage } = setup();
+    level.loadLevel(stage);
+    const gate = level.platforms.find(p => p.ammoRefill);
+    const findShield = () => level.platforms.find(p => level.isShieldTile(p) &&
+        p.sourceX === gate.ammoRefill.x && p.sourceY === gate.ammoRefill.y);
+    player.golfAmmo = 0;
+    level.updateProgressionPickups(player, items);
+    assert.ok(findShield());
+    assert.equal(items.items.length, 0);
+    level.hitWall(findShield(), 'melee');
+    level.updateProgressionPickups(player, items);
+    assert.equal(findShield(), undefined, 'Queued ball must prevent a duplicate shield');
+    game.updateShieldTiles();
+    level.updateProgressionPickups(player, items);
+    assert.equal(findShield(), undefined, 'Uncollected ball must prevent a duplicate shield');
+    items.items[0].collected = true;
+    items.update(1 / 60);
+    player.golfAmmo = 2;
+    level.updateProgressionPickups(player, items);
+    assert.equal(findShield(), undefined);
+    player.golfAmmo = 0;
+    level.updateProgressionPickups(player, items);
+    const refill = findShield();
+    assert.ok(refill);
+    level.updateProgressionPickups(player, items);
+    assert.equal(level.platforms.filter(p => p.sourceX === refill.sourceX && p.sourceY === refill.sourceY).length, 1);
+    level.hitWall(refill, 'melee');
+    game.updateShieldTiles();
+    items.items.length = 0;
+    level.hitWall(gate, 'fireball');
+    level.updateProgressionPickups(player, items);
+    assert.equal(findShield(), undefined);
+});
+
+test('mandatory gate ammo can be released with a real melee attack, collected, and fired at the gate', () => {
+    const { level, player, items, game, stage } = setup();
+    level.loadLevel(stage);
+    const gate = level.platforms.find(p => p.ammoRefill);
+    const tile = level.platforms.find(p => p.sourceX === gate.ammoRefill.x && p.sourceY === gate.ammoRefill.y);
+    player.x = tile.x - player.width;
+    player.y = tile.y + tile.height + 25 - player.height;
+    player.facingRight = true;
+    player.golfAmmo = 0;
+    player.attack();
+    game.updateShieldTiles();
+    assert.equal(items.items.length, 1);
+    assert.equal(items.items[0].type, 'SKUNK_POWERUP');
+    items.update(0.45);
+    player.x = tile.x;
+    const collected = items.checkPlayerCollision(player);
+    assert.equal(collected.length, 1);
+    items.applyItemEffect(player, collected[0]);
+    assert.equal(player.golfAmmo, 2);
+    player.selectGolfShot('fireball');
+    player.shootGolfProjectile();
+    for (let frame = 0; frame < 120 && level.platforms.includes(gate); frame++) {
+        player.updateProjectiles(1 / 60, level);
+    }
+    assert.equal(level.platforms.includes(gate), false);
 });
 
 test('editor enables shields for static platforms and non-solid walls but protects special geometry', () => {

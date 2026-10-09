@@ -182,8 +182,19 @@ class ItemManager {
     }
 
     spawnRandomPowerup(x, y) {
-        const spawners = ['spawnHealthRegen', 'spawnSpeedBoost', 'spawnDamageBoost', 'spawnSkunkPowerup'];
-        const item = this[spawners[Math.floor(Math.random() * spawners.length)]](x, y);
+        const types = ['HEALTH_REGEN', 'SPEED_BOOST', 'DAMAGE_BOOST', 'SKUNK_POWERUP'];
+        return this.spawnPowerup(types[Math.floor(Math.random() * types.length)], x, y);
+    }
+
+    spawnPowerup(type, x, y) {
+        const spawners = {
+            HEALTH_REGEN: 'spawnHealthRegen', SPEED_BOOST: 'spawnSpeedBoost',
+            DAMAGE_BOOST: 'spawnDamageBoost', SKUNK_POWERUP: 'spawnSkunkPowerup'
+        };
+        if (!Object.prototype.hasOwnProperty.call(spawners, type)) {
+            throw new Error(`Unknown shield powerup type: ${type}`);
+        }
+        const item = this[spawners[type]](x, y);
         item.popAge = 0;
         item.popDuration = 0.45;
         return item;

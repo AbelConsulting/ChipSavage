@@ -175,12 +175,7 @@ const LEVEL_CONFIGS = [
             { x: 12400, y: 160, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 150, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
-
-            // Break with an attack, kick, or shot to release one random powerup ball.
-            { x: 520, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
-            { x: 1980, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
-            { x: 4080, y: 612, width: 48, height: 48, type: 'wall', tile: 'shield_tile' }
+            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
@@ -190,6 +185,7 @@ const LEVEL_CONFIGS = [
             { x: 10750, y: 200 },
             { x: 12500, y: 120 }
         ],
+        // Ball placements become shields 25px above their support, retaining their powerup type.
         speedBoosts: [
              // Upper shock screen, mandatory fire passage, late rooftop jump.
             { x: 2820, y: 40 },

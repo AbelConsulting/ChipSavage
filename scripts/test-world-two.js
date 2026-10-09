@@ -8,13 +8,14 @@ function setup(id) {
     class Effect { update() {} }
     const context = vm.createContext({
         console,
+        window: {},
         SpeedTrailEffect: Effect,
         HealthRegenEffect: Effect,
         DamageBoostEffect: Effect,
         __err(...args) { throw new Error(args.join(' ')); }
     });
     context.id = id;
-    for (const name of ['config', 'utils', 'levelData', 'level', 'player', 'itemManager']) {
+    for (const name of ['config', 'utils', 'visualEffects', 'levelData', 'level', 'player', 'itemManager', 'game']) {
         vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', `${name}.js`), 'utf8'), context);
     }
     vm.runInContext(`
@@ -25,6 +26,9 @@ function setup(id) {
         globalThis.player = new Player(0, 0, null);
         player.level = level;
         globalThis.items = new ItemManager();
+        globalThis.game = Object.create(Game.prototype);
+        Object.assign(game, { level, player, itemManager: items, hitSparks: [] });
+        level.testGame = game;
     `, context);
     return context;
 }
@@ -32,6 +36,10 @@ function setup(id) {
 function tick(level, player) {
     level.update(1 / 60);
     player.update(1 / 60, level);
+    player._updateAttackHitboxPosition();
+    if (!player.isClimbing && level.getShieldTileAt(player.attackHitbox)) player.attack();
+    level.testGame.updateShieldTiles();
+    level.testGame.itemManager.update(1 / 60);
 }
 
 const spawners = {
@@ -68,6 +76,19 @@ for (const id of ['level_2', 'level_2_boss']) {
                 assert.ok(routes.some(([stageId, kind, x, y]) =>
                     stageId === id && kind === group && x === position.x && y === position.y
                 ));
+                const tile = group === 'idols' ? null : level.platforms.find(p =>
+                    level.isShieldTile(p) && p.sourceX === position.x && p.sourceY === position.y
+                );
+                if (group !== 'idols') {
+                    assert.ok(tile);
+                    assert.equal(tile.powerupType, {
+                        speedBoosts: 'SPEED_BOOST', damageBoosts: 'DAMAGE_BOOST', skunkPowerups: 'SKUNK_POWERUP'
+                    }[group]);
+                    assert.ok(level.platforms.some(p => !level.isShieldTile(p) &&
+                        p.type === 'static' && p.y - tile.y - tile.height === 25 &&
+                        position.x >= p.x && position.x <= p.x + p.width));
+                    continue;
+                }
                 const item = items[spawner](position.x, position.y);
                 const bounce = bounceRanges[group];
                 const bounds = {
@@ -90,8 +111,8 @@ for (const [id, group, x, y, action, startX, startY, target] of routes) {
     for (const bounce of [-bounceRanges[group], bounceRanges[group]]) {
         test(`${id} ${group} ${x} is collectible via ${action} at bounce ${bounce}`, () => {
             const { level, player, items } = setup(id);
-            const item = items[spawners[group]](x, y);
-            item.y += bounce;
+            let item = group === 'idols' ? items.spawnGoldenIdol(x, y) : null;
+            if (item) item.y += bounce;
             player.x = startX;
             player.y = startY - player.height;
             player.onGround = true;
@@ -120,10 +141,15 @@ for (const [id, group, x, y, action, startX, startY, target] of routes) {
                 player.keys = Math.abs(distance) < 12 ? {} : (distance > 0 ? { arrowright: true } : { arrowleft: true });
                 if (player.hookshotSwing && player.x > target - 140) player.releaseHookshotSwing(true);
                 tick(level, player);
-                if (items.checkPlayerCollision(player).includes(item)) {
+                if (!item) item = items.items.find(p => p.sourceX === x && p.sourceY === y);
+                if (item && (typeof item.popAge !== 'number' || item.popAge >= item.popDuration)) {
+                    item.y = item.baseY + bounce;
+                }
+                if (item && items.checkPlayerCollision(player).includes(item)) {
                     collected = true;
                     break;
                 }
+                if (group !== 'idols' && player.onGround && player.y > y) player.jump();
             }
             assert.ok(collected, `Missed pickup at ${x},${y}; player=${player.x},${player.y}`);
             assert.equal(player.golfAmmo, 0);

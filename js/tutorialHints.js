@@ -67,10 +67,10 @@ class TutorialHints {
                 duration: 10,
                 kb:    ['Press X to Attack rivals!',
                         'Chain hits within 2s for combos!',
-                        'Break shield tiles for a random powerup ball!'],
+                        'Break shield tiles to release powerup balls!'],
                 touch: ['Tap 🗡 to Attack rivals!',
                         'Chain hits within 2s for combos!',
-                        'Break shield tiles for a random powerup ball!']
+                        'Break shield tiles to release powerup balls!']
             },
             attack_pity: {
                 id: 'attack_pity',

@@ -100,16 +100,20 @@ test('the gate refill prevents an ammo softlock without duplicating pickups or r
     player.golfAmmo = 0;
     level.updateProgressionPickups(player, items);
     level.updateProgressionPickups(player, items);
-    assert.equal(items.items.length, 1);
-    const pickup = items.items[0];
-    pickup.collected = true;
+    const findShield = () => level.platforms.find(p => level.isShieldTile(p) &&
+        p.sourceX === gate.ammoRefill.x && p.sourceY === gate.ammoRefill.y);
+    assert.equal(items.items.length, 0);
+    assert.ok(findShield());
+    level.hitWall(findShield(), 'melee');
+    level.pendingPowerupDrops.length = 0;
     items.update(1 / 60);
     player.golfAmmo = 2;
     level.updateProgressionPickups(player, items);
     assert.equal(items.items.length, 0);
     player.golfAmmo = 0;
     level.updateProgressionPickups(player, items);
-    assert.equal(items.items.length, 1);
+    assert.ok(findShield());
+    assert.equal(items.items.length, 0);
     level.hitWall(gate, 'fireball');
     items.items = [];
     level.updateProgressionPickups(player, items);
