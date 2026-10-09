@@ -181,7 +181,6 @@ const LEVEL_CONFIGS = [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
             { x: 5, y: 65 },
             { x: 2900, y: 625 },
-            { x: 4750, y: 570 },
             { x: 9030, y: 130 },
         ],
         // Ball placements become shields 25px above their support, retaining their powerup type.
