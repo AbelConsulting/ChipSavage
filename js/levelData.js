@@ -84,14 +84,14 @@ const LEVEL_CONFIGS = [
             { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
             { x: 4300, y: 320, width: 250, height: 24, type: 'static', tile: 'platform4_tile' },
             // Cup alcove: jump off the ravine roof, then burn or climb the vine.
-            { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4750, y: 320, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4800, y: 160, width: 64, height: 160, type: 'wall', material: 'vine' },
             { x: 4758, y: 160, width: 36, height: 160, type: 'climb', style: 'vine' },
             { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
             { x: 5480, y: 560, width: 50, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 5650, y: 500, width: 60, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
+            { x: 5650, y: 500, width: 100, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
             // The solid cap blocks the upper lane; the base extends below the fall-death line.
