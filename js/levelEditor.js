@@ -25,7 +25,7 @@ class LevelEditor {
 
         this.storageKey = 'chipsavage_level_tiles_v1';
 
-        this.availableTiles = ['ground_tile', 'platform_tile', 'wall_tile', 'wall_tile_fire', 'wall_tile_bomb', 'wall_tile_shock'];
+        this.availableTiles = ['ground_tile', 'platform_tile', 'wall_tile', 'wall_tile_fire', 'wall_tile_bomb', 'wall_tile_shock', 'shield_tile'];
 
         this.selectedPlatformIndex = null;
 
@@ -237,6 +237,10 @@ class LevelEditor {
         }
         const p = this.level.platforms[this.selectedPlatformIndex];
         if (!p) return;
+        if (tileName === 'shield_tile' && (p.material === 'solid' || (p.type !== 'static' && p.type !== 'wall'))) {
+            alert('Shield tiles can only be assigned to static platforms or non-solid walls.');
+            return;
+        }
         if (tileName.startsWith('wall_tile_') && p.type !== 'wall') {
             alert('Elemental wall tiles can only be assigned to walls.');
             return;

@@ -181,6 +181,14 @@ class ItemManager {
         return item;
     }
 
+    spawnRandomPowerup(x, y) {
+        const spawners = ['spawnHealthRegen', 'spawnSpeedBoost', 'spawnDamageBoost', 'spawnSkunkPowerup'];
+        const item = this[spawners[Math.floor(Math.random() * spawners.length)]](x, y);
+        item.popAge = 0;
+        item.popDuration = 0.45;
+        return item;
+    }
+
     /**
      * Update all items (animations, lifetime, etc.)
      */
@@ -361,6 +369,11 @@ class ItemManager {
                 // Fast pulse
                 item.scale = 1.0 + Math.sin(item.pulseSpeed * Date.now() / 1000) * 0.15;
             }
+            if (typeof item.popAge === 'number' && item.popAge < item.popDuration) {
+                item.popAge = Math.min(item.popDuration, item.popAge + dt);
+                const progress = item.popAge / item.popDuration;
+                item.y = item.baseY + item.bounceOffset - 192 * progress * (1 - progress);
+            }
         }
     }
 
@@ -376,6 +389,7 @@ class ItemManager {
 
         for (const item of this.items) {
             if (item.collected) continue;
+            if (typeof item.popAge === 'number' && item.popAge < item.popDuration) continue;
 
             const itemRect = { 
                 x: item.x - item.width / 2, 

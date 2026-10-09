@@ -1790,6 +1790,27 @@ class Game {
             }, 900);
         }
 
+    updateShieldTiles() {
+        if (this.player.isAttackDamageActive()) {
+            const hitbox = this.player.getAttackHitboxForCollision();
+            for (const tile of this.level.platforms.slice()) {
+                if (!this.level.isShieldTile(tile) || !Utils.rectCollision(hitbox, tile)) continue;
+                const result = this.level.hitWall(tile, 'melee');
+                if (result.destroyed) {
+                    const burst = new HitSpark(result.x, result.y, { particleCount: 22 });
+                    const colors = ['#4169D8', '#FFD54A', '#F58BDC'];
+                    burst.particles.forEach((particle, index) => { particle.color = colors[index % colors.length]; });
+                    this.hitSparks.push(burst);
+                    if (this.audioManager) this.audioManager.playSound('golf_shot', { volume: 0.5, rate: 0.8 });
+                }
+            }
+        }
+        for (const drop of this.level.pendingPowerupDrops) {
+            this.itemManager.spawnRandomPowerup(drop.x, drop.y);
+        }
+        this.level.pendingPowerupDrops.length = 0;
+    }
+
         update(dt) {
             // Drive the post-level-complete wait off real frame dt instead
             // of setTimeout so it pauses with the rest of the loop.
@@ -2234,6 +2255,7 @@ class Game {
 
         // Update item manager
         if (this.itemManager) {
+            this.updateShieldTiles();
             this.level.updateProgressionPickups(this.player, this.itemManager);
             this.itemManager.update(dt);
             // Check item collection

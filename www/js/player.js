@@ -570,7 +570,14 @@ class Player {
                     height: proj.height
                 };
                 const collision = level.checkPlatformCollision(projRect, prevRect, proj.velocityY);
-                const hitWall = typeof level.getWallAt === 'function' ? level.getWallAt(projRect) : null;
+                const sweptRect = {
+                    x: Math.min(projRect.x, prevRect.x),
+                    y: Math.min(projRect.y, prevRect.y),
+                    width: proj.width + Math.abs(projRect.x - prevRect.x),
+                    height: proj.height + Math.abs(projRect.y - prevRect.y)
+                };
+                const hitShield = level.getShieldTileAt(sweptRect);
+                const hitWall = hitShield || (typeof level.getWallAt === 'function' ? level.getWallAt(projRect) : null);
                 const hitAnchor = proj.shotType === 'hookshot' && typeof level.getAnchorAt === 'function'
                     ? level.getAnchorAt(projRect)
                     : null;
@@ -656,6 +663,7 @@ class Player {
             vine: ['#97D76A', '#D8F4A5', '#5A7E46'],
             rock: ['#B8AFA1', '#EBE2D2', '#5A4D44'],
             shock: ['#4169D8', '#FFD54A', '#233B96'],
+            shield: ['#4169D8', '#FFD54A', '#F58BDC'],
             solid: ['#D3C5AF', '#F5E5CB', '#6A5B49']
         }[wallMaterial || 'solid'] || ['#D3C5AF', '#F5E5CB', '#6A5B49'];
         const spray = {

@@ -90,7 +90,7 @@ const LEVEL_CONFIGS = [
             { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
-            { x: 5480, y: 560, width: 15 0, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5650, y: 500, width: 100, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
@@ -175,7 +175,12 @@ const LEVEL_CONFIGS = [
             { x: 12400, y: 160, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 150, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
+            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+
+            // Break with an attack, kick, or shot to release one random powerup ball.
+            { x: 520, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
+            { x: 1980, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
+            { x: 4080, y: 612, width: 48, height: 48, type: 'wall', tile: 'shield_tile' }
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.

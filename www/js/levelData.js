@@ -4,16 +4,6 @@
  * Proprietary and confidential — unauthorized copying, distribution, or use
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
-/**
- * Level Configurations for Arcade Mode
- * Defines the stage progression: Forest -> City -> Dojo
- * Moving platforms use axis ('x' or 'y'), range (pixels either side of x/y),
- * speed (radians per gameplay second), and optional timeOffset (phase in radians).
- * Wall tiles bind to shots: wall_tile_fire -> fireball, wall_tile_bomb -> bomb,
- * wall_tile_shock -> gold (Stun). Plain wall_tile/solid walls cannot be broken.
- * Hookshot anchors occupy the upper band (y=64..150) for higher swing routes.
- * Boss spritePrefix optionally selects artwork without changing the boss type or AI.
- */
 
 const LEVEL_CONFIGS = [
     // =========================================================
@@ -27,7 +17,6 @@ const LEVEL_CONFIGS = [
         background: 'bg_1',
         music: ['forest_theme', 'gameplay'],
         spawnPoints: [ 
-            { x: 600, y: 300 },
             { x: 1200, y: 300 },
             { x: 1900, y: 300 },
             { x: 2600, y: 300 },
@@ -56,7 +45,9 @@ const LEVEL_CONFIGS = [
 
             // --- Section A: first wall gate ---
              { x: 8, y: 280, width: 25, height: 20, type: 'static', tile: 'platform5_tile' },
-             {x: 8, y: 150, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
+             { x: 8, y: 200, width: 25, height: 24, type: 'moving', axis: 'y', range: 50, speed: 1.4, tile: 'platform5_tile' },
+             { x: 8, y: 450, width: 35, height: 24, type: 'moving', axis: 'x', range: 50, speed: 1.4, tile: 'platform5_tile' },
+             { x: 325, y: 25, width: 48, height: 48, type: 'anchor' },
             { x: 1180, y: 400, width: 80, height: 380, type: 'wall', material: 'vine' },
             { x: 1138, y: 400, width: 36, height: 380, type: 'climb', style: 'vine' },
             { x: 980, y: 400, width: 360, height: 24, type: 'static', tile: 'platform2_tile' },
@@ -91,16 +82,16 @@ const LEVEL_CONFIGS = [
             // --- Section C: ravine wall and upper branch ---
             { x: 4580, y: 320, width: 90, height: 340, type: 'wall', material: 'vine' },
             { x: 4538, y: 320, width: 36, height: 340, type: 'climb', style: 'vine' },
-            { x: 4300, y: 320, width: 450, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4300, y: 320, width: 250, height: 24, type: 'static', tile: 'platform4_tile' },
             // Cup alcove: jump off the ravine roof, then burn or climb the vine.
-            { x: 4750, y: 320, width: 260, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 4750, y: 320, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4800, y: 160, width: 64, height: 160, type: 'wall', material: 'vine' },
             { x: 4758, y: 160, width: 36, height: 160, type: 'climb', style: 'vine' },
             { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
-            { x: 5480, y: 560, width: 50, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 5650, y: 500, width: 160, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
+            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5650, y: 500, width: 100, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
             // The solid cap blocks the upper lane; the base extends below the fall-death line.
@@ -124,7 +115,6 @@ const LEVEL_CONFIGS = [
             { x: 8940, y: 270, width: 110, height: 400, type: 'wall', material: 'vine' },
             { x: 8896, y: 270, width: 36, height: 400, type: 'climb', style: 'vine' },
             { x: 8670, y: 270, width: 520, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 8970, y: 170, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8120, y: 280, width: 260, height: 24, type: 'static', tile: 'platform6_tile' },
             // Staggered ammo shelves require two distinct jumps, not a ground pickup.
             { x: 8230, y: 430, width: 150, height: 24, type: 'static', tile: 'platform6_tile' },
@@ -185,7 +175,12 @@ const LEVEL_CONFIGS = [
             { x: 12400, y: 160, width: 200, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12540, y: 150, width: 48, height: 48, type: 'anchor' },
             { x: 12630, y: 420, width: 250, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' }
+            { x: 12880, y: 500, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+
+            // Break with an attack, kick, or shot to release one random powerup ball.
+            { x: 520, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
+            { x: 1980, y: 632, width: 48, height: 48, type: 'wall', tile: 'shield_tile' },
+            { x: 4080, y: 612, width: 48, height: 48, type: 'wall', tile: 'shield_tile' }
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.

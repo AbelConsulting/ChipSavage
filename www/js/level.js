@@ -51,6 +51,7 @@ class Level {
         // Accept partial data: if platforms is missing, keep existing platforms.
         const incomingPlatforms = Array.isArray(levelData.platforms) ? levelData.platforms : this.platforms;
         this._motionTime = 0;
+        this.pendingPowerupDrops = [];
         this.platforms = (Array.isArray(incomingPlatforms) ? incomingPlatforms : []).map(p => {
             const platform = {
                 ...p,
@@ -302,16 +303,28 @@ class Level {
         return null;
     }
 
+    isShieldTile(platform) {
+        return platform.tile === 'shield_tile' && platform.material !== 'solid' &&
+            (platform.type === 'static' || platform.type === 'wall');
+    }
+
+    getShieldTileAt(rect) {
+        return this.platforms.find(platform =>
+            this.isShieldTile(platform) && Utils.rectCollision(rect, platform)
+        ) || null;
+    }
+
     getWallMaterial(wall) {
         if (wall.material === 'solid') return 'solid';
+        if (this.isShieldTile(wall)) return 'shield';
         const tileMaterials = { wall_tile_fire: 'vine', wall_tile_bomb: 'rock', wall_tile_shock: 'shock' };
         return tileMaterials[wall.tile] || wall.material || 'solid';
     }
 
     hitWall(wall, shotType) {
-        if (!wall || wall.type !== 'wall') return { destroyed: false, material: null };
+        if (!wall || (wall.type !== 'wall' && !this.isShieldTile(wall))) return { destroyed: false, material: null };
         const material = this.getWallMaterial(wall);
-        const destroysWall = (material === 'vine' && shotType === 'fireball') ||
+        const destroysWall = material === 'shield' || (material === 'vine' && shotType === 'fireball') ||
             (material === 'rock' && shotType === 'bomb') ||
             (material === 'shock' && shotType === 'gold');
         if (!destroysWall) return { destroyed: false, material };
@@ -322,6 +335,7 @@ class Level {
 
         // Remove a climbable attached to the destroyed barrier so no visual remnant floats in place.
         this.platforms = this.platforms.filter((platform) => {
+            if (material === 'shield') return true;
             if (platform.type !== 'climb') return true;
             const verticalOverlap = platform.y < wall.y + wall.height && platform.y + platform.height > wall.y;
             const horizontalGap = Math.max(0, wall.x - (platform.x + platform.width), platform.x - (wall.x + wall.width));
@@ -331,7 +345,9 @@ class Level {
         if (typeof document !== 'undefined' && typeof this.renderStaticLayer === 'function') {
             this.renderStaticLayer();
         }
-        return { destroyed: true, material, x: wall.x + wall.width / 2, y: wall.y + wall.height / 2 };
+        const result = { destroyed: true, material, x: wall.x + wall.width / 2, y: wall.y + wall.height / 2 };
+        if (material === 'shield') this.pendingPowerupDrops.push({ x: result.x, y: result.y });
+        return result;
     }
 
     /**
@@ -483,6 +499,7 @@ class Level {
         this.height = height;
         this.platforms = [];
         this._motionTime = 0;
+        this.pendingPowerupDrops = [];
 
         // Level visuals & content
         this.backgroundName = 'bg_city';
@@ -557,6 +574,10 @@ class Level {
     }
 
     drawPlatform(ctx, p) {
+        if (this.isShieldTile(p)) {
+            this.drawShieldTile(ctx, p);
+            return;
+        }
         if (p.type === 'anchor') {
             this.drawHookshotAnchor(ctx, p);
             return;
@@ -621,6 +642,21 @@ class Level {
            ctx.fillStyle = fallbackHighlight;
            ctx.fillRect(p.x, p.y, p.width, 4);
            ctx.restore();
+    }
+
+    drawShieldTile(ctx, tile) {
+        const sprite = this._getSprite('shield_tile');
+        if (sprite) {
+            ctx.drawImage(sprite, tile.x, tile.y, tile.width, tile.height);
+        } else {
+            ctx.save();
+            ctx.fillStyle = '#4169D8';
+            ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
+            ctx.strokeStyle = '#FFD54A';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(tile.x, tile.y, tile.width, tile.height);
+            ctx.restore();
+        }
     }
 
     drawDestructibleWall(ctx, wall, tileScaleX = 1, tileScaleY = 1) {
@@ -795,6 +831,11 @@ class Level {
                 const sw = Math.max(1, Math.floor((p.width / this.width) * canvas.width));
                 const sh = Math.max(1, Math.floor((p.height / this.height) * canvas.height));
                 const scaled = { ...p, x: sx, y: sy, width: sw, height: sh };
+
+                if (this.isShieldTile(p)) {
+                    this.drawShieldTile(c, scaled);
+                    continue;
+                }
 
                 if (p.type === 'anchor') {
                     this.drawHookshotAnchor(c, scaled);

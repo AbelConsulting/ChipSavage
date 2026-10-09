@@ -306,6 +306,7 @@ class SpriteLoader {
             ['wall_tile_fire', 'assets/sprites/backgrounds/tiles/wall_tile_fire.png'],
             ['wall_tile_bomb', 'assets/sprites/backgrounds/tiles/wall_tile_bomb.png'],
             ['wall_tile_shock', 'assets/sprites/backgrounds/tiles/wall_tile_shock.png'],
+            ['shield_tile', 'assets/sprites/backgrounds/tiles/shield_tile.png'],
 
             // Attack range indicators (single frame, drawn facing right over the hitbox)
             ['attack_chip', 'assets/sprites/backgrounds/tiles/attack_chip.png'],
