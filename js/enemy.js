@@ -1789,6 +1789,126 @@ class Enemy {
         }
     }
 
+    drawShieldAura(ctx) {
+        if (this.enemyType !== 'SECOND_BASIC') return;
+        const cx = this.x + this.width / 2;
+        const cy = this.y + this.height / 2;
+        const radius = Math.max(this.width, this.height) * 0.62;
+        const flat = Config.MOBILE_FLAT_PARTICLES;
+        const time = Date.now() / 1000;
+        const flash = Utils.clamp(this.shieldBreakFlash / 0.28, 0, 1);
+
+        if (this.shieldActive) {
+            ctx.save();
+            const pulse = 0.85 + Math.sin(time * 6) * 0.15;
+            if (flat) {
+                ctx.fillStyle = `rgba(40, 120, 255, ${0.1 * pulse + flash * 0.12})`;
+            } else {
+                const glow = ctx.createRadialGradient(cx, cy, radius * 0.35, cx, cy, radius * 1.25);
+                glow.addColorStop(0, 'rgba(40, 100, 220, 0.025)');
+                glow.addColorStop(0.65, `rgba(50, 145, 255, ${0.12 * pulse + flash * 0.16})`);
+                glow.addColorStop(0.8, `rgba(110, 210, 255, ${0.24 * pulse + flash * 0.25})`);
+                glow.addColorStop(1, 'rgba(30, 90, 240, 0)');
+                ctx.fillStyle = glow;
+            }
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 1.25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // A clipped honeycomb membrane leaves the enemy sprite readable.
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.94, 0, Math.PI * 2);
+            ctx.clip();
+            const hexSize = radius * 0.22;
+            const hexHeight = Math.sqrt(3) * hexSize;
+            ctx.globalAlpha = 0.1 * pulse + flash * 0.3;
+            ctx.strokeStyle = '#85CCFF';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let column = -3; column <= 3; column++) {
+                for (let row = -3; row <= 3; row++) {
+                    const hx = cx + column * hexSize * 1.5;
+                    const hy = cy + (row + (Math.abs(column) % 2) * 0.5) * hexHeight;
+                    for (let vertex = 0; vertex < 6; vertex++) {
+                        const angle = vertex * Math.PI / 3;
+                        const x = hx + Math.cos(angle) * hexSize;
+                        const y = hy + Math.sin(angle) * hexSize;
+                        if (vertex === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                }
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.globalAlpha = 0.55 * pulse + flash * 0.35;
+            ctx.strokeStyle = '#468EFF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = '#B4E6FF';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius - 2, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const duration = Config.SECOND_BASIC_SHIELD_DURATION || 1.0;
+            const progress = Utils.clamp(this.shieldTimer / duration, 0, 1);
+            for (let segment = 0; segment < 12; segment++) {
+                const remaining = Utils.clamp(progress * 12 - segment, 0, 1);
+                ctx.globalAlpha = remaining > 0 ? 0.65 + flash * 0.3 : 0.12;
+                ctx.strokeStyle = remaining > 0 ? '#88D8FF' : '#3471BD';
+                ctx.lineWidth = 2;
+                const start = -Math.PI / 2 + segment * Math.PI / 6 + 0.04;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius + 5, start, start + (Math.PI / 6 - 0.08) * (remaining || 1));
+                ctx.stroke();
+            }
+
+            ctx.globalAlpha = 0.75;
+            ctx.strokeStyle = '#D2F1FF';
+            ctx.lineWidth = 2;
+            for (let orbit = 0; orbit < 2; orbit++) {
+                const angle = time * (orbit === 0 ? 1.3 : -0.9) + orbit * Math.PI;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius - 5, angle, angle + 0.65);
+                ctx.stroke();
+            }
+            if (flash > 0) {
+                const ripple = 1 - flash;
+                ctx.globalAlpha = flash * 0.7;
+                ctx.strokeStyle = '#D2F1FF';
+                ctx.lineWidth = 3 * flash + 0.5;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius * (0.7 + ripple * 0.6), 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        if (this.shieldParticles.length > 0) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            for (const particle of this.shieldParticles) {
+                ctx.globalAlpha = Utils.clamp(1 - particle.age / particle.life, 0, 1) * 0.9;
+                ctx.fillStyle = '#88DDFF';
+                if (!flat) {
+                    const glow = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size);
+                    glow.addColorStop(0, '#E0F5FF');
+                    glow.addColorStop(0.4, '#88DDFF');
+                    glow.addColorStop(1, 'rgba(40, 120, 255, 0)');
+                    ctx.fillStyle = glow;
+                }
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+    }
+
     draw(ctx, cameraX = 0, cameraY = 0) {
         ctx.save();
         ctx.translate(-cameraX, -cameraY);
@@ -2200,77 +2320,7 @@ class Enemy {
             }
         }
 
-        // SECOND_BASIC: shield bubble overlay
-        if (this.enemyType === 'SECOND_BASIC' && (this.shieldActive || (this.shieldBreakFlash && this.shieldBreakFlash > 0) || (this.shieldParticles && this.shieldParticles.length > 0))) {
-            const cx = this.x + this.width / 2;
-            const cy = this.y + this.height / 2;
-            const radius = Math.max(this.width, this.height) * 0.62;
-
-            if (this.shieldActive) {
-                ctx.save();
-                const pulse = 0.7 + Math.sin(Date.now() * 0.006) * 0.3;
-                const flashBoost = (this.shieldBreakFlash && this.shieldBreakFlash > 0) ? (this.shieldBreakFlash / 0.28) : 0;
-
-                // Outer radial glow
-                const outerGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, radius * 1.2);
-                outerGrad.addColorStop(0, `rgba(80, 200, 255, ${(0.12 * pulse + flashBoost * 0.25).toFixed(3)})`);
-                outerGrad.addColorStop(0.6, `rgba(40, 120, 255, ${(0.2 * pulse + flashBoost * 0.15).toFixed(3)})`);
-                outerGrad.addColorStop(1, 'rgba(0, 60, 200, 0)');
-                ctx.fillStyle = outerGrad;
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius * 1.2, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Bubble outline
-                ctx.globalAlpha = Math.min(1, 0.55 + pulse * 0.25 + flashBoost * 0.4);
-                ctx.strokeStyle = flashBoost > 0.1 ? '#FFFFFF' : '#88EEFF';
-                ctx.lineWidth = 2.5;
-                ctx.shadowColor = '#44AAFF';
-                ctx.shadowBlur = 14 + flashBoost * 10;
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-
-                // Progress arc (clockwise, shows remaining shield time)
-                const duration = Config.SECOND_BASIC_SHIELD_DURATION || 1.0;
-                const progress = Math.max(0, this.shieldTimer / duration);
-                ctx.globalAlpha = 0.75;
-                ctx.strokeStyle = '#AADDFF';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
-                ctx.stroke();
-
-                // Shield icon above enemy
-                ctx.globalAlpha = 0.9;
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#AADDFF';
-                ctx.fillText('🛡', cx, this.y - 16);
-
-                ctx.restore();
-            }
-
-            // Shield impact burst particles
-            if (this.shieldParticles && this.shieldParticles.length > 0) {
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                for (const p of this.shieldParticles) {
-                    const alpha = (1 - p.age / p.life) * 0.9;
-                    ctx.globalAlpha = alpha;
-                    const pGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-                    pGrad.addColorStop(0, '#FFFFFF');
-                    pGrad.addColorStop(0.4, '#88DDFF');
-                    pGrad.addColorStop(1, 'rgba(40, 120, 255, 0)');
-                    ctx.fillStyle = pGrad;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
-        }
+        this.drawShieldAura(ctx);
 
         // Draw health bar (kamikaze gets distinct orange/red bar)
         // Bosses get their health displayed in the dedicated UI bar — skip the small overhead bar
