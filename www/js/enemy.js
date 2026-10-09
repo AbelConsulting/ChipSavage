@@ -278,10 +278,13 @@ class Enemy {
         };
 
         const idle_sprite = getSpriteKeySafe(`${prefix}_idle`, fallbackPrefix ? `${fallbackPrefix}_idle` : null);
-        const walk_sprite = getSpriteKeySafe(`${prefix}_walk`, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
+        const walkName = !spriteLoader.getSprite(`${prefix}_walk`) && spriteLoader.getSprite(`${prefix}_run`)
+            ? `${prefix}_run` : `${prefix}_walk`;
+        const walk_sprite = getSpriteKeySafe(walkName, fallbackPrefix ? `${fallbackPrefix}_walk` : null);
         
         // Get attack animation name (bosses have special naming)
-        const attackName = this.spritePrefix ? `${prefix}_attack` : (config.attackAnim || `${prefix}_attack`);
+        const attackName = this.spritePrefix && prefix !== config.prefix
+            ? `${prefix}_attack` : (config.attackAnim || `${prefix}_attack`);
         const fallbackAttackName = fallbackPrefix ? 
             (ENEMY_TYPE_CONFIG[config.fallback]?.attackAnim || `${fallbackPrefix}_attack`) : null;
         const attack_sprite = getSpriteKeySafe(attackName, fallbackAttackName);
@@ -301,6 +304,10 @@ class Enemy {
             attack: makeAnim(attack_sprite, 4, 0.1),
             hurt: hurtAnim
         };
+        const jumpSprite = spriteLoader.getSprite(`${prefix}_jump`);
+        if (jumpSprite) {
+            this.animations.jump = makeAnim({ key: `${prefix}_jump`, sprite: jumpSprite }, 4, 0.15);
+        }
 
         this.currentAnimation = this.animations.idle;
         
@@ -1763,6 +1770,8 @@ class Enemy {
             newState = "hurt";
         } else if (this.isAttacking) {
             newState = "attack";
+        } else if (this.animations.jump && Math.abs(this.velocityY) > 1) {
+            newState = "jump";
         } else if (Math.abs(this.velocityX) > 10) {
             newState = "walk";
         }

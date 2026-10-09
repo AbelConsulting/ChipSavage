@@ -14,10 +14,13 @@ function setup() {
     }
     vm.runInContext(`
         globalThis.loader = spriteLoader;
-        for (const prefix of ['boss', 'boss1', 'basic']) {
+        for (const prefix of ['boss', 'boss1', 'boss2', 'basic']) {
             for (const state of ['idle', 'walk', 'attack', 'attack1', 'hurt']) {
                 spriteLoader.sprites[prefix + '_' + state] = { width: 512, height: 128 };
             }
+            delete spriteLoader.sprites.boss2_walk;
+            spriteLoader.sprites.boss2_run = { width: 512, height: 128 };
+            spriteLoader.sprites.boss2_jump = { width: 512, height: 128 };
         }
         spriteLoader._ready = true;
         globalThis.stage = LEVEL_CONFIGS.find(s => s.id === 'level_2_boss');
@@ -48,17 +51,81 @@ test('Municipal boss uses boss1 sheets for all four animations without changing 
     assert.equal(manager.enemies.length, 1);
 });
 
-test('first boss and default enemies retain their original artwork', () => {
+test('Greenskeeper uses boss2 artwork, level three uses original artwork, and basic enemies are unchanged', () => {
     const context = setup();
     vm.runInContext(`
         globalThis.first = new EnemyManager().spawnBoss(LEVEL_CONFIGS.find(s => s.id === 'level_1_boss').boss);
+        globalThis.third = new EnemyManager().spawnBoss(LEVEL_CONFIGS.find(s => s.id === 'level_3_boss').boss);
+        globalThis.original = new EnemyManager().spawnBoss({
+            ...LEVEL_CONFIGS.find(s => s.id === 'level_1_boss').boss,
+            spritePrefix: undefined, bossName: undefined
+        });
         globalThis.basic = new Enemy(0, 0);
     `, context);
-    assert.equal(context.first.animations.idle.spriteSheet, context.loader.getSprite('boss_idle'));
-    assert.equal(context.first.animations.attack.spriteSheet, context.loader.getSprite('boss_attack1'));
+    assert.equal(context.first.bossName, 'THE GREENSKEEPER');
+    for (const state of ['idle', 'attack', 'hurt', 'jump']) {
+        assert.equal(context.first.animations[state].spriteSheet, context.loader.getSprite(`boss2_${state}`));
+    }
+    assert.equal(context.first.animations.walk.spriteSheet, context.loader.getSprite('boss2_run'));
+    for (const key of ['enemyType', 'health', 'maxHealth', 'speed', 'attackDamage', 'attackRange', 'attackWindup', 'attackCooldown', 'bossAbility', 'x', 'y']) {
+        assert.equal(context.first[key], context.original[key], key);
+    }
+    assert.equal(context.third.animations.idle.spriteSheet, context.loader.getSprite('boss_idle'));
+    assert.equal(context.third.animations.walk.spriteSheet, context.loader.getSprite('boss_walk'));
+    assert.equal(context.third.animations.attack.spriteSheet, context.loader.getSprite('boss_attack1'));
+    assert.equal(context.third.animations.hurt.spriteSheet, context.loader.getSprite('boss_hurt'));
     assert.equal(context.basic.animations.idle.spriteSheet, context.loader.getSprite('basic_idle'));
     context.boss.loadSprites();
     assert.equal(context.boss.animations.attack.spriteSheet, context.loader.getSprite('boss1_attack'));
+});
+
+test('Greenskeeper uses jump/run states while retaining attack and hurt priority', () => {
+    const context = setup();
+    vm.runInContext(`
+        globalThis.first = new EnemyManager().spawnBoss(LEVEL_CONFIGS.find(s => s.id === 'level_1_boss').boss);
+    `, context);
+    const first = context.first;
+    first.velocityY = -100;
+    first.velocityX = 100;
+    first.updateAnimation(0.016);
+    assert.equal(first.currentAnimation, first.animations.jump);
+    first.isAttacking = true;
+    first.updateAnimation(0.016);
+    assert.equal(first.currentAnimation, first.animations.attack);
+    first.hitStunTimer = 0.2;
+    first.updateAnimation(0.016);
+    assert.equal(first.currentAnimation, first.animations.hurt);
+    first.hitStunTimer = 0;
+    first.isAttacking = false;
+    first.velocityY = 0;
+    first.updateAnimation(0.016);
+    assert.equal(first.currentAnimation, first.animations.walk);
+    first.velocityX = 0;
+    first.updateAnimation(0.016);
+    assert.equal(first.currentAnimation, first.animations.idle);
+    first.loadSprites();
+    assert.equal(first.animations.walk.spriteSheet, context.loader.getSprite('boss2_run'));
+});
+
+test('boss2 sheets are preloaded as four 128px frames and packaged byte-for-byte', async () => {
+    const { loader } = setup();
+    const loaded = new Map();
+    loader.loadSprite = async (name, assetPath) => { loaded.set(name, assetPath.split('?')[0]); };
+    await loader.loadAllSprites();
+    for (const state of ['idle', 'run', 'jump', 'attack', 'hurt']) {
+        const key = `boss2_${state}`;
+        const relative = path.join('assets', 'sprites', 'enemies', `${key}.png`);
+        assert.equal(loaded.get(key), `assets/sprites/enemies/${key}.png`);
+        assert.equal(loader.expectedFrames[key], 4);
+        const animation = loader.createAnimation(key, 4);
+        assert.equal(animation.frameWidth, 128);
+        assert.equal(animation.frameStride, 128);
+        assert.equal(animation.frameOffset, 0);
+        const bytes = fs.readFileSync(path.join(__dirname, '..', relative));
+        assert.equal(bytes.readUInt32BE(16), 512);
+        assert.equal(bytes.readUInt32BE(20), 128);
+        assert.deepEqual(fs.readFileSync(path.join(__dirname, '..', 'www', relative)), bytes);
+    }
 });
 
 test('boss1 preload names, frame counts and packaged assets match the new artwork', async () => {

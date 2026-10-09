@@ -233,6 +233,9 @@ const LEVEL_CONFIGS = [
         completion: { bossTriggerX: 4380, exitX: 5100 },
         boss: {
             type: "BOSS",
+            // Artwork and display name are independent of the boss's combat type.
+            spritePrefix: "boss2",
+            bossName: "THE GREENSKEEPER",
             spawnX: 4680,
             spawnY: 520,
             healthMultiplier: 6.5,
@@ -639,6 +642,7 @@ const LEVEL_CONFIGS = [
         completion: { bossTriggerX: 3700, exitX: 4400 },
         boss: {
             type: "BOSS",
+            spritePrefix: "boss",
             spawnX: 3980,
             spawnY: 520,
             healthMultiplier: 10.5,
