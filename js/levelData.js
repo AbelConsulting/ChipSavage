@@ -179,7 +179,7 @@ const LEVEL_CONFIGS = [
         ],
         idols: [
             // First climb, vine alcove, fortress jump, ridge screen, final alcove.
-            { x: 5, y: 25 },
+            { x: 5, y: 65 },
             { x: 2900, y: 625 },
             { x: 4750, y: 570 },
             { x: 9030, y: 130 },
