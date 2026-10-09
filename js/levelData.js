@@ -90,7 +90,7 @@ const LEVEL_CONFIGS = [
             { x: 4750, y: 160, width: 110, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Gap 3: lower shuttle route and upper hookshot reward route.
-            { x: 5480, y: 560, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 5480, y: 560, width: 15 0, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 5650, y: 500, width: 100, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform3_tile' },
 
             // --- Section D: climb, dismount, then burn the mandatory vine passage ---
