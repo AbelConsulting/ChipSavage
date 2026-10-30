@@ -533,90 +533,106 @@ const LEVEL_CONFIGS = [
             { x: 14000, y: 300 }
         ],
         platforms: [
-            { x: 0, y: 650, width: 3400, height: 40, type: 'static', tile: 'ground2_tile' },
-            { x: 3700, y: 640, width: 3500, height: 40, type: 'static', tile: 'ground2_tile' },
-            { x: 7550, y: 660, width: 3500, height: 40, type: 'static', tile: 'ground2_tile' },
-            { x: 11400, y: 650, width: 3600, height: 40, type: 'static', tile: 'ground2_tile' },
-            
-            // Courtyard
-            { x: 400, y: 550, width: 100, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 600, y: 450, width: 150, height: 24, type: 'moving', axis: 'x', range: 80, speed: 1.9, tile: 'platform4_tile' },
-            
-            // Training Hall
-            { x: 1200, y: 400, width: 800, height: 24, type: 'static', tile: 'platform3_tile' }, 
-            
-            // Moving Pillars
-            { x: 2200, y: 550, width: 100, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.4, tile: 'platform4_tile' },
-            { x: 2500, y: 550, width: 100, height: 24, type: 'moving', axis: 'y', range: 150, speed: 3.0, timeOffset: 1.5, tile: 'platform4_tile' },
-            
-            { x: 2900, y: 400, width: 200, height: 24, type: 'static', tile: 'platform3_tile' },
-            
-            // The Gauntlet
-            { x: 3500, y: 500, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 3620, y: 100, width: 48, height: 48, type: 'anchor' },
-            { x: 3800, y: 400, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 4100, y: 300, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 4400, y: 400, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 4700, y: 500, width: 100, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 0, y: 650, width: 3100, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 3550, y: 640, width: 3200, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 7050, y: 660, width: 2450, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 9950, y: 650, width: 2600, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 12850, y: 650, width: 2150, height: 40, type: 'static', tile: 'ground2_tile' },
 
-            // Upper Walkway
-            { x: 5300, y: 350, width: 1000, height: 24, type: 'static', tile: 'platform3_tile' },
-            // Choice Gate 1: burn through or climb over
-            { x: 5750, y: 350, width: 92, height: 300, type: 'wall', material: 'vine' },
-            { x: 5708, y: 350, width: 34, height: 300, type: 'climb', style: 'vine' },
-            { x: 5860, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
-            
-            // Final Steps
-            { x: 6600, y: 450, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 6900, y: 550, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 7200, y: 450, width: 200, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 7480, y: 80, width: 48, height: 48, type: 'anchor' },
+            // Courtyard: low-end warmup with a moving perch before the first real climb.
+            { x: 200, y: 540, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 520, y: 460, width: 180, height: 24, type: 'moving', axis: 'x', range: 80, speed: 1.8, tile: 'platform4_tile' },
+            { x: 860, y: 390, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 1100, y: 420, width: 120, height: 200, type: 'wall', material: 'rock' },
+            { x: 1058, y: 420, width: 34, height: 200, type: 'climb', style: 'ladder' },
+            { x: 1210, y: 520, width: 240, height: 24, type: 'static', tile: 'platform2_tile' },
 
-            // Inner temple: staggered ascent
+            // Training Hall: a staggered ridge that teaches timing before the gauntlet.
+            { x: 1720, y: 420, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 1960, y: 330, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2240, y: 240, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2500, y: 540, width: 120, height: 24, type: 'moving', axis: 'y', range: 110, speed: 2.3, tile: 'platform4_tile' },
+            { x: 2670, y: 540, width: 120, height: 24, type: 'moving', axis: 'y', range: 140, speed: 2.0, timeOffset: 1.1, tile: 'platform4_tile' },
+            { x: 2860, y: 410, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 3140, y: 280, width: 140, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 3310, y: 80, width: 48, height: 48, type: 'anchor' },
+
+            // The Gauntlet: a sequence of narrow ledges with a vine gate on the upper branch.
+            { x: 3700, y: 560, width: 110, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 3850, y: 480, width: 150, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 4080, y: 380, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 4340, y: 290, width: 180, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 4620, y: 490, width: 150, height: 24, type: 'moving', axis: 'x', range: 100, speed: 1.7, tile: 'platform6_tile' },
+            { x: 4870, y: 360, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 5100, y: 300, width: 190, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 5350, y: 360, width: 90, height: 260, type: 'wall', material: 'vine' },
+            { x: 5308, y: 360, width: 34, height: 260, type: 'climb', style: 'vine' },
+            { x: 5470, y: 500, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
+
+            // Upper Walkway: long, safer route with a gate that rewards the player for choosing a climb.
+            { x: 5860, y: 340, width: 1450, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 6000, y: 250, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 6340, y: 200, width: 160, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 6730, y: 300, width: 190, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 7040, y: 440, width: 180, height: 24, type: 'moving', axis: 'y', range: 60, speed: 1.6, tile: 'platform4_tile' },
+            { x: 7280, y: 520, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 7540, y: 80, width: 48, height: 48, type: 'anchor' },
+
+            // Inner temple: nested climbs and a bombable wall that creates a second route.
             { x: 8000, y: 560, width: 160, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 8350, y: 460, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 8750, y: 360, width: 220, height: 24, type: 'static', tile: 'platform6_tile' },
-            { x: 9150, y: 460, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
-            // Choice Gate 2: bomb shortcut through the temple foundation
-            { x: 9280, y: 410, width: 96, height: 230, type: 'wall', material: 'rock' },
-            { x: 9238, y: 410, width: 34, height: 230, type: 'climb', style: 'ladder' },
-            { x: 9400, y: 520, width: 190, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 8300, y: 470, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 8630, y: 380, width: 210, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 9000, y: 470, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 9300, y: 410, width: 110, height: 210, type: 'wall', material: 'rock' },
+            { x: 9258, y: 410, width: 34, height: 210, type: 'climb', style: 'ladder' },
+            { x: 9430, y: 520, width: 220, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 9720, y: 520, width: 120, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.7, tile: 'platform6_tile' },
+            { x: 10040, y: 420, width: 120, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.9, timeOffset: 1.2, tile: 'platform6_tile' },
+            { x: 10380, y: 320, width: 180, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10750, y: 260, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
 
-            // Hanging lanterns (moving)
-            { x: 9800, y: 520, width: 120, height: 24, type: 'moving', axis: 'y', range: 160, speed: 2.8, tile: 'platform6_tile' },
-            { x: 10150, y: 420, width: 120, height: 24, type: 'moving', axis: 'y', range: 160, speed: 3.1, timeOffset: 1.2, tile: 'platform6_tile' },
-            { x: 10500, y: 320, width: 160, height: 24, type: 'static', tile: 'platform3_tile' },
-
-            // Upper ridge
-            { x: 11200, y: 360, width: 1000, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 11330, y: 110, width: 48, height: 48, type: 'anchor' },
-            // Choice Gate 3: final mixed-route exam
-            { x: 11700, y: 360, width: 100, height: 290, type: 'wall', material: 'vine' },
-            { x: 11658, y: 360, width: 34, height: 290, type: 'climb', style: 'vine' },
-            { x: 11820, y: 500, width: 190, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 12550, y: 460, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 12950, y: 560, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
-
-            // Approach to boss arena
-            { x: 13500, y: 500, width: 700, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 14400, y: 450, width: 260, height: 24, type: 'static', tile: 'platform6_tile' }
+            // Upper ridge: the last big checkpoint before the final approach.
+            { x: 11230, y: 350, width: 980, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 11360, y: 110, width: 48, height: 48, type: 'anchor' },
+            { x: 11720, y: 360, width: 100, height: 290, type: 'wall', material: 'vine' },
+            { x: 11678, y: 360, width: 34, height: 290, type: 'climb', style: 'vine' },
+            { x: 11880, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 12160, y: 420, width: 160, height: 24, type: 'moving', axis: 'x', range: 70, speed: 1.8, tile: 'platform4_tile' },
+            { x: 12480, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 12840, y: 420, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 13220, y: 520, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 13620, y: 620, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 13980, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.7, tile: 'platform4_tile' },
+            { x: 14340, y: 420, width: 260, height: 24, type: 'static', tile: 'platform6_tile' }
         ],
         idols: [
-            { x: 1500, y: 370 },
-            { x: 5600, y: 320 },
-            { x: 11250, y: 330 }
+            { x: 900, y: 350 },
+            { x: 2100, y: 190 },
+            { x: 5400, y: 320 },
+            { x: 8900, y: 330 },
+            { x: 12320, y: 260 },
+            { x: 13880, y: 480 }
         ],
         speedBoosts: [
-            { x: 8750, y: 330 }     // Inner temple
+            { x: 680, y: 420 },
+            { x: 3600, y: 440 },
+            { x: 8600, y: 340 },
+            { x: 13680, y: 480 }
         ],
         damageBoosts: [
-            { x: 12000, y: 330 },   // Upper ridge
-            { x: 14400, y: 420 }    // Just before boss
+            { x: 5200, y: 270 },
+            { x: 11880, y: 470 },
+            { x: 14340, y: 380 }
         ],
         skunkPowerups: [
-            { x: 5200, y: 310 },   // Before first choice gate
-            { x: 8400, y: 330 },   // Mountain path skunk ammo
-            { x: 11100, y: 320 }   // Before final choice gate
+            { x: 1200, y: 480 },
+            { x: 2460, y: 500 },
+            { x: 4700, y: 450 },
+            { x: 6200, y: 300 },
+            { x: 8420, y: 430 },
+            { x: 10180, y: 380 },
+            { x: 11740, y: 460 },
+            { x: 13350, y: 480 }
         ],
         enemyConfig: {
             spawnInterval: 1.4,
