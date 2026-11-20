@@ -1,6 +1,6 @@
 # Procedural soundtrack assets
 
-The game soundtrack is generated locally by `scripts/generate_soundtrack.py` using Python's standard library. The resulting music is original Chip Savage material: loop-ready arcade grooves with warm synth chords, bass, restrained drums, and a bright golf-bell motif. The ambient loops are generated from layered tones, noise, and sparse accents.
+The game soundtrack is generated locally by `scripts/generate_soundtrack.py` using Python's standard library. The menu and forest share a musical golf shot: two pickups, an accented high note, a pause, and a lower landing note. The menu introduces it on soft electric keys in a percussion-free 72 BPM waltz. The forest plays it on a synthesized nylon-string lead every four bars, with a different landing each time. The other gameplay cues use five-note hooks with golf-bell accents. The separate environment beds use layered tones, noise, and sparse accents.
 
 From the repository root, run `npm run audio:generate` to recreate the assets. The game supports the generated mono 22.05 kHz WAV files directly. To also create compact quality-5 OGG files, install the optional encoder dependency with `python -m pip install -r requirements-audio.txt`; the audio manager prefers OGG when supported and falls back to WAV. A system `ffmpeg` with `libvorbis` also works.
 
