@@ -1751,6 +1751,47 @@ const LEVEL_CONFIGS = [
     }
 ];
 
+// Give the post-tutorial campaign courses more horizontal breathing room while
+// preserving their layouts: platforms, pickups, and triggers share one scale.
+const LEVEL_LENGTH_SCALE = 1.2;
+const stretchLevelHorizontally = (level, scale) => {
+    const scaleX = value => typeof value === 'number' ? Math.round(value * scale) : value;
+
+    level.width = scaleX(level.width);
+    if (level.completion) {
+        for (const key of ['exitX', 'bossTriggerX']) {
+            if (typeof level.completion[key] === 'number') {
+                level.completion[key] = scaleX(level.completion[key]);
+            }
+        }
+    }
+    if (level.boss && typeof level.boss.spawnX === 'number') {
+        level.boss.spawnX = scaleX(level.boss.spawnX);
+    }
+    for (const point of level.spawnPoints || []) {
+        point.x = scaleX(point.x);
+    }
+    for (const platform of level.platforms || []) {
+        platform.x = scaleX(platform.x);
+        if (typeof platform.width === 'number') platform.width = scaleX(platform.width);
+        if (platform.axis === 'x') {
+            if (typeof platform.range === 'number') platform.range = scaleX(platform.range);
+            if (typeof platform.speed === 'number') platform.speed /= scale;
+        }
+        if (platform.ammoRefill && typeof platform.ammoRefill.x === 'number') {
+            platform.ammoRefill.x = scaleX(platform.ammoRefill.x);
+        }
+    }
+    for (const field of ['idols', 'speedBoosts', 'damageBoosts', 'skunkPowerups']) {
+        for (const point of level[field] || []) point.x = scaleX(point.x);
+    }
+};
+
+const tutorialLevels = new Set(['level_1', 'level_1_boss', 'level_2', 'level_2_boss']);
+LEVEL_CONFIGS.forEach(level => {
+    if (!tutorialLevels.has(level.id)) stretchLevelHorizontally(level, LEVEL_LENGTH_SCALE);
+});
+
 // --- SURVIVAL MODE ARENA ---
 // Compact fighting arena used exclusively for Survival Mode.
 // No boss, no exit — enemies come in escalating waves until the player falls.
