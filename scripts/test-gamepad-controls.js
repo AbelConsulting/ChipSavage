@@ -52,7 +52,7 @@ test('standard gamepad maps vertical stick and D-pad input', () => {
 
 for (const [label, index, key] of [
     ['A', 0, ' '],
-    ['B', 1, 'c'],
+    ['B', 1, 'z'],
     ['X', 2, 'x'],
     ['Y', 3, 'x'],
     ['RB', 5, 'v'],
@@ -174,7 +174,7 @@ test('XR right-controller jump, special attack, grip shot and trigger attack are
     }
 });
 
-test('mapped controller inputs invoke the intended player actions', () => {
+test('Xbox B kicks while left trigger fires a golf shot', () => {
     const { app, buttons, context } = setup();
     const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'player.js'), 'utf8');
     vm.runInContext(source + '\nglobalThis.Player = Player;', context);
@@ -191,7 +191,7 @@ test('mapped controller inputs invoke the intended player actions', () => {
     player.cycleGolfShot = () => actions.push('cycle');
     app._sendKeyEvent = (key, type) => player.handleInput(key, type === 'keydown');
 
-    for (const index of [0, 1, 2, 3, 5, 8]) {
+    for (const index of [0, 1, 2, 3, 5, 6, 8]) {
         buttons[index].pressed = true;
         app._handleGamepadInput();
         app._handleGamepadInput();
@@ -200,7 +200,7 @@ test('mapped controller inputs invoke the intended player actions', () => {
     }
     assert.equal(player.jumpBufferTimer, player.jumpBufferTime);
     assert.equal(player.jumpBufferCount, 1);
-    assert.deepEqual(actions, ['golf', 'attack', 'attack', 'cycle']);
+    assert.deepEqual(actions, ['special', 'attack', 'attack', 'cycle', 'golf']);
 });
 
 test('packaged gamepad mapping matches the browser source', () => {

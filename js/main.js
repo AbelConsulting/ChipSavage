@@ -832,11 +832,9 @@ class GameApp {
         this._setKeyState(' ', aPressed);
         // Standard X/Y + right trigger: regular attack (KeyX)
         this._setKeyState('x', rightTrigger || xPressed || yPressed);
-        // Standard B + left trigger, or VR right grip: Golf Shot (KeyC)
-        this._setKeyState('c', leftTrigger || rightGrip || (isStandard && bPressed));
-        // Preserve B special attack for non-standard/VR controllers.
-        const specialPressed = !isStandard && bPressed;
-        this._setKeyState('z', specialPressed);
+        // Left trigger (or VR right grip): Golf Shot (KeyC); Xbox B remains Kick (KeyZ).
+        this._setKeyState('c', leftTrigger || rightGrip);
+        this._setKeyState('z', bPressed);
         // Left bumper / Start button: pause (Escape)
         this._setKeyState('Escape', leftBumper || startButton);
 
