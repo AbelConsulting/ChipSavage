@@ -1096,8 +1096,9 @@ class Game {
         async playMenuMusic() {
             if (!this.audioManager) return;
             try {
-                // This repo currently does not ship menu music assets, so avoid
-                // requesting a missing file and keep the game silent instead.
+                if (!this.audioManager.musicElements['menu_theme']) {
+                    await this.audioManager.loadMusic('menu_theme', 'assets/audio/music/menu_theme.wav');
+                }
                 if (this.audioManager.musicElements['menu_theme']) {
                     this.audioManager.playMusic('menu_theme', true);
                 }

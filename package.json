@@ -5,6 +5,8 @@
   "description": "Chip Savage web game and Android wrapper",
   "scripts": {
     "build:web": "node scripts/build-web.js",
+    "audio:generate": "python scripts/generate_soundtrack.py",
+    "test:soundtrack": "node --test scripts/test-soundtrack.js",
     "build:storefront": "node scripts/generate-storefront-art.mjs",
     "build:icons": "node scripts/generate-app-icons.mjs",
     "cap:add:android": "npm run build:web && npx cap add android",

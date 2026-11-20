@@ -1,0 +1,2 @@
+# Optional encoder used to write compact OGG versions of generated WAV tracks.
+imageio-ffmpeg>=0.5.1
