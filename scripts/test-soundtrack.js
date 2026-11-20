@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const { test } = require('node:test');
 
 const root = path.join(__dirname, '..');
@@ -10,7 +11,7 @@ const referencedTracks = new Set();
 for (const match of levelData.matchAll(/music\s*:\s*\[([^\]]*)\]/g)) {
     for (const track of match[1].matchAll(/['"]([^'"]+)['"]/g)) referencedTracks.add(track[1]);
 }
-for (const track of ['menu_theme', 'boss_battle', 'ambient_forest', 'ambient_city', 'ambient_cave_deep']) {
+for (const track of ['menu_theme', 'boss_battle']) {
     referencedTracks.add(track);
 }
 
@@ -35,8 +36,8 @@ function readWavInfo(file) {
     return { duration: samples / 22050, peak, boundaryJump: Math.abs(first - last) };
 }
 
-test('all configured music and ambience have loop-ready WAV and OGG assets', () => {
-    assert.ok(referencedTracks.size >= 12, 'expected campaign, menu, boss, and ambience tracks');
+test('all configured music has loop-ready WAV and OGG assets', () => {
+    assert.ok(referencedTracks.size >= 9, 'expected campaign, menu, and boss tracks');
     for (const track of referencedTracks) {
         const wav = path.join(musicDir, `${track}.wav`);
         const ogg = path.join(musicDir, `${track}.ogg`);
@@ -48,4 +49,38 @@ test('all configured music and ambience have loop-ready WAV and OGG assets', () 
         assert.ok(info.peak > 1000, `${track}.wav appears silent`);
         assert.ok(info.boundaryJump < 5000, `${track}.wav loop boundary may click (${info.boundaryJump})`);
     }
+});
+
+test('campaign and survival play music without starting ambient audio', async () => {
+    const calls = [];
+    const audioManager = {
+        musicElements: {},
+        async loadMusic(name, file) {
+            calls.push(['loadMusic', name, file]);
+            this.musicElements[name] = {};
+        },
+        playMusic(name, loop) { calls.push(['playMusic', name, loop]); },
+        loadAmbient() { assert.fail('environmental ambience should not be loaded'); },
+        playAmbient() { assert.fail('environmental ambience should not be played'); }
+    };
+    const context = vm.createContext({
+        console,
+        LEVEL_CONFIGS: [{ music: ['forest_theme'] }],
+        SURVIVAL_ARENA_CONFIG: { music: ['city_theme'] }
+    });
+    vm.runInContext(fs.readFileSync(path.join(root, 'js', 'game.js'), 'utf8') +
+        '\nglobalThis.GameForTest = Game;', context);
+    const game = Object.create(context.GameForTest.prototype);
+    game.audioManager = audioManager;
+    game.currentLevelIndex = 0;
+    game.gameMode = 'campaign';
+    await game.ensureLevelMusic();
+    game.gameMode = 'survival';
+    await game.ensureLevelMusic();
+    assert.deepEqual(calls, [
+        ['loadMusic', 'forest_theme', 'assets/audio/music/forest_theme.wav'],
+        ['playMusic', 'forest_theme', true],
+        ['loadMusic', 'city_theme', 'assets/audio/music/city_theme.wav'],
+        ['playMusic', 'city_theme', true]
+    ]);
 });

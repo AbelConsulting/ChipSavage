@@ -1,7 +1,7 @@
 """Generate original, loop-ready Chip Savage music using only Python's standard library.
 
-The arrangements use a shared retro-sport / arcade palette: warm synth chords,
-round bass, a restrained breakbeat, and bell-accented lead melodies. Run from the
+The arrangements use synthesized saxophone leads, soft strings, round bass,
+and a restrained breakbeat. Run from the
 repository root with the selected Python interpreter. WAV output is intentional;
 the game can play WAV directly and will prefer an optional OGG alongside it.
 """
@@ -85,6 +85,16 @@ def add_note(
         if voice == "bell":
             value = (fundamental + 0.34 * math.sin(phase * 2.01) + 0.13 * math.sin(phase * 3.97))
             envelope *= math.exp(-4.2 * t / max(duration, 0.01))
+        elif voice == "sax":
+            # A reedy harmonic spectrum with a gentle breath-like attack.
+            vibrato_depth = 0.10 * min(1.0, t / 0.30)
+            reed_phase = phase + vibrato_depth * math.sin(2.0 * math.pi * 5.2 * t)
+            value = (0.62 * math.sin(reed_phase) + 0.25 * math.sin(2 * reed_phase)
+                     + 0.13 * math.sin(3 * reed_phase) + 0.06 * math.sin(4 * reed_phase))
+            envelope *= 0.88 + 0.12 * math.exp(-8 * t)
+        elif voice == "strings":
+            value = (0.56 * fundamental + 0.20 * math.sin(phase * 1.002)
+                     + 0.16 * math.sin(2 * phase) + 0.08 * math.sin(3 * phase))
         elif voice == "nylon":
             value = (0.85 * fundamental + math.exp(-7 * t) *
                      (0.25 * math.sin(phase * 2) + 0.14 * math.sin(phase * 3)))
@@ -145,12 +155,12 @@ def add_shot_phrase(samples: array, start: float, beat: float, tonic: int,
         (1, 0.45, 9, 0.18), (2.5, 0.48, landing, 0.135),
     ):
         add_note(samples, start + onset * beat, length * beat, tonic + offset,
-                 gain, voice=voice, attack=0.028 if voice == "soft_keys" else 0.006,
+                 gain, voice=voice, attack=0.028,
                  release=0.075)
 
 
 def compose_menu(root: int, bpm: int) -> array:
-    """A quiet waltz for electric keys; pitches are semitones above the tonic."""
+    """A quiet saxophone waltz; pitches are semitones above the tonic."""
     beat = 60.0 / bpm
     # Each bar pairs a broken chord with (onset, duration, pitch) lead notes.
     opening = (
@@ -177,13 +187,16 @@ def compose_menu(root: int, bpm: int) -> array:
                                                (1.8, 1.1, 0.95), (0.075, 0.050, 0.038)):
             add_note(samples, start + onset * beat, length * beat, root - 12 + offset,
                      gain, voice="soft_keys", attack=0.045, release=0.20)
+        for offset in (chord[1], chord[2]):
+            add_note(samples, start + 0.2 * beat, 2.25 * beat, root - 12 + offset,
+                     0.022, voice="strings", attack=0.25, release=0.35)
         if bar_index in (0, 12):
             add_shot_phrase(samples, start, beat, root + 12,
-                            4 if bar_index == 0 else 0, "soft_keys")
+                            4 if bar_index == 0 else 0, "sax")
             continue
         for onset, length, offset in melody:
             add_note(samples, start + onset * beat, length * beat, root + 12 + offset,
-                     0.15, voice="soft_keys", attack=0.030, release=0.19)
+                     0.15, voice="sax", attack=0.030, release=0.19)
     normalize_and_loop(samples, target_peak=0.53)
     return samples
 
@@ -230,6 +243,10 @@ def compose_track(name: str, settings: tuple[int, int, bool, float, int]) -> arr
             for interval in (2, 4):
                 add_note(samples, start + onset * beat, beat * 0.64,
                          pitch(chord + interval), 0.032, voice="pad", release=0.10)
+        for interval in (2, 4):
+            add_note(samples, start + 0.25 * beat, 2.5 * beat,
+                     pitch(chord + interval), 0.017, voice="strings",
+                     attack=0.22, release=0.25)
         add_note(samples, start, beat * 0.86, pitch(chord) - 12, 0.105, voice="bass")
         if i % 4 != 3 or energy >= 0.7:
             add_note(samples, start + 2.5 * beat, beat * 0.48,
@@ -238,7 +255,7 @@ def compose_track(name: str, settings: tuple[int, int, bool, float, int]) -> arr
         forest = name == "forest_theme"
         if forest and i % 4 == 0:
             add_shot_phrase(samples, start, beat, root_note + 12,
-                            (4, 7, 5, 0)[i // 4], "nylon")
+                            (4, 7, 5, 0)[i // 4], "sax")
             continue
         if forest and i % 4 == 3:
             add_note(samples, start + 3.5 * beat, beat * 0.32,
@@ -247,8 +264,8 @@ def compose_track(name: str, settings: tuple[int, int, bool, float, int]) -> arr
         for j, (degree, (onset, length)) in enumerate(zip(phrase, rhythm, strict=True)):
             note = pitch(degree) + 12
             add_note(samples, start + onset * beat, length * beat, note,
-                     0.16 if j in (0, 4) else 0.135, voice="nylon" if forest else "warm",
-                     attack=0.008, release=0.07)
+                     0.16 if j in (0, 4) else 0.135, voice="sax",
+                     attack=0.028, release=0.07)
             if not forest and j == 0 and i % 2 == 0:
                 add_note(samples, start + onset * beat, 0.45 * beat, note + 12,
                          0.048, voice="bell", attack=0.004)
@@ -256,42 +273,6 @@ def compose_track(name: str, settings: tuple[int, int, bool, float, int]) -> arr
     add_drums(samples, bpm, energy, rng)
 
     normalize_and_loop(samples)
-    return samples
-
-
-def compose_ambient(name: str, seed: int) -> array:
-    duration = 20.0
-    count = int(duration * SAMPLE_RATE)
-    samples = array("f", [0.0]) * count
-    rng = random.Random(seed)
-    profiles = {
-        "ambient_forest": (130.81, 196.00, 261.63),
-        "ambient_city": (55.0, 82.41, 110.0),
-        "ambient_cave_deep": (41.20, 55.0, 82.41),
-    }
-    tones = profiles[name]
-    for i in range(count):
-        t = i / SAMPLE_RATE
-        swell = 0.55 + 0.20 * math.sin(2.0 * math.pi * 0.07 * t) + 0.12 * math.sin(2.0 * math.pi * 0.11 * t + 1.2)
-        drone = sum(math.sin(2.0 * math.pi * f * t) for f in tones) / len(tones)
-        noise = rng.uniform(-1.0, 1.0)
-        noise_gain = 0.035 if name == "ambient_forest" else 0.022
-        samples[i] = drone * swell * 0.12 + noise * noise_gain
-
-    # Sparse, softly decaying environmental accents.
-    accent_count = 22 if name == "ambient_forest" else 14
-    for _ in range(accent_count):
-        start = rng.uniform(0.2, duration - 0.6)
-        freq = rng.uniform(1400.0, 3500.0) if name != "ambient_city" else rng.uniform(280.0, 520.0)
-        length = rng.uniform(0.08, 0.35)
-        first = int(start * SAMPLE_RATE)
-        end = min(count, first + int(length * SAMPLE_RATE))
-        amplitude = rng.uniform(0.008, 0.025)
-        for index in range(first, end):
-            t = (index - first) / SAMPLE_RATE
-            samples[index] += math.sin(2.0 * math.pi * freq * t) * math.exp(-9.0 * t) * amplitude
-
-    normalize_and_loop(samples, target_peak=0.30)
     return samples
 
 
@@ -370,12 +351,7 @@ def main() -> None:
         print(f"{name}: {len(samples) / SAMPLE_RATE:.1f}s WAV, {size_mb:.2f} MiB" + (" + OGG" if encoded else ""))
         outputs.append(path)
 
-    for index, name in enumerate(("ambient_forest", "ambient_city", "ambient_cave_deep")):
-        path = write_wav(name, compose_ambient(name, 131 + index * 17))
-        encoded = maybe_encode_ogg(path) if not args.no_ogg else False
-        print(f"{name}: 20.0s WAV, {path.stat().st_size / (1024 * 1024):.2f} MiB" + (" + OGG" if encoded else ""))
-
-    print(f"\nGenerated {len(outputs) + 3} original loops in {MUSIC_DIR}")
+    print(f"\nGenerated {len(outputs)} original loops in {MUSIC_DIR}")
     if not get_ffmpeg() and not args.no_ogg:
         print("ffmpeg not found: WAV files are game-ready; install ffmpeg and rerun to add compact OGG versions.")
 
