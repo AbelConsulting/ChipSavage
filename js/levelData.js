@@ -54,7 +54,7 @@ const LEVEL_CONFIGS = [
             { x: 780, y: 540, width: 160, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Gap 1: drifting ledge and stepping stone below a hookshot crossing to the far ground.
-            { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 1700, y: 500, width: 150, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 1770, y: 140, width: 48, height: 48, type: 'anchor' },
             { x: 1360, y: 310, width: 180, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.4, tile: 'platform6_tile' },
 
@@ -106,7 +106,7 @@ const LEVEL_CONFIGS = [
             // Gap 4: hook from the post-gate ledge or take the lower bridge.
             { x: 7350, y: 500, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 7580, y: 540, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4tile' },
+            { x: 7740, y: 480, width: 120, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 7850, y: 430, width: 150, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 8010, y: 430, width: 190, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 7650, y: 64, width: 48, height: 48, type: 'anchor' },
@@ -161,7 +161,7 @@ const LEVEL_CONFIGS = [
             { x: 11780, y: 540, width: 130, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 11950, y: 470, width: 130, height: 24, type: 'moving', axis: 'x', range: 60, speed: 1.6, tile: 'platform2_tile' },
             { x: 11690, y: 600, width: 120, height: 24, type: 'static', tile: 'platform2_tile' },
-            { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11890, y: 600, width: 160, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12110, y: 570, width: 160, height: 24, type: 'moving', axis: 'y', range: 55, speed: 1.5, tile: 'platform2_tile' },
             { x: 12130, y: 435, width: 180, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 12280, y: 300, width: 90, height: 370, type: 'wall', material: 'rock' },
@@ -259,7 +259,7 @@ const LEVEL_CONFIGS = [
             { x: 1130, y: 380, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
             { x: 1470, y: 460, width: 90, height: 220, type: 'wall', material: 'vine' },
             { x: 1428, y: 460, width: 34, height: 220, type: 'climb', style: 'vine' },
-            { x: 1610, y: 520, width: 190, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.35, tile: 'platform_tile' },
+            { x: 1610, y: 520, width: 190, height: 24, type: 'moving', axis: 'y', range: 70, speed: 1.35, tile: 'platform2_tile' },
             { x: 1830, y: 420, width: 220, height: 24, type: 'static', tile: 'platform2_tile' },
 
             // Mid quarter: forked tower route
@@ -1321,13 +1321,13 @@ const LEVEL_CONFIGS = [
             // Abyssal Caverns: perilous gaps, narrow bridges, treacherous drops
             // Threshold: rocky ledges at the abyss entrance
             { x: 200, y: 520, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 600, y: 430, width: 150, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 600, y: 430, width: 150, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 950, y: 520, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 1300, y: 440, width: 250, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Stalactite Drops: fast vertical movers simulating falling rocks
-            { x: 1800, y: 380, width: 100, height: 24, type: 'moving', axis: 'y', range: 220, speed: 3.0, tile: 'platform_tile' },
-            { x: 2100, y: 320, width: 100, height: 24, type: 'moving', axis: 'y', range: 220, speed: 3.0, timeOffset: 1.0, tile: 'platform_tile' },
+            { x: 1800, y: 380, width: 100, height: 24, type: 'moving', axis: 'y', range: 220, speed: 3.0, tile: 'platform4_tile' },
+            { x: 2100, y: 320, width: 100, height: 24, type: 'moving', axis: 'y', range: 220, speed: 3.0, timeOffset: 1.0, tile: 'platform4_tile' },
             { x: 2400, y: 440, width: 280, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Bone Bridge: very long narrow crossing over void
@@ -1335,39 +1335,39 @@ const LEVEL_CONFIGS = [
 
             // Lava Shelf: wide shelf then descending
             { x: 4000, y: 420, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 4400, y: 350, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 4400, y: 350, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4800, y: 440, width: 250, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Pendulum Crossing: horizontal movers over gaps
-            { x: 5300, y: 480, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, tile: 'platform_tile' },
-            { x: 5800, y: 380, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, timeOffset: 1.5, tile: 'platform_tile' },
+            { x: 5300, y: 480, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, tile: 'platform4_tile' },
+            { x: 5800, y: 380, width: 120, height: 24, type: 'moving', axis: 'x', range: 160, speed: 2.2, timeOffset: 1.5, tile: 'platform4_tile' },
             { x: 6200, y: 90, width: 48, height: 48, type: 'anchor' },
             { x: 6300, y: 480, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Mushroom Shelf: alternating heights
             { x: 6800, y: 530, width: 180, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 7100, y: 430, width: 160, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 7400, y: 330, width: 160, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 7400, y: 330, width: 160, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 7700, y: 430, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 8050, y: 530, width: 250, height: 24, type: 'static', tile: 'platform5_tile' },
 
             // Abyss Crossing: triple vertical movers
-            { x: 8500, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, tile: 'platform_tile' },
-            { x: 8850, y: 350, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 0.7, tile: 'platform_tile' },
-            { x: 9200, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 1.4, tile: 'platform_tile' },
+            { x: 8500, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, tile: 'platform4_tile' },
+            { x: 8850, y: 350, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 0.7, tile: 'platform4_tile' },
+            { x: 9200, y: 450, width: 110, height: 24, type: 'moving', axis: 'y', range: 170, speed: 2.4, timeOffset: 1.4, tile: 'platform4_tile' },
             { x: 9450, y: 110, width: 48, height: 48, type: 'anchor' },
 
             // Deep Shelf: safety platform
             { x: 9600, y: 400, width: 500, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Final Descent: steep drops to boss approach
-            { x: 10400, y: 350, width: 200, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 10400, y: 350, width: 200, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 10800, y: 450, width: 300, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 11400, y: 380, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 11400, y: 380, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
 
             // Boss Gauntlet
-            { x: 12000, y: 460, width: 140, height: 24, type: 'moving', axis: 'x', range: 140, speed: 2.2, tile: 'platform_tile' },
-            { x: 12500, y: 380, width: 140, height: 24, type: 'moving', axis: 'x', range: 140, speed: 2.2, timeOffset: 1.0, tile: 'platform_tile' },
+            { x: 12000, y: 460, width: 140, height: 24, type: 'moving', axis: 'x', range: 140, speed: 2.2, tile: 'platform4_tile' },
+            { x: 12500, y: 380, width: 140, height: 24, type: 'moving', axis: 'x', range: 140, speed: 2.2, timeOffset: 1.0, tile: 'platform4_tile' },
             { x: 13100, y: 470, width: 700, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 14100, y: 400, width: 400, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 14800, y: 500, width: 350, height: 24, type: 'static', tile: 'platform5_tile' }
@@ -1426,12 +1426,12 @@ const LEVEL_CONFIGS = [
         platforms: [
             { x: 0, y: 600, width: 5000, height: 40, type: 'static', tile: 'ground3_tile' },
             { x: 250, y: 520, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 700, y: 420, width: 170, height: 24, type: 'static', tile: 'platform_tile' },
-            { x: 1200, y: 320, width: 160, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.5, tile: 'platform_tile' },
+            { x: 700, y: 420, width: 170, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 1200, y: 320, width: 160, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.5, tile: 'platform4_tile' },
             { x: 1750, y: 460, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 2300, y: 350, width: 180, height: 24, type: 'static', tile: 'platform_tile' },
+            { x: 2300, y: 350, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 2900, y: 480, width: 200, height: 24, type: 'static', tile: 'platform5_tile' },
-            { x: 3450, y: 380, width: 160, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.5, timeOffset: 1.0, tile: 'platform_tile' },
+            { x: 3450, y: 380, width: 160, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.5, timeOffset: 1.0, tile: 'platform4_tile' },
             { x: 4000, y: 500, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 4500, y: 420, width: 220, height: 24, type: 'static', tile: 'platform5_tile' }
         ],
