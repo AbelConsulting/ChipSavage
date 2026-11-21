@@ -53,6 +53,8 @@ Same horizontal strip format. Standard enemies use 64 × 64 frames; bosses use 9
 | `boss8_` | 4 | 96 × 96 | `boss8_walk`, `boss8_attack`, `boss8_hurt` (no idle) |
 | `boss9_` | 4 | 96 × 96 | `boss9_idle`, `boss9_walk`, `boss9_attack`, `boss9_hurt` |
 
+The final boss, The Divot King (`BOSS10`), is drawn procedurally by the enemy renderer and does not require sprite sheets. His pennant, rake and throwing glove animate with the attack phase. The clump in the glove uses the same grass-and-soil drawing as the airborne divots.
+
 ---
 
 ## sprites/backgrounds/
@@ -89,15 +91,17 @@ Tiles are used for platforms and ground. All tiles are **single-frame square ima
 | `ground_tile.png` | 64 × 64 | Main ground surface |
 | `ground2_tile.png` | 64 × 64 | Alternate ground (world 2 variant) |
 | `ground3_tile.png` | 64 × 64 | Alternate ground (world 3 variant) |
-| `platform_tile.png` | 64 × 64 | Floating platform |
-| `platform2_tile.png` | 64 × 64 | Platform variant 2 |
-| `platform3_tile.png` | 64 × 64 | Platform variant 3 |
+| `platform_tile.png` | 96 × 24 | Fairway turf over cut soil |
+| `platform2_tile.png` | 96 × 24 | Braced timber boardwalk |
+| `platform3_tile.png` | 96 × 24 | Dressed stone ledge |
 | `platform4_tile.png` | 64 × 64 | Platform variant 4 |
 | `platform5_tile.png` | 64 × 64 | Platform variant 5 |
 | `platform6_tile.png` | 64 × 64 | Platform variant 6 |
 | `wall_tile.png` | 64 × 64 | Vertical wall surface |
 
 ---
+
+Climbable ladders and vines are drawn by the level renderer, not from platform tiles. Ladder rungs have metal bindings; climbable vines have a winding stem and alternating leaves. Destructible vine walls use separate wall art.
 
 ## sprites/items/
 

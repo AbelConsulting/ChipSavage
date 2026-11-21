@@ -2699,13 +2699,15 @@ class Game {
                             this.player.takeDamage(proj.damage, enemy);
                             this._lastDeathCause = 'projectile';
                         }
-                        // Create a purple spray burst at impact
+                        // Match the impact burst to the thrown material.
                         try {
                             const burst = new HitSpark(proj.x, proj.y, {
                                 particleCount: 10, speedMin: 80, speedMax: 180
                             });
                             for (const particle of burst.particles) {
-                                particle.color = Math.random() > 0.5 ? '#CC44FF' : '#AA00EE';
+                                particle.color = proj.projectileShape === 'divot'
+                                    ? (Math.random() > 0.5 ? '#91B74C' : '#A66B40')
+                                    : (Math.random() > 0.5 ? '#CC44FF' : '#AA00EE');
                                 particle.size = Utils.randomFloat(2, 5);
                             }
                             this.hitSparks.push(burst);

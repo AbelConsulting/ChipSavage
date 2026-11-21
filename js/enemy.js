@@ -25,7 +25,8 @@ const ENEMY_TYPE_CONFIG = {
     'BOSS6': { prefix: 'boss6', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss6_attack', bossName: 'DR DIVOT', bossTitle: 'Architect of the Night Links', ability: 'summon' },
     'BOSS7': { prefix: 'boss7', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss7_attack', bossName: 'CADDIE CRUSHER', bossTitle: 'Captain of Eagle Ridge', ability: 'crystalBarrage' },
     'BOSS8': { prefix: 'boss8', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss8_attack', bossName: 'SAND TRAP', bossTitle: "Master of Devil's Dogleg", ability: 'charge' },
-    'BOSS9': { prefix: 'boss9', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss9_attack', bossName: 'THE SCRATCH KING', bossTitle: 'Midnight Tour Champion', ability: 'projectile' }
+    'BOSS9': { prefix: 'boss9', size: { width: 128, height: 128 }, fallback: 'BASIC', attackAnim: 'boss9_attack', bossName: 'THE SCRATCH KING', bossTitle: 'Midnight Tour Champion', ability: 'projectile' },
+    'BOSS10': { prefix: 'boss10', size: { width: 128, height: 128 }, fallback: 'BASIC', bossName: 'THE DIVOT KING', bossTitle: 'Terror of the Championship Green', ability: 'divotKing' }
 };
 
 const HEAVY_BOSS_ATTACK_TYPES = new Set(['BOSS5', 'BOSS6', 'BOSS7', 'BOSS8', 'BOSS9']);
@@ -151,6 +152,13 @@ class Enemy {
         this.bossName = (config && config.bossName) || 'BOSS'; // Display name
         this.bossTitle = (config && config.bossTitle) || '';    // Sub-title
         this.bossDefeatParticles = [];  // Defeat celebration particles
+        if (this.enemyType === 'BOSS10') {
+            this.divotPhase = 'wait';
+            this.divotTimer = 0.8;
+            this.divotNextAttack = 0;
+            this.divotDirection = -1;
+            this.divotFollowup = false;
+        }
 
         // Hit feedback
         this.hitStunTimer = 0;
@@ -498,6 +506,11 @@ class Enemy {
                 p.age += dt;
                 if (p.age >= p.life) this.shieldParticles.splice(i, 1);
             }
+        }
+
+        if (this.enemyType === 'BOSS10') {
+            this.updateDivotKing(dt, player, level);
+            return;
         }
 
         // Boss phase system: enrage at 50% HP, desperate at 25% HP
@@ -1586,6 +1599,13 @@ class Enemy {
             ctx.save();
             ctx.translate(sx, sy);
 
+            if (proj.projectileShape === 'divot') {
+                ctx.rotate(proj.age * 5 * Math.sign(proj.velocityX));
+                this.drawTurfClump(ctx);
+                ctx.restore();
+                continue;
+            }
+
             // Motion trail
             const mag = Math.sqrt(proj.velocityX * proj.velocityX + proj.velocityY * proj.velocityY) || 1;
             const nx = proj.velocityX / mag;
@@ -1751,8 +1771,351 @@ class Enemy {
         this.explosionAge = 0;
     }
 
+    updateDivotKing(dt, player, level) {
+        this.bossAuraTimer += dt;
+        this.bossEnraged = this.health <= this.maxHealth * 0.5;
+        this.bossPhase = this.bossEnraged ? 2 : 1;
+        this.velocityX = 0;
+        this.isAttacking = false;
+        if (this.thrownProjectiles.length) this._updateThrownProjectiles(dt, level);
+
+        if (!this.bossEntranceDone) {
+            this.bossEntranceTimer += dt;
+            if (this.bossEntranceTimer >= 1.5) this.bossEntranceDone = true;
+        } else if (player && this.hitStunTimer <= 0 && !this.isGolfHit) {
+            this.divotTimer -= dt;
+            if (this.divotPhase === 'burrow') {
+                this.velocityX = this.divotDirection * (this.bossEnraged ? 260 : 210);
+                this.x = Utils.clamp(this.x + this.velocityX * dt, 0, level.width - this.width);
+            }
+            if (this.divotTimer <= 0) {
+                switch (this.divotPhase) {
+                    case 'wait': {
+                        this.divotDirection = player.x + (player.width || 0) / 2 >= this.x + this.width / 2 ? 1 : -1;
+                        this.facingRight = this.divotDirection > 0;
+                        const attack = this.divotNextAttack % 3;
+                        this.divotNextAttack++;
+                        this.divotPhase = ['burrow_windup', 'barrage_windup', 'sweep_windup'][attack];
+                        this.divotTimer = attack === 0 ? 0.8 : 0.75;
+                        break;
+                    }
+                    case 'burrow_windup':
+                        this.divotPhase = 'burrow';
+                        this.divotTimer = 1.25;
+                        break;
+                    case 'burrow':
+                        this.divotPhase = 'emerge';
+                        this.divotTimer = 0.45;
+                        this.divotFollowup = this.bossEnraged;
+                        break;
+                    case 'emerge':
+                        this.divotPhase = this.divotFollowup ? 'sweep_windup' : 'recovery';
+                        this.divotTimer = this.divotFollowup ? 0.55 : 1.25;
+                        break;
+                    case 'sweep_windup':
+                        this.divotPhase = 'sweep';
+                        this.divotTimer = this.bossEnraged ? 0.22 : 0.34;
+                        if (this.audioManager) this.audioManager.playSound('boss_attack', { volume: 0.7, rate: 1.0 });
+                        break;
+                    case 'sweep':
+                        this.divotPhase = 'recovery';
+                        this.divotTimer = this.bossEnraged ? 1.7 : 1.25;
+                        this.divotFollowup = false;
+                        break;
+                    case 'barrage_windup':
+                        this.fireDivotBarrage();
+                        this.divotPhase = 'recovery';
+                        this.divotTimer = 1.25;
+                        break;
+                    case 'recovery':
+                        this.divotPhase = 'wait';
+                        this.divotTimer = 0.35;
+                        break;
+                }
+            }
+        }
+
+        this.bossSpecialActive = !['wait', 'recovery'].includes(this.divotPhase);
+        this._applyGravityAndCollision(dt, level);
+        this.x = Utils.clamp(this.x, 0, level.width - this.width);
+        if (this.hitStunTimer <= 0 && !this.isGolfHit && (this.divotPhase === 'burrow' || this.divotPhase === 'sweep')) {
+            this.isAttacking = true;
+            this.attackHitbox = this.divotPhase === 'burrow'
+                ? { x: this.x, y: this.y + this.height - 30, width: this.width, height: 30 }
+                : { x: this.facingRight ? this.x + this.width : this.x - 150,
+                    y: this.y + this.height - 42, width: 150, height: 42 };
+        }
+        this.updateAnimation(dt);
+    }
+
+    fireDivotBarrage() {
+        const direction = this.divotDirection;
+        for (const [speed, lift] of [[220, 260], [280, 320], [340, 380]]) {
+            this.thrownProjectiles.push({
+                x: this.x + this.width / 2 + direction * 45,
+                y: this.y + 35,
+                width: 24, height: 24,
+                velocityX: direction * speed, velocityY: -lift,
+                damage: Math.floor(this.attackDamage * 0.6),
+                lifetime: 3, age: 0,
+                projectileShape: 'divot'
+            });
+        }
+        if (this.audioManager) this.audioManager.playSound('boss2_attack', { volume: 0.65, rate: 0.9 });
+    }
+
+    drawTurfClump(ctx) {
+        ctx.fillStyle = '#915730';
+        ctx.strokeStyle = '#392d22';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-12, -3);
+        ctx.lineTo(-8, 6);
+        ctx.lineTo(1, 11);
+        ctx.lineTo(9, 6);
+        ctx.lineTo(12, -3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#9dc44d';
+        ctx.beginPath();
+        ctx.moveTo(-12, -3);
+        ctx.lineTo(-11, -9);
+        ctx.lineTo(-6, -6);
+        ctx.lineTo(-4, -12);
+        ctx.lineTo(0, -7);
+        ctx.lineTo(8, -11);
+        ctx.lineTo(7, -6);
+        ctx.lineTo(13, -7);
+        ctx.lineTo(11, -1);
+        ctx.quadraticCurveTo(0, 3, -12, -3);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#deac73';
+        ctx.fillRect(-5, 3, 4, 2);
+    }
+
+    drawDivotKing(ctx) {
+        const x = this.x, y = this.y;
+        const phase = this.divotPhase;
+        const time = this.bossAuraTimer;
+        ctx.save();
+        ctx.translate(x + this.width / 2, y + this.height);
+        ctx.scale(this.facingRight ? 1 : -1, 1);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        const ellipse = (cx, cy, rx, ry, fill, stroke = '#30201c', lineWidth = 2.5) => {
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+            if (stroke) {
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+            }
+        };
+        const path = (points, fill, stroke = '#30201c', lineWidth = 2.5) => {
+            ctx.beginPath();
+            ctx.moveTo(points[0][0], points[0][1]);
+            for (const point of points.slice(1)) ctx.lineTo(point[0], point[1]);
+            ctx.closePath();
+            ctx.fillStyle = fill;
+            ctx.fill();
+            if (stroke) {
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+            }
+        };
+        const gradient = (top, bottom, colors) => {
+            const result = ctx.createLinearGradient(0, top, 0, bottom);
+            colors.forEach(([stop, color]) => result.addColorStop(stop, color));
+            return result;
+        };
+
+        if (phase === 'burrow') {
+            const shake = Math.sin(time * 24);
+            ellipse(0, -6, 62, 11, '#402b20');
+            ellipse(-2, -13, 51, 15, gradient(-28, 0, [[0, '#b17b42'], [1, '#573521']]));
+            path([[-47, -14], [-36, -22], [-25, -19], [-13, -31], [0, -27],
+                [11, -34], [24, -23], [37, -24], [48, -12]], '#825129');
+            path([[-39, -18], [-28, -24], [-15, -20], [-3, -27], [9, -24],
+                [20, -27], [34, -18], [22, -16], [6, -18], [-8, -15], [-25, -17]],
+                '#77a046', '#344427', 1.5);
+            for (const [dx, dy, size] of [[-43, -30, 4], [-25, -38, 3], [4, -41, 5], [34, -33, 3]]) {
+                ellipse(dx - shake * 3, dy + shake * 3, size, size * 0.75, '#b17d48', null);
+            }
+        } else {
+            const windup = phase === 'sweep_windup';
+            const sweeping = phase === 'sweep';
+            const breathing = Math.sin(time * 3) * 1.4;
+            const progress = duration => 1 - Utils.clamp(this.divotTimer / duration, 0, 1);
+            const coil = windup ? progress(this.divotFollowup ? 0.55 : 0.75) : 0;
+            const scoop = phase === 'barrage_windup' ? progress(0.75) : 0;
+            const dig = phase === 'burrow_windup' ? progress(0.8) : 0;
+            const swing = sweeping ? progress(this.bossEnraged ? 0.22 : 0.34) : 0;
+            if (phase === 'emerge') {
+                const rise = progress(0.45);
+                for (const dir of [-1, 1]) {
+                    ctx.save();
+                    ctx.translate(dir * (24 + 44 * rise), -6 - 28 * Math.sin(Math.PI * rise));
+                    ctx.scale(0.55, 0.55);
+                    ctx.rotate(dir * rise * 3);
+                    this.drawTurfClump(ctx);
+                    ctx.restore();
+                }
+                // Reveal from the turf line instead of drawing feet through the platform.
+                ctx.beginPath();
+                ctx.rect(-160, -200, 320, 201);
+                ctx.clip();
+                ctx.translate(0, 98 * (1 - rise) ** 2);
+            }
+            ctx.translate(0, breathing);
+            ctx.transform(1, 0, 0.12 * coil - 0.12 * swing, 1 - 0.30 * dig - 0.09 * scoop, 0, 0);
+
+            // Split championship pennant, anchored at the collar.
+            const hem = Math.sin(time * 5) * 3 + 8 * swing;
+            path([[-20,-76],[-37,-63],[-56,-32],[-68,-24+hem],[-53,-20+hem],
+                [-57,-12+hem],[-34,-20],[-17,-49]], '#903542', '#45272e');
+            path([[-38,-54],[-52,-29],[-62,-24+hem],[-51,-24+hem]], '#e6b45e', null);
+
+            if (sweeping) {
+                ctx.strokeStyle = 'rgba(255, 227, 144, 0.72)';
+                ctx.lineWidth = 7;
+                ctx.beginPath();
+                ctx.arc(27, -36, 76, -0.5, 0.65);
+                ctx.stroke();
+            }
+
+            // Rear rake and shoulders give the silhouette a readable windup.
+            ctx.save();
+            ctx.translate(19, -46);
+            ctx.rotate(sweeping ? 1.30 + 0.60 * swing : -0.38 - 0.95 * coil + 0.70 * dig);
+            if (sweeping) ctx.scale(1, 1.7);
+            ctx.strokeStyle = '#37241b';
+            ctx.lineWidth = 9;
+            ctx.beginPath();
+            ctx.moveTo(0, 13);
+            ctx.lineTo(0, -70);
+            ctx.stroke();
+            ctx.strokeStyle = '#c7985d';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            path([[-17, -76], [17, -76], [15, -67], [-15, -67]], '#b6c8c0');
+            for (const tx of [-12, -6, 0, 6, 12]) {
+                ctx.strokeStyle = '#dbe6d6';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(tx, -76);
+                ctx.lineTo(tx, -84);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            const fur = this.hitStunTimer > 0 ? '#dfab77' : gradient(-110, 0, [
+                [0, '#c58a52'], [0.55, '#89502e'], [1, '#533321']
+            ]);
+            ellipse(-31, -14, 21, 11, '#4b3023');
+            ellipse(26, -13, 22, 11, '#4b3023');
+            ellipse(-3, -48, 47, 44, fur);
+            ellipse(-5, -44, 31, 32, '#c49462', '#73492f', 1.5);
+            path([[-36, -75], [-21, -64], [-25, -18], [-36, -20]], '#315640');
+            path([[10, -70], [20, -72], [24, -25], [13, -22]], '#315640');
+            path([[-29, -39], [19, -40], [20, -26], [-28, -25]], '#43382b');
+            path([[-9, -38], [6, -38], [6, -27], [-9, -27]], '#d7ad52', '#513e24', 1.5);
+            path([[-5, -35], [3, -35], [3, -30], [-5, -30]], '#53442c', null);
+            ellipse(-36, -53, 14, 22, fur);
+            ellipse(27, -51, 13, 20, fur);
+            ctx.save();
+            ctx.translate(-38 - 6 * scoop, -41 - 36 * scoop);
+            if (phase === 'barrage_windup') {
+                ctx.save();
+                ctx.translate(-1, -14);
+                ctx.scale(1.18, 1.18);
+                this.drawTurfClump(ctx);
+                ctx.restore();
+            }
+            ellipse(0, 0, 14, 11, '#d7c19a');
+            ctx.restore();
+            ellipse(30, -37, 14, 11, '#e8d5ae');
+            ctx.strokeStyle = '#987d5d';
+            ctx.lineWidth = 1.5;
+            for (const dx of [-5, 0, 5]) {
+                ctx.beginPath();
+                ctx.moveTo(30 + dx, -42);
+                ctx.lineTo(29 + dx, -34);
+                ctx.stroke();
+            }
+
+            ellipse(-25, -100, 13, 14, '#7e4c30');
+            ellipse(-25, -100, 7, 8, '#b17b66', null);
+            ellipse(1, -92, 34, 31, fur);
+            path([[-28,-98],[-39,-86],[-31,-87],[-38,-75],[-27,-79],[-30,-69],[-13,-78]],
+                '#ab7146', '#613c2c', 1.7);
+            ellipse(19, -79, 24, 16, '#dbac79');
+            ellipse(34, -84, 9, 6, '#332521');
+            path([[9, -73], [30, -73], [26, -63], [14, -63]], '#fbefd0', '#634d3b', 1.5);
+            ctx.strokeStyle = '#715744';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(20, -72);
+            ctx.lineTo(20, -63);
+            ctx.stroke();
+            ellipse(11, -96, 7, 8, '#f4e4c0');
+            ellipse(13, -95, 3.5, 4.5, this.bossEnraged ? '#d33c25' : '#241c19', null);
+            path([[1, -107], [18, -104], [18, -100], [3, -103]], '#41291f', null);
+            ctx.strokeStyle = '#e4c39d';
+            ctx.lineWidth = 1.4;
+            for (const offset of [-3, 2, 7]) {
+                ctx.beginPath();
+                ctx.moveTo(26, -77 + offset);
+                ctx.lineTo(45, -80 + offset);
+                ctx.stroke();
+            }
+
+            // A worn course cap and brass divot badge distinguish the champion.
+            path([[-30, -109], [-24, -123], [-3, -128], [20, -122], [27, -109]], '#426d45');
+            path([[-32, -110], [29, -112], [43, -106], [25, -102], [-28, -104]], '#294a35');
+            ellipse(0, -116, 7, 6, '#d0aa4d', '#473b24', 1.5);
+            ctx.strokeStyle = '#514026';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-3, -118);
+            ctx.lineTo(3, -113);
+            ctx.moveTo(3, -118);
+            ctx.lineTo(-3, -113);
+            ctx.stroke();
+            if (this.bossEnraged) {
+                path([[-22, -126], [-17, -138], [-9, -129], [-1, -140], [7, -129], [16, -136], [19, -125]],
+                    '#e5b94c', '#674b21', 2);
+            }
+        }
+        ctx.restore();
+
+        if (phase === 'sweep_windup') {
+            ctx.save();
+            const start = this.divotDirection > 0 ? x + this.width : x - 150;
+            const ground = y + this.height;
+            ctx.fillStyle = 'rgba(255, 199, 70, 0.16)';
+            ctx.fillRect(start, ground - 42, 150, 42);
+            ctx.strokeStyle = '#ffdc77';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.strokeRect(start, ground - 42, 150, 40);
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#fff0b0';
+            ctx.font = 'bold 19px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('!', x + this.width / 2, y - 16);
+            ctx.restore();
+        }
+    }
+
     isAttackDamageActive() {
         if (!this.isAttacking) return false;
+        if (this.enemyType === 'BOSS10') return this.divotPhase === 'burrow' || this.divotPhase === 'sweep';
         const dur = this.attackDuration || 0;
         if (dur <= 0) return false;
 
@@ -2023,7 +2386,9 @@ class Enemy {
                 }
             }
             
-            if (this.currentAnimation && this.currentAnimation.spriteSheet) {
+            if (this.enemyType === 'BOSS10') {
+                this.drawDivotKing(ctx);
+            } else if (this.currentAnimation && this.currentAnimation.spriteSheet) {
                 this.currentAnimation.draw(ctx, this.x, this.y, this.width, this.height, this.facingRight);
             } else {
                 // Red box fallback when sprites aren't loaded yet

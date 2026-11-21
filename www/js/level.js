@@ -648,6 +648,20 @@ class Level {
         }
     }
 
+    // Keep the 24px side elevations attached to their ledges, including in the scaled static cache.
+    fillPlatformPattern(ctx, pattern, tileName, p, scaleX = 1, scaleY = 1) {
+        ctx.save();
+        ctx.fillStyle = pattern;
+        if (['platform_tile', 'platform2_tile', 'platform3_tile'].includes(tileName)) {
+            ctx.translate(p.x * scaleX, p.y * scaleY);
+            ctx.scale(scaleX, scaleY * p.height / 24);
+            ctx.fillRect(0, 0, p.width, 24);
+        } else {
+            ctx.fillRect(p.x * scaleX, p.y * scaleY, p.width * scaleX, p.height * scaleY);
+        }
+        ctx.restore();
+    }
+
     drawPlatform(ctx, p) {
         if (this.isShieldTile(p)) {
             this.drawShieldTile(ctx, p);
@@ -673,10 +687,7 @@ class Level {
             const tileName = p.tile || 'platform_tile';
             const pattern = this._createPattern(ctx, tileName);
             if (pattern) {
-                ctx.save();
-                ctx.fillStyle = pattern;
-                ctx.fillRect(p.x, p.y, p.width, p.height);
-                ctx.restore();
+                this.fillPlatformPattern(ctx, pattern, tileName, p);
 
                 // Subtle border and highlight for readability
                 ctx.save();
@@ -831,47 +842,72 @@ class Level {
 
     drawClimbable(ctx, p) {
         const style = p.style || (p.tile && p.tile.includes('vine') ? 'vine' : 'ladder');
-        if (style === 'vine') {
-            const stemX = p.x + p.width * 0.45;
-            const stemW = Math.max(4, p.width * 0.18);
-            const leafCount = Math.max(4, Math.floor(p.height / 36));
-            ctx.save();
-            const stemGrad = ctx.createLinearGradient(p.x, p.y, p.x + p.width, p.y + p.height);
-            stemGrad.addColorStop(0, '#1f7a2a');
-            stemGrad.addColorStop(1, '#0d4f16');
-            ctx.fillStyle = stemGrad;
-            ctx.fillRect(stemX, p.y, stemW, p.height);
-            ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(stemX, p.y, stemW, p.height);
-            for (let i = 0; i < leafCount; i++) {
-                const y = p.y + (i + 0.5) * (p.height / leafCount);
-                const side = i % 2 === 0 ? -1 : 1;
-                ctx.beginPath();
-                ctx.fillStyle = side < 0 ? '#2aa03b' : '#55c96a';
-                ctx.ellipse(stemX + stemW / 2 + side * p.width * 0.18, y, p.width * 0.16, p.height / (leafCount * 2.3), side * 0.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.restore();
-            return;
-        }
-
-        const railW = Math.max(4, Math.floor(p.width * 0.16));
-        const rungCount = Math.max(3, Math.floor(p.height / 26));
+        const height = p.height;
         ctx.save();
-        ctx.fillStyle = '#7b4b21';
-        ctx.fillRect(p.x, p.y, railW, p.height);
-        ctx.fillRect(p.x + p.width - railW, p.y, railW, p.height);
-        ctx.fillStyle = '#b07b45';
-        ctx.fillRect(p.x + railW, p.y, p.width - railW * 2, 4);
-        ctx.fillStyle = '#c9a16f';
-        for (let i = 1; i < rungCount; i++) {
-            const y = p.y + (i * p.height) / rungCount;
-            ctx.fillRect(p.x + railW, y, p.width - railW * 2, 3);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.width / 36, 1);
+        if (style === 'vine') {
+            const count = Math.max(1, Math.round(height / 25));
+            const step = height / count;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(18, 0);
+            for (let i = 0; i < count; i++) {
+                ctx.quadraticCurveTo(i % 2 ? 10 : 26, (i + 0.5) * step, 18, (i + 1) * step);
+            }
+            for (const [width, color] of [[8, '#273c28'], [5, '#56723c'], [2, '#9ca751']]) {
+                ctx.lineWidth = width;
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+            for (let i = 0; i < count; i++) {
+                const side = i % 2 ? -1 : 1;
+                ctx.save();
+                ctx.translate(18 + side * 4, (i + 0.62) * step);
+                ctx.scale(side, Math.min(1, step / 22));
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(-2, -11, 13, -13);
+                ctx.quadraticCurveTo(14, -2, 0, 0);
+                ctx.fillStyle = i % 3 ? '#65924f' : '#88ab55';
+                ctx.fill();
+                ctx.strokeStyle = '#294c32';
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(10, -10);
+                ctx.strokeStyle = '#bcce79';
+                ctx.lineWidth = 1.4;
+                ctx.stroke();
+                ctx.restore();
+            }
+        } else {
+            for (const x of [0, 29]) {
+                ctx.fillStyle = '#49382d';
+                ctx.fillRect(x, 0, 7, height);
+                ctx.fillStyle = '#98603c';
+                ctx.fillRect(x + 1, 0, 4.5, height);
+                ctx.fillStyle = '#cf9860';
+                ctx.fillRect(x + 1, 0, 1.5, height);
+            }
+            const count = Math.max(2, Math.round(height / 22));
+            for (let i = 0; i < count; i++) {
+                const y = Math.floor((i + 0.5) * height / count) - 3;
+                ctx.fillStyle = '#4d392c';
+                ctx.fillRect(2, y, 32, 7);
+                ctx.fillStyle = '#bd8754';
+                ctx.fillRect(4, y + 1, 28, 4);
+                ctx.fillStyle = '#e5bc7e';
+                ctx.fillRect(7, y + 1, 22, 1.5);
+                for (const x of [2, 29]) {
+                    ctx.fillStyle = '#47554e';
+                    ctx.fillRect(x, y, 5, 6);
+                    ctx.fillStyle = '#dbcb94';
+                    ctx.fillRect(x + 1.5, y + 1.5, 2, 2);
+                }
+            }
         }
-        ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(p.x, p.y, p.width, p.height);
         ctx.restore();
     }
 
@@ -932,10 +968,7 @@ class Level {
                     const tileName = p.tile || 'platform_tile';
                     const pattern = this._createPattern(c, tileName);
                     if (pattern) {
-                        c.save();
-                        c.fillStyle = pattern;
-                        c.fillRect(sx, sy, sw, sh);
-                        c.restore();
+                        this.fillPlatformPattern(c, pattern, tileName, p, canvas.width / this.width, canvas.height / this.height);
                         // subtle border
                         c.save(); c.strokeStyle = 'rgba(0,0,0,0.6)'; c.lineWidth = 2; c.strokeRect(sx, sy, sw, sh); c.restore();
                         continue;

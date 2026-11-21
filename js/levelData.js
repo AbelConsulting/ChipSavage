@@ -1713,7 +1713,7 @@ const LEVEL_CONFIGS = [
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
         boss: {
-            type: "BOSS",
+            type: "BOSS10",
             spawnX: 4480,
             spawnY: 520,
             healthMultiplier: 19.0,
