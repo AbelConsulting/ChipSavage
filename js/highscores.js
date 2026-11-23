@@ -5,10 +5,10 @@
  * of this file, via any medium, is strictly prohibited. See LICENSE for terms.
  */
 // js/highscores.js
-// Global high-score manager using the chipsavage.io leaderboard API.
+// High-score manager. The leaderboard is stored on this device only (localStorage);
+// Play Games / Steam submissions remain best-effort platform extras.
 
-// Import the REST API functions for the global leaderboard
-import { submitScore as submitAPIScore, getHighScores as getAPIHighScores, checkHealth as checkAPIHealth, getEntitlements as fetchAPIEntitlements, setEntitlement as pushAPIEntitlement } from './firebase.js'; // REST client (no Firebase SDK)
+import { getEntitlements as fetchAPIEntitlements, setEntitlement as pushAPIEntitlement } from './firebase.js';
 
 // Bridge the entitlement helpers to the global scope so classic-script
 // modules (PurchaseManager) can use them without bundling. PurchaseManager
@@ -373,18 +373,63 @@ try {
   }
   // --- End of achievement logic ---
 
+  // ── Local (on-device) leaderboard store ──
+  const LOCAL_SCORES_KEY = 'chipsavage_local_scores_v1';
+
+  function _readLocalScores() {
+    try {
+      const raw = window.safeStorage
+        ? window.safeStorage.getJSON(LOCAL_SCORES_KEY, [])
+        : JSON.parse(localStorage.getItem(LOCAL_SCORES_KEY) || '[]');
+      return Array.isArray(raw)
+        ? raw.filter(e => e && typeof e === 'object' && validateScore(e.score) && Number.isFinite(e.timestamp))
+        : [];
+    } catch (e) { return []; }
+  }
+
+  function _writeLocalScores(entries) {
+    if (window.safeStorage) return window.safeStorage.setJSON(LOCAL_SCORES_KEY, entries) !== false;
+    try { localStorage.setItem(LOCAL_SCORES_KEY, JSON.stringify(entries)); return true; }
+    catch (e) { console.warn('Failed to save local scores', e); return false; }
+  }
+
+  /** Start (ms) of the given leaderboard period in local time; 0 for all-time. Weeks start Monday. */
+  function _periodStart(period, now = new Date()) {
+    if (period === 'week') {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return d.getTime();
+    }
+    if (period === 'month') return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    return 0;
+  }
+
+  function _rankScores(entries, period, now) {
+    const since = _periodStart(period, now);
+    return entries
+      .filter(e => e.timestamp >= since)
+      .sort((a, b) => (b.score - a.score) || (a.timestamp - b.timestamp))
+      .slice(0, MAX_SCORES);
+  }
+
+  function _saveLocalScore(entry) {
+    const entries = _readLocalScores();
+    if (entry.runId && entries.some(e => e.runId === entry.runId)) return true;
+    entries.push(entry);
+    // Only keep rows that can still appear on a board (top N of week, month or all-time).
+    const keep = new Set();
+    for (const period of ['week', 'month', 'alltime']) {
+      for (const e of _rankScores(entries, period)) keep.add(e);
+    }
+    return _writeLocalScores(entries.filter(e => keep.has(e)));
+  }
+
   /**
-   * Fetches scores from the chipsavage.io leaderboard.
-   * @returns {Promise<Array>} A promise that resolves to an array of score objects.
+   * Loads the on-device leaderboard for a period ('week' | 'month' | 'alltime').
+   * @returns {Promise<Array>} Top scores, highest first.
    */
   async function loadScores(period) {
-    try {
-      const scores = await getAPIHighScores(MAX_SCORES, period || 'alltime');
-      return scores || [];
-    } catch(e) { 
-      console.warn('Failed to load highscores from chipsavage.io', e);
-      return null; 
-    }
+    return _rankScores(_readLocalScores(), period || 'alltime');
   }
 
   /**
@@ -460,7 +505,7 @@ try {
   }
 
   /**
-   * Submits a score to the chipsavage.io leaderboard.
+   * Saves a score to the on-device leaderboard (plus Play Games / Steam when available).
    * @param {number} score The player's score.
    * @param {string} name The player's name/initials.
    * @param {object} [gameStats] Game session stats for achievement checks.
@@ -523,11 +568,14 @@ try {
       const achievementIds = Object.keys(allUnlocked).filter(id => allUnlocked[id] && allUnlocked[id].unlocked);
       const prestige = getPrestigeScore(allUnlocked);
       const titleInfo = getPlayerTitle();
-      const apiSubmitPromise = submitAPIScore(name, score, achievementIds, {
+      const localOk = _saveLocalScore({
+        name,
+        score,
+        achievements: achievementIds,
         prestige,
         title: titleInfo.title,
-        achievementCount: titleInfo.count,
         level: gameStats ? (gameStats.levelsCompleted || 0) : 0,
+        timestamp: Date.now(),
         runId
       });
       const canSubmitPlayGames = !!(
@@ -543,7 +591,7 @@ try {
 
       // Steam leaderboard submit (desktop build only). electronAPI.platform
       // === 'steam' is set by electron/preload.js. Best-effort: a Steam
-      // failure must not block the Cloud Functions submission.
+      // failure must not block the local save.
       const canSubmitSteam = !!(
         window.electronAPI &&
         window.electronAPI.platform === 'steam' &&
@@ -555,14 +603,13 @@ try {
             .catch(() => false)
         : Promise.resolve(false);
 
-      const [apiOk, playGamesOk, steamOk] = await Promise.all([
-        apiSubmitPromise,
+      const [playGamesOk, steamOk] = await Promise.all([
         playGamesSubmitPromise,
         steamSubmitPromise,
       ]);
 
-      if (!apiOk && !playGamesOk && !steamOk) {
-        console.error('Score submission failed for Cloud Functions, Play Games, and Steam');
+      if (!localOk && !playGamesOk && !steamOk) {
+        console.error('Score could not be saved locally, to Play Games, or to Steam');
       } else {
         // Mark this runId so a follow-up retry can't double-post.
         _submitCompleted.add(runId);
@@ -578,9 +625,9 @@ try {
           });
         }
       } catch (e) { /* */ }
-      return apiOk || playGamesOk || steamOk;
+      return localOk || playGamesOk || steamOk;
       } catch (e) {
-        console.error("Failed to submit score to chipsavage.io", e);
+        console.error('Failed to save score', e);
         return false;
       } finally {
         _submitInflight.delete(runId);
@@ -657,7 +704,7 @@ try {
         box.innerHTML = '';
         const confirmTitle = document.createElement('div');
         confirmTitle.className = 'highscore-prompt-title';
-        confirmTitle.textContent = '✓ Score Submitted!';
+        confirmTitle.textContent = '✓ Score Saved!';
         confirmTitle.style.color = '#4CAF50';
         box.appendChild(confirmTitle);
         
@@ -717,7 +764,7 @@ try {
       header.className = 'scoreboard-header';
 
       const title = document.createElement('h3');
-      title.textContent = '🏆 GLOBAL LEADERBOARD';
+      title.textContent = '🏆 LOCAL LEADERBOARD';
       title.className = 'scoreboard-title';
       header.appendChild(title);
 
@@ -809,7 +856,7 @@ try {
 
     // Loading state (preserves header + tabs so controls stay visible)
     if (refreshBtn) refreshBtn.disabled = true;
-    list.innerHTML = '<div class="scoreboard-state scoreboard-state--loading">Loading global scores…</div>';
+    list.innerHTML = '<div class="scoreboard-state scoreboard-state--loading">Loading scores…</div>';
     if (updatedEl) updatedEl.textContent = '';
 
     let scores = null;
@@ -827,7 +874,7 @@ try {
     if (loadFailed || !Array.isArray(scores)) {
       const err = document.createElement('div');
       err.className = 'scoreboard-state scoreboard-state--error';
-      err.textContent = "Couldn't reach the leaderboard. Tap Refresh to try again.";
+      err.textContent = "Couldn't load saved scores. Tap Refresh to try again.";
       list.appendChild(err);
       return;
     }
@@ -962,11 +1009,11 @@ try {
   }
 
   /**
-   * Pings the leaderboard service to confirm it is online.
+   * The leaderboard is local, so it is available whenever storage is.
    * @returns {Promise<boolean>}
    */
   async function checkServiceHealth() {
-    return checkAPIHealth();
+    return true;
   }
 
   // ── Survival Mode Local Leaderboard ─────────────────────────────────────────

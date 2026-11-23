@@ -1017,9 +1017,9 @@ class DamageBoostEffect {
 }
 
 /**
- * ExitPortal: A swirling vortex that appears at the exit position after boss defeat.
- * Draws a glowing, rotating portal with orbiting particles the player walks into
- * to complete the level.
+ * ExitPortal: the level exit, drawn as a golf clubhouse that rises out of the
+ * ground at the exit position. The player walks through the lit front door to
+ * complete the level. (x, y) is the door centre; y + radius is the ground line.
  */
 class ExitPortal {
     constructor(x, y, opts = {}) {
@@ -1027,38 +1027,21 @@ class ExitPortal {
         this.y = y;
         this.radius = opts.radius || 50;
         this.age = 0;
-        this.spawnDuration = 0.8; // seconds to grow from 0 to full size
+        this.spawnDuration = 0.8; // seconds to rise out of the ground
         this.active = true;
-
-        // Swirl particles orbiting the vortex
-        this.orbiters = [];
-        const count = opts.orbiterCount || 18;
-        const colors = ['#00FFCC', '#44FFDD', '#88EEFF', '#FFFFFF', '#00FF88', '#AAFFEE'];
-        for (let i = 0; i < count; i++) {
-            this.orbiters.push({
-                angle: (Math.PI * 2 * i) / count,
-                dist: 0.4 + Math.random() * 0.6,   // fraction of radius
-                speed: 1.8 + Math.random() * 1.5,   // radians/sec
-                size:  2 + Math.random() * 3,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                phase: Math.random() * Math.PI * 2
-            });
-        }
     }
 
     update(dt) {
         this.age += dt;
-        for (const o of this.orbiters) {
-            o.angle += o.speed * dt;
-        }
     }
 
-    /** Returns the current visual scale (0→1 during spawn, then 1). */
+    /** Returns the current spawn progress (0→1 with ease-out, then 1). */
     _scale() {
-        return Math.min(1, this.age / this.spawnDuration);
+        const t = Math.min(1, this.age / this.spawnDuration);
+        return 1 - Math.pow(1 - t, 3);
     }
 
-    /** Check if a rect (player) overlaps the portal circle. */
+    /** Check if a rect (player) overlaps the clubhouse doorway. */
     overlaps(px, py, pw, ph) {
         const cx = px + pw / 2;
         const cy = py + ph / 2;
@@ -1068,81 +1051,205 @@ class ExitPortal {
     }
 
     draw(ctx, cameraX, cameraY) {
-        const sx = this.x - cameraX;
-        const sy = this.y - cameraY;
         const scale = this._scale();
-        const r = this.radius * scale;
-        if (r < 2) return;
+        if (scale <= 0.01) return;
 
         const now = Date.now() / 1000;
+        const cx = Math.round(this.x - cameraX);
+        const groundY = Math.round(this.y + this.radius - cameraY);
+
+        const bodyW = 240, bodyH = 112;
+        const roofH = 62, eave = 22;
+        const totalH = bodyH + roofH + 26;
+        // Exits sit ~100px from the level's right edge, so the building extends
+        // left of the door and the flagstick is planted on the far side.
+        const bx = cx - 60;
+        const left = bx - bodyW / 2;
+        const wallTop = groundY - bodyH;
+        const roofTop = wallTop - roofH;
+        const doorW = 54, doorH = 80;
+        const pulse = 0.75 + 0.25 * Math.sin(now * 2.4);
 
         ctx.save();
-
-        // Outer glow
-        ctx.globalCompositeOperation = 'lighter';
-        const glowPulse = 0.6 + 0.4 * Math.sin(now * 3);
-        const outerGlow = ctx.createRadialGradient(sx, sy, r * 0.2, sx, sy, r * 1.5);
-        outerGlow.addColorStop(0, `rgba(0, 255, 200, ${0.25 * glowPulse})`);
-        outerGlow.addColorStop(0.5, `rgba(0, 200, 180, ${0.12 * glowPulse})`);
-        outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = outerGlow;
+        // Rise out of the ground during spawn.
         ctx.beginPath();
-        ctx.arc(sx, sy, r * 1.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.rect(left - 140, groundY - totalH - 60, bodyW + 280, totalH + 60);
+        ctx.clip();
+        ctx.translate(0, Math.round((1 - scale) * (totalH + 10)));
 
-        // Rotating swirl rings
-        ctx.globalCompositeOperation = 'source-over';
-        for (let ring = 0; ring < 3; ring++) {
-            const ringAngle = now * (1.5 + ring * 0.7) + ring * 1.2;
-            const ringR = r * (0.35 + ring * 0.25);
-            const alpha = 0.35 - ring * 0.08;
-            ctx.save();
-            ctx.translate(sx, sy);
-            ctx.rotate(ringAngle * (ring % 2 === 0 ? 1 : -1));
+        // Warm light spill on the ground in front of the door
+        const spill = ctx.createRadialGradient(cx, groundY, 4, cx, groundY, 120);
+        spill.addColorStop(0, `rgba(255, 210, 120, ${0.35 * pulse})`);
+        spill.addColorStop(1, 'rgba(255, 210, 120, 0)');
+        ctx.fillStyle = spill;
+        ctx.fillRect(cx - 120, groundY - 40, 240, 40);
+
+        // Chimney with drifting smoke
+        const chimX = left + 150;
+        ctx.fillStyle = '#7A4A36';
+        ctx.fillRect(chimX, roofTop - 22, 22, 44);
+        ctx.fillStyle = '#5E3828';
+        ctx.fillRect(chimX - 3, roofTop - 26, 28, 8);
+        for (let i = 0; i < 3; i++) {
+            const t = (now * 0.45 + i / 3) % 1;
+            ctx.fillStyle = `rgba(235, 235, 235, ${0.35 * (1 - t)})`;
             ctx.beginPath();
-            ctx.ellipse(0, 0, ringR, ringR * 0.55, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(0, 255, 210, ${alpha})`;
-            ctx.lineWidth = 2 - ring * 0.4;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // Dark vortex center
-        const coreGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 0.45);
-        coreGrad.addColorStop(0, 'rgba(0, 10, 20, 0.85)');
-        coreGrad.addColorStop(0.6, 'rgba(0, 40, 50, 0.5)');
-        coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = coreGrad;
-        ctx.beginPath();
-        ctx.arc(sx, sy, r * 0.45, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Orbiting particles
-        ctx.globalCompositeOperation = 'lighter';
-        for (const o of this.orbiters) {
-            const dist = r * o.dist;
-            const px = sx + Math.cos(o.angle) * dist;
-            const py = sy + Math.sin(o.angle) * dist * 0.6; // elliptical
-            const particleAlpha = 0.5 + 0.5 * Math.sin(now * 4 + o.phase);
-            const s = o.size * scale;
-            const grad = ctx.createRadialGradient(px, py, 0, px, py, s * 1.5);
-            grad.addColorStop(0, o.color);
-            grad.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.globalAlpha = particleAlpha;
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(px, py, s * 1.5, 0, Math.PI * 2);
+            ctx.arc(chimX + 11 + Math.sin(t * 6 + i) * 6 + t * 18, roofTop - 32 - t * 46, 6 + t * 9, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        // "EXIT" prompt text (pulsing)
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 0.6 + 0.3 * Math.sin(now * 2.5);
-        ctx.fillStyle = '#AAFFDD';
-        ctx.font = `bold ${Math.floor(12 * scale)}px Arial`;
+        // Walls: cream siding with a stone base
+        ctx.fillStyle = '#EFE4C8';
+        ctx.fillRect(left, wallTop, bodyW, bodyH);
+        ctx.strokeStyle = 'rgba(150, 125, 90, 0.35)';
+        ctx.lineWidth = 1;
+        for (let y = wallTop + 12; y < groundY - 18; y += 12) {
+            ctx.beginPath();
+            ctx.moveTo(left, y + 0.5);
+            ctx.lineTo(left + bodyW, y + 0.5);
+            ctx.stroke();
+        }
+        ctx.fillStyle = '#8D8478';
+        ctx.fillRect(left - 4, groundY - 18, bodyW + 8, 18);
+        ctx.fillStyle = '#A59C8F';
+        for (let x = left; x < left + bodyW; x += 26) ctx.fillRect(x + 2, groundY - 16, 20, 6);
+        ctx.strokeStyle = '#6E5A44';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(left, wallTop, bodyW, bodyH);
+
+        // Pitched roof
+        ctx.fillStyle = '#2F6B3F';
+        ctx.beginPath();
+        ctx.moveTo(left - eave, wallTop + 4);
+        ctx.lineTo(left + 34, roofTop);
+        ctx.lineTo(left + bodyW - 34, roofTop);
+        ctx.lineTo(left + bodyW + eave, wallTop + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+        for (let i = 1; i < 4; i++) {
+            const y = roofTop + (roofH * i) / 4;
+            const inset = 34 * (1 - i / 4) - eave * (i / 4);
+            ctx.beginPath();
+            ctx.moveTo(left + inset, y);
+            ctx.lineTo(left + bodyW - inset, y);
+            ctx.stroke();
+        }
+        ctx.fillStyle = '#1F4D2C';
+        ctx.fillRect(left - eave, wallTop + 2, bodyW + eave * 2, 6);
+
+        // "CLUBHOUSE" sign board on the roof
+        ctx.fillStyle = '#3B2A1E';
+        ctx.fillRect(bx - 66, roofTop + 14, 132, 26);
+        ctx.strokeStyle = '#D9B45A';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bx - 66, roofTop + 14, 132, 26);
+        ctx.fillStyle = '#F6D77A';
+        ctx.font = "bold 15px 'Space Grotesk', Arial, sans-serif";
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText('EXIT', sx, sy + r + 8);
+        ctx.textBaseline = 'middle';
+        ctx.fillText('CLUBHOUSE', bx, roofTop + 28);
+
+        // Windows with warm interior light and shutters
+        for (const wx of [left + 20, left + 90]) {
+            const wy = wallTop + 26;
+            ctx.fillStyle = '#2F6B3F';
+            ctx.fillRect(wx - 9, wy, 8, 40);
+            ctx.fillRect(wx + 43, wy, 8, 40);
+            const glass = ctx.createLinearGradient(0, wy, 0, wy + 40);
+            glass.addColorStop(0, `rgba(255, 226, 150, ${0.75 + 0.2 * pulse})`);
+            glass.addColorStop(1, 'rgba(255, 170, 80, 0.95)');
+            ctx.fillStyle = glass;
+            ctx.fillRect(wx, wy, 42, 40);
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(wx, wy, 42, 40);
+            ctx.beginPath();
+            ctx.moveTo(wx + 21, wy);
+            ctx.lineTo(wx + 21, wy + 40);
+            ctx.moveTo(wx, wy + 20);
+            ctx.lineTo(wx + 42, wy + 20);
+            ctx.stroke();
+            ctx.fillStyle = '#C84B4B';
+            ctx.fillRect(wx - 2, wy + 42, 46, 7);
+        }
+
+        // Front door: open and glowing so it reads as the exit
+        const doorX = cx - doorW / 2;
+        const doorY = groundY - doorH;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(doorX - 6, doorY - 6, doorW + 12, doorH + 6);
+        const doorGlow = ctx.createLinearGradient(0, doorY, 0, groundY);
+        doorGlow.addColorStop(0, `rgba(255, 236, 170, ${0.85 + 0.15 * pulse})`);
+        doorGlow.addColorStop(1, 'rgba(255, 180, 90, 1)');
+        ctx.fillStyle = doorGlow;
+        ctx.fillRect(doorX, doorY, doorW, doorH);
+        // Door swung open to the side
+        ctx.fillStyle = '#6B3E26';
+        ctx.beginPath();
+        ctx.moveTo(doorX, doorY);
+        ctx.lineTo(doorX + 14, doorY + 6);
+        ctx.lineTo(doorX + 14, groundY - 4);
+        ctx.lineTo(doorX, groundY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Striped awning over the door
+        const awnY = doorY - 22;
+        for (let i = 0; i < 6; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#2F8F4E' : '#F3F0E4';
+            ctx.fillRect(doorX - 14 + i * ((doorW + 28) / 6), awnY, (doorW + 28) / 6 + 0.5, 14);
+        }
+        for (let i = 0; i < 6; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#2F8F4E' : '#F3F0E4';
+            ctx.beginPath();
+            ctx.arc(doorX - 14 + (i + 0.5) * ((doorW + 28) / 6), awnY + 14, (doorW + 28) / 12, 0, Math.PI);
+            ctx.fill();
+        }
+
+        // Flagstick beside the clubhouse
+        const poleX = left - 46;
+        ctx.strokeStyle = '#E8E8E8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(poleX, groundY);
+        ctx.lineTo(poleX, groundY - 150);
+        ctx.stroke();
+        ctx.fillStyle = '#D92B2B';
+        ctx.beginPath();
+        ctx.moveTo(poleX, groundY - 150);
+        for (let i = 0; i <= 8; i++) {
+            const fx = poleX + i * 5;
+            const fy = groundY - 150 + Math.sin(now * 5 - i * 0.7) * 3 * (i / 8);
+            ctx.lineTo(fx, fy);
+        }
+        for (let i = 8; i >= 0; i--) {
+            const fx = poleX + i * 5;
+            const fy = groundY - 150 + 26 - 13 * (i / 8) + Math.sin(now * 5 - i * 0.7) * 3 * (i / 8);
+            ctx.lineTo(fx, fy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(poleX, groundY - 1, 12, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bobbing arrow over the door
+        if (scale >= 1) {
+            const bob = Math.sin(now * 4) * 4;
+            ctx.globalAlpha = 0.65 + 0.35 * pulse;
+            ctx.fillStyle = '#FFE27A';
+            ctx.strokeStyle = 'rgba(60, 40, 10, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, awnY - 6 + bob);
+            ctx.lineTo(cx - 11, awnY - 20 + bob);
+            ctx.lineTo(cx + 11, awnY - 20 + bob);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
 
         ctx.restore();
     }

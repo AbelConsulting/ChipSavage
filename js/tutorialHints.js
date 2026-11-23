@@ -119,10 +119,10 @@ class TutorialHints {
             exit_portal: {
                 id: 'exit_portal',
                 duration: 9,
-                kb:    ['🌀 Next Tee opened!',
-                    'Head right to complete the hole.'],
-                touch: ['🌀 Next Tee opened!',
-                    'Head right to complete the hole.']
+                kb:    ['🏌️ The Clubhouse is open!',
+                    'Walk through the door to finish the hole.'],
+                touch: ['🏌️ The Clubhouse is open!',
+                    'Walk through the door to finish the hole.']
             },
             objective: {
                 id: 'objective',
