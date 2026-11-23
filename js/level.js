@@ -401,16 +401,8 @@ class Level {
 
         const wallIndex = this.platforms.indexOf(wall);
         if (wallIndex < 0) return { destroyed: false, material };
+        // Ladders and vines are indestructible and stay in place when their wall breaks.
         this.platforms.splice(wallIndex, 1);
-
-        // Remove a climbable attached to the destroyed barrier so no visual remnant floats in place.
-        this.platforms = this.platforms.filter((platform) => {
-            if (material === 'shield') return true;
-            if (platform.type !== 'climb') return true;
-            const verticalOverlap = platform.y < wall.y + wall.height && platform.y + platform.height > wall.y;
-            const horizontalGap = Math.max(0, wall.x - (platform.x + platform.width), platform.x - (wall.x + wall.width));
-            return !(verticalOverlap && horizontalGap <= 12);
-        });
         this._staticNeedsUpdate = true;
         if (typeof document !== 'undefined' && typeof this.renderStaticLayer === 'function') {
             this.renderStaticLayer();

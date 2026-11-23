@@ -50,7 +50,7 @@ for (const [material, tile, correctShot] of elements) {
         });
     }
 
-    test(`a real ${correctShot} projectile destroys a ${material} wall and invalidates cached art`, () => {
+    test(`a real ${correctShot} projectile destroys a ${material} wall, keeps its climbable, and invalidates cached art`, () => {
         const { level, player } = setup([
             { x: 300, y: 200, width: 80, height: 480, type: 'wall', material },
             { x: 258, y: 200, width: 36, height: 480, type: 'climb' }
@@ -62,7 +62,8 @@ for (const [material, tile, correctShot] of elements) {
         for (let frame = 0; frame < 120 && player.golfProjectiles.length; frame++) {
             player.updateProjectiles(1 / 60, level);
         }
-        assert.equal(level.platforms.length, 0);
+        assert.equal(level.platforms.length, 1);
+        assert.equal(level.platforms[0].type, 'climb');
         assert.equal(level._staticNeedsUpdate, true);
         assert.equal(player.golfAmmo, 1);
         assert.equal(player.golfProjectiles.length, 0);

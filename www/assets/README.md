@@ -101,7 +101,7 @@ Tiles are used for platforms and ground. All tiles are **single-frame square ima
 
 ---
 
-Climbable ladders and vines are drawn by the level renderer, not from platform tiles. Ladder rungs have metal bindings; climbable vines have a winding stem and alternating leaves. Destructible vine walls use separate wall art.
+Climbable ladders and vines are drawn by the level renderer, not from platform tiles. Ladder rungs have metal bindings; climbable vines have a winding stem and alternating leaves. Destructible vine walls use separate wall art. Ladders and climbable vines are indestructible and remain in place when an adjacent wall is destroyed.
 
 ## sprites/items/
 

@@ -530,14 +530,15 @@ const LEVEL_CONFIGS = [
             { x: 9300, y: 300 },
             { x: 11000, y: 300 },
             { x: 12600, y: 300 },
-            { x: 14000, y: 300 }
+            { x: 14400, y: 300 }
         ],
         platforms: [
             { x: 0, y: 650, width: 3100, height: 40, type: 'static', tile: 'ground2_tile' },
             { x: 3550, y: 640, width: 3200, height: 40, type: 'static', tile: 'ground2_tile' },
             { x: 7050, y: 660, width: 2450, height: 40, type: 'static', tile: 'ground2_tile' },
             { x: 9950, y: 650, width: 2600, height: 40, type: 'static', tile: 'ground2_tile' },
-            { x: 12850, y: 650, width: 2150, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 12850, y: 650, width: 850, height: 40, type: 'static', tile: 'ground2_tile' },
+            { x: 14050, y: 650, width: 950, height: 40, type: 'static', tile: 'ground2_tile' },
 
             // Courtyard: low-end warmup with a moving perch before the first real climb.
             { x: 200, y: 540, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
@@ -578,6 +579,11 @@ const LEVEL_CONFIGS = [
             { x: 7280, y: 520, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 7540, y: 80, width: 48, height: 48, type: 'anchor' },
 
+            // Temple Gate: rock wall across the lower courtyard with a ladder bypass.
+            { x: 7600, y: 460, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 7700, y: 460, width: 100, height: 200, type: 'wall', material: 'rock' },
+            { x: 7658, y: 460, width: 34, height: 200, type: 'climb', style: 'ladder' },
+
             // Inner temple: nested climbs and a bombable wall that creates a second route.
             { x: 8000, y: 560, width: 160, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 8300, y: 470, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
@@ -590,25 +596,39 @@ const LEVEL_CONFIGS = [
             { x: 10040, y: 420, width: 120, height: 24, type: 'moving', axis: 'y', range: 180, speed: 2.9, timeOffset: 1.2, tile: 'platform6_tile' },
             { x: 10380, y: 320, width: 180, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 10750, y: 260, width: 150, height: 24, type: 'static', tile: 'platform5_tile' },
+            { x: 9760, y: 120, width: 48, height: 48, type: 'anchor' },
+
+            // Side Shrine: a bombable shortcut through the far courtyard.
+            { x: 10500, y: 450, width: 280, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 10600, y: 450, width: 90, height: 200, type: 'wall', material: 'rock' },
+            { x: 10558, y: 450, width: 34, height: 200, type: 'climb', style: 'ladder' },
 
             // Upper ridge: the last big checkpoint before the final approach.
             { x: 11230, y: 350, width: 980, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 11360, y: 110, width: 48, height: 48, type: 'anchor' },
+            { x: 11900, y: 220, width: 160, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 11720, y: 360, width: 100, height: 290, type: 'wall', material: 'vine' },
             { x: 11678, y: 360, width: 34, height: 290, type: 'climb', style: 'vine' },
             { x: 11880, y: 500, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
             { x: 12160, y: 420, width: 160, height: 24, type: 'moving', axis: 'x', range: 70, speed: 1.8, tile: 'platform4_tile' },
             { x: 12480, y: 300, width: 220, height: 24, type: 'static', tile: 'platform5_tile' },
             { x: 12840, y: 420, width: 240, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 13220, y: 520, width: 220, height: 24, type: 'static', tile: 'platform4_tile' },
-            { x: 13620, y: 620, width: 140, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 13980, y: 520, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.7, tile: 'platform4_tile' },
-            { x: 14340, y: 420, width: 260, height: 24, type: 'static', tile: 'platform6_tile' }
+
+            // Final approach: shock gate, a lift over the summit gap, then a vine gate before the exit.
+            { x: 13180, y: 450, width: 320, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 13300, y: 450, width: 90, height: 200, type: 'wall', material: 'shock' },
+            { x: 13258, y: 450, width: 34, height: 200, type: 'climb', style: 'ladder' },
+            { x: 13560, y: 520, width: 180, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 13820, y: 540, width: 140, height: 24, type: 'moving', axis: 'y', range: 80, speed: 1.7, tile: 'platform4_tile' },
+            { x: 13880, y: 140, width: 48, height: 48, type: 'anchor' },
+            { x: 14140, y: 430, width: 360, height: 24, type: 'static', tile: 'platform6_tile' },
+            { x: 14250, y: 430, width: 90, height: 220, type: 'wall', material: 'vine' },
+            { x: 14208, y: 430, width: 34, height: 220, type: 'climb', style: 'vine' }
         ],
         idols: [
             { x: 900, y: 350 },
-            { x: 5400, y: 320 },
-            { x: 12320, y: 260 }
+            { x: 4430, y: 250 },
+            { x: 11980, y: 180 }
         ],
         speedBoosts: [
             { x: 680, y: 420 },
@@ -629,7 +649,7 @@ const LEVEL_CONFIGS = [
             { x: 8420, y: 430 },
             { x: 10180, y: 380 },
             { x: 11740, y: 460 },
-            { x: 13350, y: 480 }
+            { x: 13450, y: 410 }
         ],
         enemyConfig: {
             spawnInterval: 1.4,
@@ -665,10 +685,16 @@ const LEVEL_CONFIGS = [
         platforms: [
             { x: 0, y: 650, width: 4500, height: 40, type: 'static', tile: 'ground2_tile' },
             { x: 300, y: 530, width: 240, height: 24, type: 'static', tile: 'platform3_tile' },
-            { x: 750, y: 430, width: 200, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 780, y: 450, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 900, y: 450, width: 90, height: 200, type: 'wall', material: 'rock' },
+            { x: 858, y: 450, width: 34, height: 200, type: 'climb', style: 'ladder' },
             { x: 1100, y: 480, width: 100, height: 24, type: 'moving', axis: 'y', range: 150, speed: 2.5, tile: 'platform4_tile' },
             { x: 1350, y: 330, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 1800, y: 100, width: 48, height: 48, type: 'anchor' },
             { x: 2000, y: 490, width: 280, height: 24, type: 'static', tile: 'platform4_tile' },
+            { x: 2300, y: 430, width: 280, height: 24, type: 'static', tile: 'platform3_tile' },
+            { x: 2400, y: 430, width: 90, height: 220, type: 'wall', material: 'vine' },
+            { x: 2358, y: 430, width: 34, height: 220, type: 'climb', style: 'vine' },
             { x: 2600, y: 380, width: 260, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 3150, y: 510, width: 300, height: 24, type: 'static', tile: 'platform3_tile' },
             { x: 3750, y: 410, width: 240, height: 24, type: 'static', tile: 'platform4_tile' }
