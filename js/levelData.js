@@ -1738,7 +1738,7 @@ const LEVEL_CONFIGS = [
         id: "level_10_boss",
         width: 5000,
         completion: { bossTriggerX: 4200, exitX: 4900 },
-        boss: {
+        boss: {lku6er
             type: "BOSS10",
             spawnX: 4480,
             spawnY: 520,

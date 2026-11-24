@@ -1,9 +1,9 @@
 """Generate original, loop-ready Chip Savage music using only Python's standard library.
 
-The arrangements use synthesized saxophone leads, soft strings, round bass,
-and a restrained breakbeat. Run from the
-repository root with the selected Python interpreter. WAV output is intentional;
-the game can play WAV directly and will prefer an optional OGG alongside it.
+The arrangements combine synthesized saxophone leads, piano counterlines,
+round bass, and a restrained breakbeat. Run from the repository root with the
+selected Python interpreter. WAV output is intentional; the game can play WAV
+directly and will prefer an optional OGG alongside it.
 """
 
 from __future__ import annotations
@@ -31,8 +31,8 @@ ARRANGEMENTS = {
     "forest_theme": (60, 104, False, 0.44, 37),
     "city_theme": (55, 116, False, 0.60, 41),
     "action_theme": (52, 128, True, 0.82, 53),
-    "cave_ambient": (50, 92, True, 0.30, 67),
-    "ambient_cave_loop": (50, 88, True, 0.22, 71),
+    "cave_ambient": (50, 92, True, 0.56, 67),
+    "ambient_cave_loop": (50, 88, True, 0.52, 71),
     "boss_theme": (45, 132, True, 0.90, 83),
     "boss_battle": (45, 144, True, 1.00, 97),
 }
@@ -92,20 +92,25 @@ def add_note(
             value = (0.62 * math.sin(reed_phase) + 0.25 * math.sin(2 * reed_phase)
                      + 0.13 * math.sin(3 * reed_phase) + 0.06 * math.sin(4 * reed_phase))
             envelope *= 0.88 + 0.12 * math.exp(-8 * t)
-        elif voice == "strings":
-            value = (0.56 * fundamental + 0.20 * math.sin(phase * 1.002)
-                     + 0.16 * math.sin(2 * phase) + 0.08 * math.sin(3 * phase))
+        elif voice == "piano":
+            # Slightly stretched partials and a fast-decaying strike give the
+            # short notes a percussive, piano-like attack without a pad tail.
+            stretch = 0.00012
+            value = (
+                0.72 * fundamental
+                + 0.30 * math.sin(phase * 2.0 * (1.0 + stretch * 4))
+                + 0.16 * math.sin(phase * 3.0 * (1.0 + stretch * 9))
+                + 0.08 * math.sin(phase * 4.0 * (1.0 + stretch * 16))
+                + 0.035 * math.sin(phase * 5.0 * (1.0 + stretch * 25))
+            )
+            value += 0.08 * math.sin(phase * 8.0) * math.exp(-24.0 * t)
+            envelope *= math.exp(-2.4 * t)
         elif voice == "nylon":
             value = (0.85 * fundamental + math.exp(-7 * t) *
                      (0.25 * math.sin(phase * 2) + 0.14 * math.sin(phase * 3)))
             envelope *= math.exp(-2.2 * t)
-        elif voice == "soft_keys":
-            value = 0.91 * fundamental + 0.09 * math.sin(phase * 2.0)
-            envelope *= math.exp(-1.6 * t)
         elif voice == "bass":
             value = 0.82 * fundamental + 0.18 * math.sin(phase * 2.0)
-        elif voice == "pad":
-            value = 0.70 * fundamental + 0.20 * math.sin(phase * 2.0) + 0.10 * math.sin(phase * 3.0)
         else:
             value = 0.78 * fundamental + 0.16 * math.sin(phase * 2.0) + 0.06 * math.sin(phase * 3.0)
         samples[first + offset] += value * amplitude * envelope
@@ -186,10 +191,10 @@ def compose_menu(root: int, bpm: int) -> array:
         for offset, onset, length, gain in zip(chord, (0, 0.9, 1.7),
                                                (1.8, 1.1, 0.95), (0.075, 0.050, 0.038)):
             add_note(samples, start + onset * beat, length * beat, root - 12 + offset,
-                     gain, voice="soft_keys", attack=0.045, release=0.20)
-        for offset in (chord[1], chord[2]):
-            add_note(samples, start + 0.2 * beat, 2.25 * beat, root - 12 + offset,
-                     0.022, voice="strings", attack=0.25, release=0.35)
+                     gain, voice="piano", attack=0.008, release=0.10)
+        for onset, offset in ((0.75, chord[1]), (2.0, chord[2])):
+            add_note(samples, start + onset * beat, 0.48 * beat, root + 12 + offset,
+                     0.065, voice="piano", attack=0.006, release=0.08)
         if bar_index in (0, 12):
             add_shot_phrase(samples, start, beat, root + 12,
                             4 if bar_index == 0 else 0, "sax")
@@ -238,19 +243,20 @@ def compose_track(name: str, settings: tuple[int, int, bool, float, int]) -> arr
 
     for i, (chord, phrase) in enumerate(zip(progression, phrases, strict=True)):
         start = i * bar
-        stabs = (1.5,) if energy < 0.35 or i % 4 == 3 else (0.5, 2.5)
-        for onset in stabs:
-            for interval in (2, 4):
-                add_note(samples, start + onset * beat, beat * 0.64,
-                         pitch(chord + interval), 0.032, voice="pad", release=0.10)
-        for interval in (2, 4):
-            add_note(samples, start + 0.25 * beat, 2.5 * beat,
-                     pitch(chord + interval), 0.017, voice="strings",
-                     attack=0.22, release=0.25)
         add_note(samples, start, beat * 0.86, pitch(chord) - 12, 0.105, voice="bass")
         if i % 4 != 3 or energy >= 0.7:
             add_note(samples, start + 2.5 * beat, beat * 0.48,
                      pitch(chord + 4) - 12, 0.08, voice="bass")
+
+        piano_pattern = (
+            ((0.5, 0.34, 4), (1.5, 0.32, 2), (2.5, 0.34, 1), (3.25, 0.48, 2))
+            if i % 2 == 0 else
+            ((0.25, 0.34, 2), (1.25, 0.32, 4), (2.0, 0.34, 2), (3.0, 0.48, 4))
+        )
+        for onset, length, interval in piano_pattern:
+            add_note(samples, start + onset * beat, length * beat,
+                     pitch(chord + interval) + 12, 0.065, voice="piano",
+                     attack=0.006, release=0.08)
 
         forest = name == "forest_theme"
         if forest and i % 4 == 0:
